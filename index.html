@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LodgeLink — Find, compare and reserve accommodation for church programs in Asese and RCCG Camp before the rush begins." />
+  <title>LodgeLink — Accommodation Finder</title>
+ 
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+ 
+  <style>
+    /* ─── DESIGN TOKENS ─────────────────────────────────────────────────────── */
+    :root {
+      --navy:        #0B1F3A;
+      --navy-mid:    #12294D;
+      --gold:        #E8A020;
+      --gold-light:  #F5C254;
+      --cream:       #FDF6EC;
+      --white:       #FFFFFF;
+      --text-dark:   #0B1F3A;
+      --text-mid:    #3D5A80;
+      --text-light:  #7A95B0;
+      --border:      #D9E6F2;
+      --success:     #1A7A4A;
+      --radius-sm:   8px;
+      --radius-md:   14px;
+      --radius-lg:   22px;
+      --shadow-sm:   0 2px 8px rgba(11,31,58,0.08);
+      --shadow-md:   0 6px 24px rgba(11,31,58,0.13);
+      --shadow-lg:   0 16px 48px rgba(11,31,58,0.18);
+      --font-head:   'Syne', sans-serif;
+      --font-body:   'Outfit', sans-serif;
+      --transition:  0.22s cubic-bezier(0.4,0,0.2,1);
+    }
+ 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--cream);
+      color: var(--text-dark);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+ 
+    .container {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+ 
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+ 
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(232,160,32,0.4); }
+      50%       { box-shadow: 0 0 0 10px rgba(232,160,32,0); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+ 
+    /* ════════════════════════════════════════════════════════════════
+       ONBOARDING WALKTHROUGH OVERLAY — Option C
+       Shows to first-time users only. Dismissed by tapping CTA or skip.
+       Stored in localStorage so it never shows again after first dismissal.
+    ════════════════════════════════════════════════════════════════════ */
+    #onboarding-overlay {
+      position: fixed; inset: 0;
+      background: rgba(11,31,58,0.92);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+ 
+    #onboarding-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+ 
+    .onboarding-sheet {
+      background: var(--white);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      padding: 28px 24px 40px;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      transform: translateY(40px);
+      transition: transform 0.3s ease;
+    }
+ 
+    #onboarding-overlay.open .onboarding-sheet {
+      transform: translateY(0);
+    }
+ 
+    .onboarding-handle {
+      width: 40px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+ 
+    .onboarding-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+ 
+    .onboarding-title {
+      font-family: var(--font-head);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+ 
+    .onboarding-sub {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 28px;
+    }
+ 
+    /* 3-step how it works row */
+    .steps-row {
+      display: flex;
+      gap: 0;
+      margin-bottom: 28px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+ 
+    .step {
+      flex: 1;
+      padding: 16px 12px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+      background: var(--white);
+    }
+ 
+    .step:last-child { border-right: none; }
+ 
+    .step-num {
+      width: 24px; height: 24px;
+      background: var(--navy);
+      color: var(--white);
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 8px;
+    }
+ 
+    .step-icon {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+ 
+    .step-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dark);
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+ 
+    .step-desc {
+      font-size: 10px;
+      color: var(--text-light);
+      line-height: 1.5;
+    }
+ 
+    /* Progress dots */
+    .onboarding-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+ 
+    .onboarding-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: all 0.2s ease;
+    }
+ 
+    .onboarding-dot.active {
+      background: var(--navy);
+      width: 20px;
+      border-radius: 3px;
+    }
+ 
+    /* Primary CTA — get started */
+    #btn-onboarding-start {
+      width: 100%;
+      padding: 18px;
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+      margin-bottom: 12px;
+    }
+ 
+    #btn-onboarding-start:hover  { background: var(--navy-mid); }
+    #btn-onboarding-start:active { transform: scale(0.99); }
+ 
+    .onboarding-skip {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-light);
+    }
+ 
+    .onboarding-skip button {
+      background: none;
+      border: none;
+      color: var(--text-mid);
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: underline;
+      font-family: var(--font-body);
+    }
+ 
+    /* ════════════════════════════════════════════════════════════════
+       HERO
+    ════════════════════════════════════════════════════════════════════ */
+    #hero {
+      background: var(--navy);
+      padding: 48px 0 36px;
+      position: relative;
+      overflow: hidden;
+    }
+ 
+    #hero::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,160,32,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+ 
+    .hero-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+      animation: fadeUp 0.5s ease both;
+    }
+ 
+    .logo-mark {
+      width: 40px; height: 40px;
+      background: var(--gold);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 20px;
+    }
+ 
+    .logo-text {
+      font-family: var(--font-head);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: -0.3px;
+    }
+ 
+    .logo-text span { color: var(--gold); }
+ 
+    .hero-headline {
+      font-family: var(--font-head);
+      font-size: clamp(26px, 7vw, 34px);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 10px;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+ 
+    .hero-headline em { font-style: normal; color: var(--gold); }
+ 
+    .hero-sub {
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+      font-weight: 300;
+      margin-bottom: 28px;
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+ 
+    /* ── PROGRAM SELECTOR with visual cue ── */
+    .program-selector {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 8px;
+      animation: fadeUp 0.5s 0.25s ease both;
+      transition: border-color var(--transition);
+    }
+ 
+    /* Glows gold when untouched — visual cue to act first */
+    .program-selector.needs-attention {
+      border-color: rgba(232,160,32,0.6);
+      box-shadow: 0 0 0 3px rgba(232,160,32,0.12);
+    }
+ 
+    .program-selector label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+ 
+    .program-selector select {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+ 
+    .program-selector select option { background: var(--navy-mid); color: var(--white); }
+ 
+    /* Nudge text below program selector */
+    .program-nudge {
+      font-size: 11px;
+      color: rgba(232,160,32,0.8);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      animation: fadeUp 0.5s 0.28s ease both;
+    }
+ 
+    .program-nudge.hidden { display: none; }
+ 
+    /* ── AI SEARCH BAR ── */
+    .search-wrap {
+      position: relative;
+      animation: fadeUp 0.5s 0.3s ease both;
+    }
+ 
+    .search-wrap label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 8px;
+    }
+ 
+    #search-input {
+      width: 100%;
+      padding: 16px 52px 16px 18px;
+      background: var(--white);
+      border: 2px solid transparent;
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-dark);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+ 
+    #search-input::placeholder { color: var(--text-light); font-size: 13px; }
+ 
+    #search-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px rgba(232,160,32,0.15);
+    }
+ 
+    #btn-primary {
+      position: absolute;
+      right: 6px; bottom: 6px;
+      width: 40px; height: 40px;
+      background: var(--gold);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background var(--transition), transform var(--transition);
+      animation: pulse 2.5s infinite;
+    }
+ 
+    #btn-primary:hover { background: var(--gold-light); transform: scale(1.05); }
+    #btn-primary:active { transform: scale(0.97); }
+    #btn-primary svg { width: 18px; height: 18px; fill: var(--navy); }
+ 
+    .search-hints {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      animation: fadeUp 0.5s 0.35s ease both;
+    }
+ 
+    .hint-chip {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+      white-space: nowrap;
+    }
+ 
+    .hint-chip:hover {
+      background: rgba(232,160,32,0.2);
+      color: var(--gold-light);
+      border-color: var(--gold);
+    }
+ 
+    /* ════════════════════════════════════════════════════════════════
+       MAIN
+    ════════════════════════════════════════════════════════════════════ */
+    #main { padding: 24px 0 40px; }
+ 
+    #insights-panel {
+      background: linear-gradient(135deg, #0B1F3A 0%, #12294D 100%);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(232,160,32,0.2);
+      box-shadow: var(--shadow-md);
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+ 
+    .insights-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+ 
+    .insights-icon {
+      width: 32px; height: 32px;
+      background: rgba(232,160,32,0.15);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+ 
+    .insights-title {
+      font-family: var(--font-head);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--white);
+    }
+ 
+    .insights-subtitle { font-size: 11px; color: rgba(255,255,255,0.5); }
+ 
+    .price-range {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+ 
+    .price-label { font-size: 11px; color: rgba(255,255,255,0.5); white-space: nowrap; }
+ 
+    .price-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+ 
+    .price-bar-fill {
+      height: 100%;
+      width: 60%;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      border-radius: 3px;
+    }
+ 
+    .insight-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+ 
+    .insight-tag {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+ 
+    .tag-fair  { background: rgba(26,122,74,0.2);  color: #4ADE80; border: 1px solid rgba(26,122,74,0.3); }
+    .tag-above { background: rgba(220,38,38,0.15); color: #FCA5A5; border: 1px solid rgba(220,38,38,0.2); }
+    .tag-best  { background: rgba(232,160,32,0.2); color: var(--gold-light); border: 1px solid rgba(232,160,32,0.3); }
+ 
+    /* ── FILTER BAR with visual cue ── */
+    .filter-bar-wrap {
+      margin-bottom: 20px;
+      animation: fadeUp 0.5s 0.15s ease both;
+    }
+ 
+    /* Hint label above filters — tells first-timers what to do */
+    .filter-hint {
+      font-size: 11px;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+ 
+    .filter-hint.hidden { display: none; }
+ 
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+ 
+    .filter-bar::-webkit-scrollbar { display: none; }
+ 
+    .filter-btn {
+      flex-shrink: 0;
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--white);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-mid);
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+ 
+    .filter-btn.active,
+    .filter-btn:hover {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: var(--white);
+    }
+ 
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+ 
+    .results-count { font-size: 13px; color: var(--text-light); }
+    .results-count strong { color: var(--text-dark); font-weight: 600; }
+ 
+    .sort-btn {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-family: var(--font-body);
+      font-size: 12px;
+      color: var(--text-mid);
+      cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      transition: all var(--transition);
+    }
+ 
+    .sort-btn:hover { border-color: var(--navy); color: var(--navy); }
+ 
+    /* ── LISTING CARDS ── */
+    #list-root {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeUp 0.5s 0.25s ease both;
+    }
+ 
+    .listing-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      transition: transform var(--transition), box-shadow var(--transition);
+      cursor: pointer;
+    }
+ 
+    .listing-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .listing-card:active { transform: translateY(0); }
+ 
+    .card-image {
+      position: relative;
+      height: 180px;
+      background: linear-gradient(135deg, #D9E6F2 0%, #B8CDE0 100%);
+      overflow: hidden;
+    }
+ 
+    .card-image::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.8s infinite;
+    }
+ 
+    .card-image-placeholder {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px;
+      opacity: 0.3;
+    }
+ 
+    .price-badge {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: var(--navy);
+      color: var(--white);
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-head);
+      font-size: 13px;
+      font-weight: 700;
+      z-index: 1;
+    }
+ 
+    .price-badge span { font-size: 10px; font-weight: 400; opacity: 0.7; }
+ 
+    .fair-label {
+      position: absolute;
+      top: 12px; left: 12px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      z-index: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+ 
+    .fair-label.fair  { background: rgba(26,122,74,0.9);  color: #fff; }
+    .fair-label.above { background: rgba(220,38,38,0.85); color: #fff; }
+    .fair-label.best  { background: rgba(232,160,32,0.95); color: var(--navy); }
+ 
+    .card-body { padding: 16px; }
+ 
+    .card-title {
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+ 
+    .card-type {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+ 
+    .card-meta { display: flex; gap: 16px; margin-bottom: 12px; }
+ 
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      color: var(--text-mid);
+    }
+ 
+    .meta-icon { font-size: 14px; }
+    .meta-item strong { color: var(--text-dark); font-weight: 600; }
+ 
+    .amenities { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+ 
+    .amenity-pill {
+      background: #EEF4FB;
+      color: var(--text-mid);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+ 
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+ 
+    .host-info { display: flex; align-items: center; gap: 8px; }
+ 
+    .host-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--navy));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+ 
+    .host-name { font-size: 12px; color: var(--text-light); }
+    .host-name strong { color: var(--text-mid); font-weight: 600; }
+ 
+    /* ── RESERVE BUTTON — bigger, more prominent ── */
+    .reserve-btn {
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 12px 22px;           /* was 9px 18px — now taller and wider */
+      font-family: var(--font-body);
+      font-size: 14px;              /* was 13px */
+      font-weight: 700;             /* was 600 */
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      letter-spacing: 0.2px;
+      box-shadow: 0 3px 10px rgba(11,31,58,0.2);
+    }
+ 
+    .reserve-btn:hover  {
+      background: var(--gold);
+      color: var(--navy);
+      box-shadow: 0 5px 16px rgba(232,160,32,0.35);
+    }
+    .reserve-btn:active { transform: scale(0.97); }
+ 
+    /* ── NO MATCH PANEL ── */
+    .no-match-panel {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 28px 20px;
+      text-align: center;
+      border: 1.5px dashed var(--border);
+      display: none;
+    }
+ 
+    .no-match-panel.visible { display: block; }
+    .no-match-icon { font-size: 40px; margin-bottom: 12px; }
+ 
+    .no-match-title {
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+ 
+    .no-match-body {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+ 
+    .priority-question {
+      background: #EEF4FB;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+ 
+    .priority-question p { font-size: 13px; font-weight: 600; color: var(--text-dark); margin-bottom: 10px; }
+ 
+    .priority-btns { display: flex; gap: 8px; }
+ 
+    .priority-btn {
+      flex: 1;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: var(--white);
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-mid);
+      cursor: pointer;
+      transition: all var(--transition);
+      text-align: center;
+    }
+ 
+    .priority-btn:hover { border-color: var(--navy); background: var(--navy); color: var(--white); }
+ 
+    /* ════════════════════════════════════════════════════════════════
+       RESERVATION MODAL — with guided step prompts
+    ════════════════════════════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(11,31,58,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex; align-items: flex-end;
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--transition);
+    }
+ 
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+ 
+    .modal-sheet {
+      background: var(--white);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      padding: 28px 24px 40px;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      transform: translateY(40px);
+      transition: transform var(--transition);
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+ 
+    .modal-overlay.open .modal-sheet { transform: translateY(0); }
+ 
+    .modal-handle {
+      width: 40px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+ 
+    .modal-title {
+      font-family: var(--font-head);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+ 
+    .modal-sub { font-size: 13px; color: var(--text-light); margin-bottom: 20px; }
+ 
+    /* Guided step prompts — shows user where they are in the flow */
+    .modal-steps {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+ 
+    .modal-step-item {
+      flex: 1;
+      padding: 10px 8px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+      background: #F8FBFF;
+      transition: background var(--transition);
+    }
+ 
+    .modal-step-item:last-child { border-right: none; }
+ 
+    .modal-step-item.active {
+      background: var(--navy);
+    }
+ 
+    .modal-step-num {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-light);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 5px;
+      transition: all var(--transition);
+    }
+ 
+    .modal-step-item.active .modal-step-num {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--navy);
+    }
+ 
+    .modal-step-item.done .modal-step-num {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+ 
+    .modal-step-label {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      line-height: 1.3;
+    }
+ 
+    .modal-step-item.active .modal-step-label { color: rgba(255,255,255,0.8); }
+ 
+    /* Field group with inline helper text */
+    .field-group { margin-bottom: 16px; }
+ 
+    .field-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-mid);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+ 
+    /* Helper text below each field — guides first-time users */
+    .field-helper {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+ 
+    .field-group input,
+    .field-group select {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--text-dark);
+      background: var(--white);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      appearance: none;
+      -webkit-appearance: none;
+    }
+ 
+    .field-group input:focus,
+    .field-group select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(232,160,32,0.12);
+    }
+ 
+    .fee-summary {
+      background: #EEF4FB;
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+ 
+    .fee-label { font-size: 13px; color: var(--text-mid); }
+    .fee-amount { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--navy); }
+    .fee-note { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+ 
+    /* What the fee covers — answers the question before it's asked */
+    .fee-explainer {
+      background: rgba(26,122,74,0.08);
+      border: 1px solid rgba(26,122,74,0.2);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      font-size: 12px;
+      color: var(--success);
+      line-height: 1.5;
+    }
+ 
+    /* ── CONFIRM BUTTON — large and clear ── */
+    #btn-reserve-confirm {
+      width: 100%;
+      padding: 18px;
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 14px rgba(11,31,58,0.2);
+    }
+ 
+    #btn-reserve-confirm:hover  { background: var(--gold); color: var(--navy); }
+    #btn-reserve-confirm:active { transform: scale(0.99); }
+ 
+    .modal-trust {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 10px;
+    }
+ 
+    .modal-close {
+      position: absolute;
+      top: 16px; right: 16px;
+      background: none; border: none;
+      font-size: 22px; cursor: pointer;
+      color: var(--text-light);
+      line-height: 1;
+      padding: 4px;
+    }
+ 
+    /* ════════════════════════════════════════════════════════════════
+       FOOTER
+    ════════════════════════════════════════════════════════════════════ */
+    #footer { background: var(--navy); padding: 32px 0 28px; margin-top: 8px; }
+ 
+    .footer-logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); margin-bottom: 6px; }
+    .footer-logo span { color: var(--gold); }
+ 
+    .footer-tagline { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 24px; line-height: 1.5; }
+ 
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+    .footer-links a { font-size: 13px; color: rgba(255,255,255,0.6); transition: color var(--transition); }
+    .footer-links a:hover { color: var(--gold); }
+ 
+    .footer-divider { height: 1px; background: rgba(255,255,255,0.08); margin-bottom: 20px; }
+    .footer-legal { font-size: 11px; color: rgba(255,255,255,0.3); line-height: 1.6; }
+ 
+    @media (min-width: 600px) {
+      .container { max-width: 560px; }
+      .hero-headline { font-size: 38px; }
+      #list-root { gap: 20px; }
+      .card-image { height: 200px; }
+    }
+  </style>
+</head>
+ 
+<body>
+ 
+  <!-- ════════════════════════════════════════════════════════════════
+       ONBOARDING WALKTHROUGH — Option C
+       Shown to first-time users only. Controlled by app.js.
+  ════════════════════════════════════════════════════════════════════ -->
+  <div id="onboarding-overlay" role="dialog" aria-modal="true"
+       aria-labelledby="onboarding-title" aria-hidden="true">
+    <div class="onboarding-sheet">
+      <div class="onboarding-handle" aria-hidden="true"></div>
+ 
+      <p class="onboarding-eyebrow">Welcome to LodgeLink</p>
+      <h2 class="onboarding-title" id="onboarding-title">
+        Find your room<br />before you travel.
+      </h2>
+      <p class="onboarding-sub">Here's how it works — takes 60 seconds</p>
+ 
+      <!-- 3-step walkthrough -->
+      <div class="steps-row" role="list" aria-label="How LodgeLink works">
+        <div class="step" role="listitem">
+          <div class="step-num" aria-hidden="true">1</div>
+          <div class="step-icon" aria-hidden="true">📅</div>
+          <div class="step-title">Pick your program</div>
+          <div class="step-desc">Select the event you are attending</div>
+        </div>
+        <div class="step" role="listitem">
+          <div class="step-num" aria-hidden="true">2</div>
+          <div class="step-icon" aria-hidden="true">🏨</div>
+          <div class="step-title">Browse rooms</div>
+          <div class="step-desc">See real photos, prices and distances</div>
+        </div>
+        <div class="step" role="listitem">
+          <div class="step-num" aria-hidden="true">3</div>
+          <div class="step-icon" aria-hidden="true">✅</div>
+          <div class="step-title">Reserve it</div>
+          <div class="step-desc">Secure your room for ₦1,500 — sorted</div>
+        </div>
+      </div>
+ 
+      <!-- Progress dots -->
+      <div class="onboarding-dots" aria-hidden="true">
+        <div class="onboarding-dot active"></div>
+        <div class="onboarding-dot"></div>
+        <div class="onboarding-dot"></div>
+      </div>
+ 
+      <button id="btn-onboarding-start" type="button">
+        Let's Find a Room →
+      </button>
+ 
+      <div class="onboarding-skip">
+        <button type="button" id="btn-onboarding-skip">
+          Skip — I know how this works
+        </button>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- ════════════════════════════════════════════════════════════════
+       HERO
+  ════════════════════════════════════════════════════════════════════ -->
+  <header id="hero" role="banner">
+    <div class="container">
+ 
+      <div class="hero-brand">
+        <div class="logo-mark" aria-hidden="true">🏠</div>
+        <div class="logo-text">Lodge<span>Link</span></div>
+      </div>
+ 
+      <h1 class="hero-headline">
+        Find your room<br />
+        <em>before the rush.</em>
+      </h1>
+      <p class="hero-sub">Accommodation for church programs in Asese &amp; RCCG Camp</p>
+ 
+      <!-- Program selector with visual cue (gold glow until selected) -->
+      <div class="program-selector needs-attention" id="program-selector-wrap">
+        <label for="program-select">
+          👆 Start here — which program are you attending?
+        </label>
+        <select id="program-select" name="program" aria-label="Select upcoming program">
+          <option value="">— Select a program —</option>
+          <option value="iclc">International Cell Leaders Conference</option>
+          <option value="isw">International Staff Week</option>
+          <option value="llc">Loveworld Ladies Convention</option>
+          <option value="ippc">International Pastors and Partners Conference</option>
+          <option value="haven">Haven Convention</option>
+          <option value="healing-school">Healing School Programs</option>
+        </select>
+      </div>
+ 
+      <!-- Nudge shown until program is selected -->
+      <p class="program-nudge" id="program-nudge" aria-live="polite">
+        ⚡ Rooms fill up fast — pick your program first to see what's available
+      </p>
+ 
+      <div class="search-wrap">
+        <label for="search-input">Or describe what you need</label>
+        <input
+          type="search"
+          id="search-input"
+          name="search"
+          placeholder="e.g. Room for 2 under ₦20,000 close to auditorium"
+          autocomplete="off"
+          aria-label="Search for accommodation"
+          aria-describedby="search-hint"
+        />
+        <button id="btn-primary" type="button" aria-label="Search accommodation">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
+              stroke="#0B1F3A" stroke-width="2.5" stroke-linecap="round"
+              fill="none"/>
+          </svg>
+        </button>
+        <p id="search-hint" class="sr-only">Type your accommodation needs in plain language and tap search</p>
+      </div>
+ 
+      <div class="search-hints" role="group" aria-label="Search suggestions">
+        <button class="hint-chip" type="button">Room for 2 under ₦20k</button>
+        <button class="hint-chip" type="button">AC + close to gate</button>
+        <button class="hint-chip" type="button">Budget single room</button>
+        <button class="hint-chip" type="button">Family suite</button>
+      </div>
+ 
+    </div>
+  </header>
+ 
+  <!-- ════════════════════════════════════════════════════════════════
+       MAIN
+  ════════════════════════════════════════════════════════════════════ -->
+  <main id="main" role="main">
+    <div class="container">
+ 
+      <section id="insights-panel" aria-label="AI price insights">
+        <div class="insights-header">
+          <div class="insights-icon" aria-hidden="true">✦</div>
+          <div>
+            <div class="insights-title">AI Price Insights</div>
+            <div class="insights-subtitle">Based on 24 listings for this program</div>
+          </div>
+        </div>
+        <div class="price-range">
+          <span class="price-label">₦8k</span>
+          <div class="price-bar-wrap" role="img" aria-label="Price range">
+            <div class="price-bar-fill"></div>
+          </div>
+          <span class="price-label">₦35k</span>
+        </div>
+        <div class="insight-tags" role="list">
+          <span class="insight-tag tag-fair"  role="listitem">✓ Fair Price: ₦10k–₦18k</span>
+          <span class="insight-tag tag-best"  role="listitem">★ Best Value: ₦12k</span>
+          <span class="insight-tag tag-above" role="listitem">↑ Above avg: ₦25k+</span>
+        </div>
+      </section>
+ 
+      <!-- Filter bar with visual cue hint -->
+      <div class="filter-bar-wrap">
+        <p class="filter-hint" id="filter-hint" aria-live="polite">
+          👇 Tap a filter to narrow results instantly
+        </p>
+        <div class="filter-bar" role="group" aria-label="Filter accommodation type">
+          <button class="filter-btn active" type="button">All</button>
+          <button class="filter-btn" type="button">Hotel</button>
+          <button class="filter-btn" type="button">Guesthouse</button>
+          <button class="filter-btn" type="button">Hostel</button>
+          <button class="filter-btn" type="button">Self-contain</button>
+        </div>
+      </div>
+ 
+      <div class="results-header">
+        <p class="results-count"><strong id="results-count-num">5 rooms</strong> available for this program</p>
+        <button class="sort-btn" type="button" aria-label="Sort results">
+          <span aria-hidden="true">⇅</span> Sort
+        </button>
+      </div>
+ 
+      <div id="list-root" role="list" aria-label="Available accommodation listings"></div>
+ 
+      <div class="no-match-panel" id="no-match-panel" role="alert" aria-live="polite">
+        <div class="no-match-icon" aria-hidden="true">🔍</div>
+        <h2 class="no-match-title">No exact match found</h2>
+        <p class="no-match-body">
+          No rooms match your exact search.<br />
+          Here are the closest alternatives — tell us what matters most.
+        </p>
+        <div class="priority-question">
+          <p>What matters more to you?</p>
+          <div class="priority-btns">
+            <button class="priority-btn" type="button" id="btn-priority-budget">Stay within budget</button>
+            <button class="priority-btn" type="button" id="btn-priority-distance">Close to auditorium</button>
+          </div>
+        </div>
+      </div>
+ 
+    </div>
+  </main>
+ 
+  <!-- ════════════════════════════════════════════════════════════════
+       RESERVATION MODAL with guided step prompts
+  ════════════════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog"
+       aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+    <div class="modal-sheet" style="position:relative;">
+      <button class="modal-close" type="button"
+              aria-label="Close reservation form" onclick="closeModal()">✕</button>
+      <div class="modal-handle" aria-hidden="true"></div>
+ 
+      <h2 class="modal-title" id="modal-title">Reserve your room</h2>
+      <p class="modal-sub" id="modal-property-name">Loading...</p>
+ 
+      <!-- Guided step indicator — shows user where they are in 3 steps -->
+      <div class="modal-steps" role="list" aria-label="Reservation steps">
+        <div class="modal-step-item active" id="modal-step-1" role="listitem">
+          <div class="modal-step-num">1</div>
+          <div class="modal-step-label">Your details</div>
+        </div>
+        <div class="modal-step-item" id="modal-step-2" role="listitem">
+          <div class="modal-step-num">2</div>
+          <div class="modal-step-label">Stay length</div>
+        </div>
+        <div class="modal-step-item" id="modal-step-3" role="listitem">
+          <div class="modal-step-num">3</div>
+          <div class="modal-step-label">Confirm</div>
+        </div>
+      </div>
+ 
+      <!-- Full name -->
+      <div class="field-group">
+        <label for="input-name">Full name</label>
+        <input
+          type="text"
+          id="input-name"
+          name="full_name"
+          placeholder="e.g. Patience Okafor"
+          autocomplete="name"
+          required
+          aria-required="true"
+        />
+        <p class="field-helper">ℹ️ Used to confirm your reservation with the host</p>
+      </div>
+ 
+      <!-- Phone number -->
+      <div class="field-group">
+        <label for="input-phone">Phone number</label>
+        <input
+          type="tel"
+          id="input-phone"
+          name="phone"
+          placeholder="e.g. 08012345678"
+          autocomplete="tel"
+          required
+          aria-required="true"
+          pattern="[0-9]{11}"
+        />
+        <p class="field-helper">📱 We'll send your confirmation SMS here</p>
+      </div>
+ 
+      <!-- Number of guests -->
+      <div class="field-group">
+        <label for="input-guests">Number of guests</label>
+        <select id="input-guests" name="guests" aria-label="Number of guests">
+          <option value="1">1 guest</option>
+          <option value="2" selected>2 guests</option>
+          <option value="3">3 guests</option>
+          <option value="4">4 guests</option>
+        </select>
+        <p class="field-helper">👥 Include yourself in the count</p>
+      </div>
+ 
+      <!-- Number of nights -->
+      <div class="field-group">
+        <label for="input-nights">Number of nights</label>
+        <select id="input-nights" name="nights" aria-label="Number of nights" onchange="updateTotal()">
+          <option value="1">1 night</option>
+          <option value="2" selected>2 nights</option>
+          <option value="3">3 nights</option>
+          <option value="4">4 nights</option>
+          <option value="5">5 nights</option>
+        </select>
+        <p class="field-helper">🗓️ You pay the host directly on arrival for your full stay</p>
+      </div>
+ 
+      <!-- Cost breakdown -->
+      <div class="fee-summary" aria-label="Cost breakdown" aria-live="polite">
+        <div>
+          <div class="fee-label">Total accommodation cost</div>
+          <div class="fee-note" id="nights-breakdown">2 nights × ₦15,000 per night</div>
+          <div class="fee-note" style="margin-top:4px; color:#1A7A4A; font-weight:600;">
+            Paid directly to host on arrival — cash or transfer
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div class="fee-amount" id="modal-total">₦30,000</div>
+          <div class="fee-note" style="margin-top:4px;">+ ₦1,500 reservation fee</div>
+        </div>
+      </div>
+ 
+      <!-- Fee explainer — answers the question before the user asks it -->
+      <div class="fee-explainer">
+        ✓ The ₦1,500 reservation fee secures your room on LodgeLink. It is separate from what you pay the host. The price listed here is the price at the door — no surprises.
+      </div>
+ 
+      <button id="btn-reserve-confirm" type="button" onclick="confirmReservation()">
+        Confirm &amp; Pay ₦1,500 to Secure Room
+      </button>
+ 
+      <p class="modal-trust">🔒 Secured by Paystack · Price on arrival matches this listing</p>
+ 
+    </div>
+  </div>
+ 
+  <!-- ════════════════════════════════════════════════════════════════
+       PRE-PAY SHEET
+       Shown after reservation confirmation. Lets user choose to pay
+       the full accommodation cost now via bank transfer, or on arrival.
+       Phase 3: this becomes a full Paystack integration.
+  ════════════════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="prepay-overlay" role="dialog"
+       aria-modal="true" aria-labelledby="prepay-title" aria-hidden="true">
+    <div class="modal-sheet" style="position:relative;">
+      <button class="modal-close" type="button"
+              aria-label="Close" onclick="closePrePay()">✕</button>
+      <div class="modal-handle" aria-hidden="true"></div>
+ 
+      <!-- Success confirmation header -->
+      <div id="prepay-success-badge" style="
+        background: rgba(26,122,74,0.1);
+        border: 1px solid rgba(26,122,74,0.25);
+        border-radius: 12px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;">
+        <span style="font-size:22px;">✅</span>
+        <div>
+          <div style="font-size:13px; font-weight:700; color:#1A7A4A;">Room secured!</div>
+          <div style="font-size:11px; color:#3D5A80;" id="prepay-property-confirm">Your reservation is confirmed.</div>
+        </div>
+      </div>
+ 
+      <h2 class="modal-title" id="prepay-title" style="font-size:18px;">
+        Pay your accommodation now?
+      </h2>
+      <p class="modal-sub" style="margin-bottom:20px;">
+        Your room is already secured. But some guests prefer to pay in full before they travel — no cash to carry, no stress on arrival.
+      </p>
+ 
+      <!-- Total cost summary -->
+      <div class="fee-summary" style="margin-bottom:20px;" aria-label="Total accommodation cost">
+        <div>
+          <div class="fee-label">Total accommodation cost</div>
+          <div class="fee-note" id="prepay-breakdown">2 nights × ₦15,000</div>
+          <div class="fee-note" style="margin-top:4px; color:#1A7A4A; font-weight:600;">
+            Pay directly to host — bank transfer
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div class="fee-amount" id="prepay-total">₦30,000</div>
+        </div>
+      </div>
+ 
+      <!-- Pay now — reveals bank details -->
+      <button id="btn-prepay-now" type="button" onclick="showBankDetails()" style="
+        width: 100%;
+        padding: 16px;
+        background: var(--navy);
+        color: var(--white);
+        border: none;
+        border-radius: var(--radius-md);
+        font-family: var(--font-head);
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 14px rgba(11,31,58,0.2);
+        transition: background 0.2s ease;">
+        Pay in Full Now — Get Host Bank Details
+      </button>
+ 
+      <!-- Pay on arrival — dismisses sheet -->
+      <button type="button" onclick="closePrePay()" style="
+        width: 100%;
+        padding: 14px;
+        background: none;
+        color: var(--text-mid);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-md);
+        font-family: var(--font-body);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        margin-bottom: 16px;">
+        I'll Pay on Arrival — That's Fine
+      </button>
+ 
+      <!-- Bank details panel — hidden until user taps Pay Now -->
+      <div id="bank-details-panel" style="display:none;">
+        <div style="
+          background: #EEF4FB;
+          border-radius: var(--radius-md);
+          padding: 16px;
+          margin-bottom: 12px;">
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-mid); margin-bottom:12px;">
+            Host Bank Details
+          </div>
+          <div id="bank-details-content" style="font-size:14px; color:var(--text-dark); line-height:2;">
+            <!-- Populated by app.js from active reservation -->
+          </div>
+        </div>
+        <div style="
+          background: rgba(232,160,32,0.1);
+          border: 1px solid rgba(232,160,32,0.3);
+          border-radius: var(--radius-sm);
+          padding: 12px 14px;
+          font-size:12px;
+          color: var(--text-mid);
+          line-height:1.6;
+          margin-bottom: 16px;">
+          ⚠️ After transferring, send your payment screenshot to the host via WhatsApp or SMS. The host will confirm receipt and your booking is fully settled.
+        </div>
+        <button type="button" onclick="closePrePay()" style="
+          width: 100%;
+          padding: 14px;
+          background: var(--gold);
+          color: var(--navy);
+          border: none;
+          border-radius: var(--radius-md);
+          font-family: var(--font-head);
+          font-size: 15px;
+          font-weight: 700;
+          cursor: pointer;">
+          Done — I've Noted the Details
+        </button>
+      </div>
+ 
+      <p style="text-align:center; font-size:11px; color:var(--text-light); margin-top:8px;">
+        🔒 Bank details are provided directly by your verified host
+      </p>
+    </div>
+  </div>
+ 
+  <!-- ════════════════════════════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════════════════════════════ -->
+  <footer id="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-logo">Lodge<span>Link</span></div>
+      <p class="footer-tagline">
+        Find, compare and reserve accommodation for church programs<br />
+        in Asese &amp; RCCG Camp — before the rush begins.
+      </p>
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="#hero">Home</a>
+        <a href="#main">Listings</a>
+        <a href="#" aria-label="List your property on LodgeLink">List your property</a>
+        <a href="#" aria-label="Contact LodgeLink support">Contact</a>
+        <a href="#" aria-label="Privacy policy">Privacy</a>
+      </nav>
+      <div class="footer-divider" aria-hidden="true"></div>
+      <p class="footer-legal">
+        © <span id="footer-year">2026</span> LodgeLink. All rights reserved.<br />
+        LodgeLink connects attendees with accommodation providers.
+        Prices displayed are set by hosts and verified at listing approval.
+      </p>
+    </div>
+  </footer>
+ 
+  <script src="app.js"></script>
+ 
+</body>
+</html>
