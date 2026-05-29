@@ -1026,8 +1026,13 @@
       btn.disabled = true;
  
       try {
-        await db.insert('listings', listing);
-        showToast('✓ Listing submitted for review!', 'success');
+  await db.insert('listings', listing);
+  showToast('✓ Listing submitted for review!', 'success');
+
+  // Show WhatsApp photo instruction
+  setTimeout(() => {
+    alert(`✅ Listing submitted successfully!\n\n📸 ADD YOUR ROOM PHOTOS\n\nTo make your listing stand out, send 3-5 photos of your room to our WhatsApp:\n\n+234 9017732996\n\nWe will add your photos within 2 hours.\n\nTip: Good lighting and tidy room = more bookings!`);
+  }, 1600);
  
         // Reset form
         setTimeout(() => {
