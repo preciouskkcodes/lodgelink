@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LodgeLink — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:       #0B1F3A;
+      --navy-mid:   #12294D;
+      --gold:       #E8A020;
+      --gold-light: #F5C254;
+      --cream:      #FDF6EC;
+      --white:      #FFFFFF;
+      --text-dark:  #0B1F3A;
+      --text-mid:   #3D5A80;
+      --text-light: #7A95B0;
+      --border:     #D9E6F2;
+      --success:    #1A7A4A;
+      --error:      #DC2626;
+      --radius-sm:  8px;
+      --radius-md:  14px;
+      --radius-lg:  22px;
+      --shadow-sm:  0 2px 8px rgba(11,31,58,0.08);
+      --shadow-md:  0 6px 24px rgba(11,31,58,0.13);
+      --font-head:  'Syne', sans-serif;
+      --font-body:  'Outfit', sans-serif;
+      --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
+    }
+ 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: #F0F4F8;
+      color: var(--text-dark);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+ 
+    /* ── HEADER ── */
+    #header {
+      background: var(--navy);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-md);
+    }
+ 
+    .logo {
+      font-family: var(--font-head);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--white);
+    }
+ 
+    .logo span { color: var(--gold); }
+ 
+    .admin-badge {
+      background: rgba(232,160,32,0.2);
+      border: 1px solid rgba(232,160,32,0.4);
+      color: var(--gold);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+ 
+    .header-links {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+ 
+    .header-links a {
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+ 
+    .header-links a:hover { color: var(--gold); }
+ 
+    /* ── LOGIN SCREEN ── */
+    #screen-login {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+ 
+    .login-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+    }
+ 
+    .login-title {
+      font-family: var(--font-head);
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+ 
+    .login-sub {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 28px;
+    }
+ 
+    /* ── MAIN LAYOUT ── */
+    #screen-dashboard {
+      display: none;
+      padding: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+ 
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+ 
+    .stat-card {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+ 
+    .stat-number {
+      font-family: var(--font-head);
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+ 
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+ 
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: var(--white);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      width: fit-content;
+    }
+ 
+    .tab {
+      padding: 8px 20px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: none;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+ 
+    .tab.active {
+      background: var(--navy);
+      color: var(--white);
+    }
+ 
+    /* Table */
+    .table-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+ 
+    .table-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+ 
+    .table-title {
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+ 
+    .table-count {
+      font-size: 12px;
+      color: var(--text-light);
+      background: #EEF4FB;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+ 
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+ 
+    th {
+      background: #F8FBFF;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+ 
+    td {
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--text-dark);
+      border-bottom: 1px solid #F0F4F8;
+      vertical-align: middle;
+    }
+ 
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFCFF; }
+ 
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+ 
+    .badge-pending  { background: rgba(232,160,32,0.15); color: #92600A; }
+    .badge-approved { background: rgba(26,122,74,0.12);  color: var(--success); }
+    .badge-declined { background: rgba(220,38,38,0.1);   color: var(--error); }
+    .badge-confirmed{ background: rgba(26,122,74,0.12);  color: var(--success); }
+    .badge-live     { background: rgba(26,122,74,0.12);  color: var(--success); }
+    .badge-review   { background: rgba(232,160,32,0.15); color: #92600A; }
+ 
+    /* Action buttons */
+    .btn-approve {
+      background: var(--success);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: opacity var(--transition);
+      margin-right: 6px;
+    }
+ 
+    .btn-approve:hover { opacity: 0.85; }
+ 
+    .btn-decline {
+      background: none;
+      color: var(--error);
+      border: 1.5px solid var(--error);
+      border-radius: var(--radius-sm);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all var(--transition);
+    }
+ 
+    .btn-decline:hover { background: var(--error); color: white; }
+ 
+    /* Forms */
+    .field-group { margin-bottom: 16px; }
+ 
+    .field-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-mid);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+ 
+    .field-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--text-dark);
+      outline: none;
+      transition: border-color var(--transition);
+    }
+ 
+    .field-group input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(232,160,32,0.12);
+    }
+ 
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-head);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+ 
+    .btn-primary:hover { background: var(--gold); color: var(--navy); }
+ 
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--navy);
+      color: var(--white);
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 999;
+      transform: translateY(80px);
+      transition: transform 0.3s ease;
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+    }
+ 
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { background: var(--success); }
+    #toast.error   { background: var(--error); }
+ 
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-light);
+    }
+ 
+    .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state p { font-size: 13px; }
+ 
+    /* Listing image thumbnail */
+    .listing-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      background: #EEF4FB;
+    }
+ 
+    .listing-thumb-placeholder {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      background: #EEF4FB;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+ 
+    /* Refresh button */
+    .btn-refresh {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-mid);
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all var(--transition);
+    }
+ 
+    .btn-refresh:hover { border-color: var(--navy); color: var(--navy); }
+ 
+    @media (max-width: 768px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      #screen-dashboard { padding: 16px; }
+      table { font-size: 12px; }
+      td, th { padding: 10px 12px; }
+    }
+  </style>
+</head>
+<body>
+ 
+  <!-- HEADER -->
+  <header id="header">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="logo">Lodge<span>Link</span></div>
+      <div class="admin-badge">Admin</div>
+    </div>
+    <div class="header-links">
+      <a href="index.html">Attendee side ↗</a>
+      <a href="host.html">Host portal ↗</a>
+      <a href="#" onclick="handleLogout()" style="color:rgba(255,255,255,0.4);">Sign out</a>
+    </div>
+  </header>
+ 
+  <!-- ════════════════════════════════════════════════════════════════
+       LOGIN SCREEN
+  ════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-login">
+    <div class="login-card">
+      <div style="font-size:40px; margin-bottom:16px;">🔐</div>
+      <div class="login-title">Admin Access</div>
+      <div class="login-sub">LodgeLink management dashboard — authorised personnel only</div>
+ 
+      <div class="field-group">
+        <label for="admin-password">Admin password</label>
+        <input type="password" id="admin-password" placeholder="Enter admin password"
+               onkeydown="if(event.key==='Enter') handleAdminLogin()" />
+      </div>
+ 
+      <button class="btn-primary" onclick="handleAdminLogin()">
+        Sign in to Dashboard →
+      </button>
+    </div>
+  </div>
+ 
+  <!-- ════════════════════════════════════════════════════════════════
+       DASHBOARD
+  ════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-dashboard">
+ 
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-total-listings" style="color:var(--navy);">—</div>
+        <div class="stat-label">Total Listings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-pending-listings" style="color:#92600A;">—</div>
+        <div class="stat-label">Pending Review</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-total-reservations" style="color:var(--success);">—</div>
+        <div class="stat-label">Reservations</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-revenue" style="color:var(--gold);">—</div>
+        <div class="stat-label">Fee Revenue</div>
+      </div>
+    </div>
+ 
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('listings')">🏠 Listings</button>
+      <button class="tab" onclick="switchTab('reservations')">📋 Reservations</button>
+      <button class="tab" onclick="switchTab('hosts')">👤 Hosts</button>
+    </div>
+ 
+    <!-- LISTINGS TAB -->
+    <div id="tab-listings">
+      <div class="table-card">
+        <div class="table-header">
+          <div>
+            <div class="table-title">All Listings</div>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span class="table-count" id="listings-count">Loading...</span>
+            <button class="btn-refresh" onclick="loadDashboard()">↻ Refresh</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Photo</th>
+                <th>Property</th>
+                <th>Type</th>
+                <th>Price/Night</th>
+                <th>Distance</th>
+                <th>Host</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="listings-table-body">
+              <tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon">⏳</div><p>Loading listings...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- RESERVATIONS TAB -->
+    <div id="tab-reservations" style="display:none;">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">All Reservations</div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span class="table-count" id="reservations-count">Loading...</span>
+            <button class="btn-refresh" onclick="loadDashboard()">↻ Refresh</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Guest</th>
+                <th>Phone</th>
+                <th>Property</th>
+                <th>Nights</th>
+                <th>Total Cost</th>
+                <th>Fee Paid</th>
+                <th>Program</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="reservations-table-body">
+              <tr><td colspan="9"><div class="empty-state"><div class="empty-state-icon">⏳</div><p>Loading reservations...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- HOSTS TAB -->
+    <div id="tab-hosts" style="display:none;">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Registered Hosts</div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span class="table-count" id="hosts-count">Loading...</span>
+            <button class="btn-refresh" onclick="loadDashboard()">↻ Refresh</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Joined</th>
+              </tr>
+            </thead>
+            <tbody id="hosts-table-body">
+              <tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">⏳</div><p>Loading hosts...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+ 
+  </div>
+ 
+  <!-- TOAST -->
+  <div id="toast"></div>
+ 
+  <script>
+    // ─── CONFIG ──────────────────────────────────────────────────────
+    const SUPABASE_URL  = 'https://zomcrvfekwihqrrqvifi.supabase.co';
+    const SUPABASE_KEY  = 'sb_publishable_lC9xUJnLXMF5saz5Y6JYag_JGzmP6fD';
+ 
+    // Simple admin password — change this to something only you know
+    const ADMIN_PASSWORD = 'lodgelink357';
+ 
+    // ─── SUPABASE HELPER ─────────────────────────────────────────────
+    const db = {
+      async get(table, filters = {}) {
+        let url = `${SUPABASE_URL}/rest/v1/${table}?select=*`;
+        Object.entries(filters).forEach(([k, v]) => {
+          url += `&${k}=eq.${encodeURIComponent(v)}`;
+        });
+        const res = await fetch(url, {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+          }
+        });
+        if (!res.ok) throw new Error(`GET failed: ${res.status}`);
+        return res.json();
+      },
+ 
+      async getAll(table) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+          }
+        });
+        if (!res.ok) throw new Error(`GET failed: ${res.status}`);
+        return res.json();
+      },
+ 
+      async update(table, id, data) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(`UPDATE failed: ${res.status}`);
+        return true;
+      }
+    };
+ 
+    // ─── TOAST ───────────────────────────────────────────────────────
+    function showToast(msg, type = '') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'show ' + type;
+      setTimeout(() => { toast.className = ''; }, 3000);
+    }
+ 
+    // ─── LOGIN ───────────────────────────────────────────────────────
+    function handleAdminLogin() {
+      const pwd = document.getElementById('admin-password').value;
+      if (pwd === ADMIN_PASSWORD) {
+        sessionStorage.setItem('lodgelink_admin', '1');
+        document.getElementById('screen-login').style.display = 'none';
+        document.getElementById('screen-dashboard').style.display = 'block';
+        loadDashboard();
+      } else {
+        showToast('Incorrect password', 'error');
+        document.getElementById('admin-password').value = '';
+        document.getElementById('admin-password').focus();
+      }
+    }
+ 
+    function handleLogout() {
+      sessionStorage.removeItem('lodgelink_admin');
+      document.getElementById('screen-dashboard').style.display = 'none';
+      document.getElementById('screen-login').style.display = 'flex';
+    }
+ 
+    // ─── TABS ────────────────────────────────────────────────────────
+    function switchTab(name) {
+      ['listings', 'reservations', 'hosts'].forEach(t => {
+        document.getElementById(`tab-${t}`).style.display = t === name ? 'block' : 'none';
+      });
+      document.querySelectorAll('.tab').forEach((btn, i) => {
+        btn.classList.toggle('active', ['listings','reservations','hosts'][i] === name);
+      });
+    }
+ 
+    // ─── LOAD DASHBOARD ──────────────────────────────────────────────
+    async function loadDashboard() {
+      try {
+        const [listings, reservations, users] = await Promise.all([
+          db.getAll('listings'),
+          db.getAll('reservations'),
+          db.get('users', { role: 'host' }),
+        ]);
+ 
+        // Stats
+        const pendingListings = listings.filter(l => !l.approved);
+        const totalRevenue    = reservations.reduce((sum, r) => sum + (r.reservation_fee || 0), 0);
+ 
+        document.getElementById('stat-total-listings').textContent     = listings.length;
+        document.getElementById('stat-pending-listings').textContent   = pendingListings.length;
+        document.getElementById('stat-total-reservations').textContent = reservations.length;
+        document.getElementById('stat-revenue').textContent            = '₦' + totalRevenue.toLocaleString('en-NG');
+ 
+        // Render tables
+        renderListingsTable(listings);
+        renderReservationsTable(reservations, listings);
+        renderHostsTable(users);
+ 
+      } catch (err) {
+        console.error('Dashboard load error:', err);
+        showToast('Could not load data — check connection', 'error');
+      }
+    }
+ 
+    // ─── LISTINGS TABLE ───────────────────────────────────────────────
+    function renderListingsTable(listings) {
+      const tbody = document.getElementById('listings-table-body');
+      document.getElementById('listings-count').textContent = `${listings.length} total`;
+ 
+      if (!listings.length) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon">🏠</div><p>No listings yet.</p></div></td></tr>`;
+        return;
+      }
+ 
+      tbody.innerHTML = listings.map(l => `
+        <tr>
+          <td>
+            ${l.image_url
+              ? `<img src="${l.image_url}" class="listing-thumb" alt="${l.name}" />`
+              : `<div class="listing-thumb-placeholder">🏨</div>`
+            }
+          </td>
+          <td>
+            <div style="font-weight:600;">${l.name}</div>
+            <div style="font-size:11px; color:var(--text-light);">${l.room_type}</div>
+          </td>
+          <td>${l.type}</td>
+          <td>₦${Number(l.price_per_night).toLocaleString('en-NG')}</td>
+          <td>${l.distance_label}</td>
+          <td>
+            <div style="font-weight:500;">${l.host_name}</div>
+            <div style="font-size:11px; color:var(--text-light);">${l.host_phone}</div>
+          </td>
+          <td>
+            <span class="badge ${l.approved ? 'badge-live' : 'badge-review'}">
+              ${l.approved ? '✓ Live' : '⏳ Review'}
+            </span>
+          </td>
+          <td>
+            ${!l.approved ? `
+              <button class="btn-approve" onclick="approveListing('${l.id}')">✓ Approve</button>
+              <button class="btn-decline" onclick="declineListing('${l.id}')">✕ Decline</button>
+            ` : `
+              <button class="btn-decline" onclick="declineListing('${l.id}')">Take down</button>
+            `}
+          </td>
+        </tr>`).join('');
+    }
+ 
+    // ─── RESERVATIONS TABLE ───────────────────────────────────────────
+    function renderReservationsTable(reservations, listings) {
+      const tbody = document.getElementById('reservations-table-body');
+      document.getElementById('reservations-count').textContent = `${reservations.length} total`;
+ 
+      if (!reservations.length) {
+        tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-state-icon">📭</div><p>No reservations yet.</p></div></td></tr>`;
+        return;
+      }
+ 
+      // Sort by most recent first
+      const sorted = [...reservations].sort((a, b) =>
+        new Date(b.created_at) - new Date(a.created_at));
+ 
+      tbody.innerHTML = sorted.map(r => {
+        const listing = listings.find(l => l.id === r.listing_id);
+        const date    = r.created_at ? new Date(r.created_at).toLocaleDateString('en-NG') : '—';
+        return `
+          <tr>
+            <td><strong>${r.guest_name}</strong></td>
+            <td>${r.guest_phone}</td>
+            <td>${listing ? listing.name : r.listing_id?.substring(0,8) + '...'}</td>
+            <td>${r.nights} night${r.nights !== 1 ? 's' : ''}</td>
+            <td>₦${Number(r.total_cost).toLocaleString('en-NG')}</td>
+            <td>₦${Number(r.reservation_fee || 1500).toLocaleString('en-NG')}</td>
+            <td>${r.program || '—'}</td>
+            <td><span class="badge badge-${r.status}">${r.status}</span></td>
+            <td style="font-size:11px; color:var(--text-light);">${date}</td>
+          </tr>`;
+      }).join('');
+    }
+ 
+    // ─── HOSTS TABLE ─────────────────────────────────────────────────
+    function renderHostsTable(hosts) {
+      const tbody = document.getElementById('hosts-table-body');
+      document.getElementById('hosts-count').textContent = `${hosts.length} hosts`;
+ 
+      if (!hosts.length) {
+        tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">👤</div><p>No hosts registered yet.</p></div></td></tr>`;
+        return;
+      }
+ 
+      tbody.innerHTML = hosts.map(h => `
+        <tr>
+          <td><strong>${h.name || '—'}</strong></td>
+          <td>${h.phone}</td>
+          <td><span class="badge badge-approved">${h.role}</span></td>
+          <td style="font-size:11px; color:var(--text-light);">
+            ${h.created_at ? new Date(h.created_at).toLocaleDateString('en-NG') : '—'}
+          </td>
+        </tr>`).join('');
+    }
+ 
+    // ─── APPROVE / DECLINE ────────────────────────────────────────────
+    async function approveListing(id) {
+      try {
+        await db.update('listings', id, { approved: true, available: true });
+        showToast('✓ Listing approved and live!', 'success');
+        loadDashboard();
+      } catch (err) {
+        showToast('Could not approve listing', 'error');
+      }
+    }
+ 
+    async function declineListing(id) {
+      if (!confirm('Are you sure you want to decline or take down this listing?')) return;
+      try {
+        await db.update('listings', id, { approved: false, available: false });
+        showToast('Listing removed from live site', '');
+        loadDashboard();
+      } catch (err) {
+        showToast('Could not update listing', 'error');
+      }
+    }
+ 
+    // ─── INIT ────────────────────────────────────────────────────────
+    function init() {
+      const isAdmin = sessionStorage.getItem('lodgelink_admin');
+      if (isAdmin) {
+        document.getElementById('screen-login').style.display = 'none';
+        document.getElementById('screen-dashboard').style.display = 'block';
+        loadDashboard();
+      }
+    }
+ 
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+ 
+</body>
+</html>
