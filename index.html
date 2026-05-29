@@ -296,7 +296,8 @@
  
     .hero-headline {
       font-family: var(--font-head);
-      font-size: clamp(26px, 7vw, 34px);
+      font-size: clamp(30px, 8vw, 42px);
+      text-align: center;
       font-weight: 800;
       color: var(--white);
       line-height: 1.15;
@@ -311,6 +312,7 @@
       color: rgba(255,255,255,0.65);
       font-weight: 300;
       margin-bottom: 28px;
+      text-align: center;
       animation: fadeUp 0.5s 0.2s ease both;
     }
  
@@ -1151,6 +1153,22 @@
 </a>
  
       <!-- Program selector with visual cue (gold glow until selected) -->
+      <!-- Feature icons — what you can do with LodgeLink -->
+<div style="display:flex; gap:8px; margin-bottom:16px;">
+  <div style="flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 6px; text-align:center;">
+    <div style="font-size:18px; margin-bottom:5px;">🔍</div>
+    <div style="font-size:9px; font-weight:600; color:rgba(255,255,255,0.7); line-height:1.4;">Search rooms near auditorium</div>
+  </div>
+  <div style="flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 6px; text-align:center;">
+    <div style="font-size:18px; margin-bottom:5px;">📋</div>
+    <div style="font-size:9px; font-weight:600; color:rgba(255,255,255,0.7); line-height:1.4;">Secure your room before you leave home</div>
+  </div>
+  <div style="flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 6px; text-align:center;">
+    <div style="font-size:18px; margin-bottom:5px;">🏠</div>
+    <div style="font-size:9px; font-weight:600; color:rgba(255,255,255,0.7); line-height:1.4;">List your property — fill rooms early</div>
+  </div>
+</div>
+      
       <div class="program-selector needs-attention" id="program-selector-wrap">
         <label for="program-select">
           👆 Start here — which program are you attending?
