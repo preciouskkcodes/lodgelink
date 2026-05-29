@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -9,23 +9,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --navy:       #7C2D12;
-      --navy-mid:   #9A3412;
-      --gold:       #EA580C;
-      --gold-light: #FB923C;
-      --cream:      #FFF7ED;
+      --navy:       #0B1F3A;
+      --navy-mid:   #12294D;
+      --gold:       #E8A020;
+      --gold-light: #F5C254;
+      --cream:      #FDF6EC;
       --white:      #FFFFFF;
-      --text-dark:  #431407;
-      --text-mid:   #9A3412;
-      --text-light: #C2724F;
-      --border:     #FDDCCA;
+      --text-dark:  #0B1F3A;
+      --text-mid:   #3D5A80;
+      --text-light: #7A95B0;
+      --border:     #D9E6F2;
       --success:    #1A7A4A;
       --error:      #DC2626;
       --radius-sm:  8px;
       --radius-md:  14px;
       --radius-lg:  22px;
-      --shadow-sm:  0 2px 8px rgba(124,45,18,0.08);
-      --shadow-md:  0 6px 24px rgba(124,45,18,0.15);
+      --shadow-sm:  0 2px 8px rgba(11,31,58,0.08);
+      --shadow-md:  0 6px 24px rgba(11,31,58,0.13);
       --font-head:  'Syne', sans-serif;
       --font-body:  'Outfit', sans-serif;
       --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
@@ -51,7 +51,7 @@
  
     /* ── HEADER ── */
     #header {
-      background: #7C2D12;
+      background: var(--navy);
       padding: 20px 0;
     }
  
@@ -201,7 +201,7 @@
     .btn-primary {
       width: 100%;
       padding: 16px;
-      background: #7C2D12;
+      background: var(--navy);
       color: var(--white);
       border: none;
       border-radius: var(--radius-md);
@@ -270,7 +270,7 @@
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%) translateY(80px);
-      background: #7C2D12;
+      background: var(--navy);
       color: var(--white);
       padding: 12px 24px;
       border-radius: var(--radius-md);
@@ -391,7 +391,7 @@
     }
  
     .form-step:last-child { border-right: none; }
-    .form-step.active { background: #7C2D12; }
+    .form-step.active { background: var(--navy); }
     .form-step.done   { background: rgba(26,122,74,0.1); }
  
     .form-step-num {
@@ -517,11 +517,11 @@
       <!-- Stats row -->
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:20px 0;">
         <div class="card" style="padding:14px; text-align:center; margin-bottom:0;">
-          <div style="font-family:var(--font-head); font-size:22px; font-weight:800; color:#7C2D12;" id="stat-listings">0</div>
+          <div style="font-family:var(--font-head); font-size:22px; font-weight:800; color:var(--navy);" id="stat-listings">0</div>
           <div style="font-size:11px; color:var(--text-light);">Listings</div>
         </div>
         <div class="card" style="padding:14px; text-align:center; margin-bottom:0;">
-          <div style="font-family:var(--font-head); font-size:22px; font-weight:800; color:#EA580C;" id="stat-pending">0</div>
+          <div style="font-family:var(--font-head); font-size:22px; font-weight:800; color:var(--gold);" id="stat-pending">0</div>
           <div style="font-size:11px; color:var(--text-light);">Pending</div>
         </div>
         <div class="card" style="padding:14px; text-align:center; margin-bottom:0;">
@@ -741,7 +741,7 @@
   <script>
     // ─── SUPABASE CONFIG ─────────────────────────────────────────────
     const SUPABASE_URL = 'https://zomcrvfekwihqrrqvifi.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_lC9xUJnLXMF5saz5Y6JYag_JGzmP6fD';
+    const SUPABASE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY';
  
     const db = {
       async get(table, filters = {}) {
@@ -1026,13 +1026,8 @@
       btn.disabled = true;
  
       try {
-  await db.insert('listings', listing);
-  showToast('✓ Listing submitted for review!', 'success');
-
-  // Show WhatsApp photo instruction
-  setTimeout(() => {
-    alert(`✅ Listing submitted successfully!\n\n📸 ADD YOUR ROOM PHOTOS\n\nTo make your listing stand out, send 3-5 photos of your room to our WhatsApp:\n\n+234 9017732996\n\nWe will add your photos within 2 hours.\n\nTip: Good lighting and tidy room = more bookings!`);
-  }, 1600);
+        await db.insert('listings', listing);
+        showToast('✓ Listing submitted for review!', 'success');
  
         // Reset form
         setTimeout(() => {
