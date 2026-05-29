@@ -114,6 +114,7 @@ async function fetchListings() {
       hostBankAccount:l.host_bank_account,
       hostBankBank:   l.host_bank_bank,
       available:      l.available,
+      imageUrl:       l.image_url || '',
     }));
  
     renderList(allListings);
@@ -182,7 +183,10 @@ function buildCard(listing, allPrices) {
   card.setAttribute('aria-label', `${listing.name} listing`);
   card.innerHTML = `
     <div class="card-image">
-      <div class="card-image-placeholder" aria-hidden="true">🏨</div>
+        ${listing.imageUrl
+          ? `<img src="${listing.imageUrl}" alt="${listing.name}" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;" />`
+          : `<div class="card-image-placeholder" aria-hidden="true">🏨</div>`
+        }
       <div class="price-badge">${formatPrice(listing.pricePerNight)} <span>/night</span></div>
       <div class="fair-label ${cls}">${label}</div>
     </div>
