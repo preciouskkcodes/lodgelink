@@ -509,7 +509,7 @@ window.confirmReservation = async function() {
         { display_name: 'Phone',      variable_name: 'phone',      value: phone },
       ]
     },
-    callback: async function(response) {
+    callback: function(response) {
       // Payment successful — save reservation
       record.status          = 'paid';
       record.paystack_ref    = response.reference;
