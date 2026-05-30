@@ -495,30 +495,31 @@ window.confirmReservation = async function() {
     status:          'pending',
   };
 
-  /// Use Paystack redirect method — more reliable across all browsers
-  const paystackUrl = `https://checkout.paystack.com/pay` +
-  `?key=${encodeURIComponent('pk_live_3ce71a22fa041e5e931427644e0a0e3863e895e8')}` +
-  `&email=${encodeURIComponent(phone + '@lodgelink.app')}` +
-  `&amount=150000` +
-  `&currency=NGN` +
-  `&ref=LDG-${Date.now()}` +
-  `&metadata=${encodeURIComponent(JSON.stringify({
-    guest_name: name,
-    property: activeReservation.propertyName,
-    phone: phone
-  }))}` +
-  `&callback_url=${encodeURIComponent('https://lodgelink-ng.vercel.app/success.html')}`;
+  try {
+    await db.insert('reservations', record);
 
-// Save pending reservation to localStorage before redirecting
-localStorage.setItem('lodgelink_pending_reservation', JSON.stringify(record));
+    const localRecord = {
+      ...record,
+      id:            'res-' + Date.now(),
+      propertyName:  activeReservation.propertyName,
+      pricePerNight: activeReservation.pricePerNight,
+      totalCost:     record.total_cost,
+      timestamp:     new Date().toISOString(),
+    };
 
-// Open Paystack in new tab
-window.open(paystackUrl, '_blank');
+    const records = loadData();
+    records.push(localRecord);
+    saveData(records);
 
-// Close modal and show instruction
-closeModal();
-alert('A Paystack payment page has opened in a new tab. Complete your payment there to secure your room.');
-};  
+    closeModal();
+    setTimeout(() => openPrePay(localRecord), 300);
+
+  } catch (err) {
+    console.error('LodgeLink: reservation save failed', err);
+    alert('Could not save your reservation. Please check your connection and try again.');
+  }
+};
+
     
 // ─── PRE-PAY FLOW ─────────────────────────────────────────────────────────────
  
@@ -578,7 +579,7 @@ window.closeModal = function() {
   const overlay = document.getElementById('modal-overlay');
   if (overlay) {
     overlay.classList.remove('open');
-    overlay.setAttribute('afilterByLocationria-hidden', 'true');
+    overlay.setAttribute('aria-hidden', 'true');
   }
 };
  
