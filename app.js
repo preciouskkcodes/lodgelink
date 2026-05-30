@@ -495,20 +495,29 @@ window.confirmReservation = async function() {
     status:          'pending',
   };
 
-  // Open Paystack checkout
-  const handler = PaystackPop.setup({
-    key: 'pk_live_3ce71a22fa041e5e931427644e0a0e3863e895e8',
-    email: `${phone}@lodgelink.app`,
-    amount: 150000, // ₦1,500 in kobo
-    currency: 'NGN',
-    ref: 'LDG-' + Date.now(),
-    metadata: {
-      custom_fields: [
-        { display_name: 'Guest Name', variable_name: 'guest_name', value: name },
-        { display_name: 'Property',   variable_name: 'property',   value: activeReservation.propertyName },
-        { display_name: 'Phone',      variable_name: 'phone',      value: phone },
-      ]
-    },
+  /// Use Paystack redirect method — more reliable across all browsers
+  const paystackUrl = `https://checkout.paystack.com/pay` +
+  `?key=${encodeURIComponent('pk_live_3ce71a22fa041e5e931427644e0a0e3863e895e8')}` +
+  `&email=${encodeURIComponent(phone + '@lodgelink.app')}` +
+  `&amount=150000` +
+  `&currency=NGN` +
+  `&ref=LDG-${Date.now()}` +
+  `&metadata=${encodeURIComponent(JSON.stringify({
+    guest_name: name,
+    property: activeReservation.propertyName,
+    phone: phone
+  }))}` +
+  `&callback_url=${encodeURIComponent('https://lodgelink-ng.vercel.app/success.html')}`;
+
+// Save pending reservation to localStorage before redirecting
+localStorage.setItem('lodgelink_pending_reservation', JSON.stringify(record));
+
+// Open Paystack in new tab
+window.open(paystackUrl, '_blank');
+
+// Close modal and show instruction
+closeModal();
+alert('A Paystack payment page has opened in a new tab. Complete your payment there to secure your room.');
     
     callback: function(response) {
       record.status       = 'paid';
