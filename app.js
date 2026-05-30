@@ -509,20 +509,21 @@ window.confirmReservation = async function() {
         { display_name: 'Phone',      variable_name: 'phone',      value: phone },
       ]
     },
+    
     callback: function(response) {
-      // Payment successful — save reservation
-      record.status          = 'paid';
-      record.paystack_ref    = response.reference;
+      record.status       = 'paid';
+      record.paystack_ref = response.reference;
 
-      try {
-        await db.insert('reservations', record);
-
+      db.insert('reservations', record).then(function() {
         const localRecord = {
-          ...record,
           id:            'res-' + Date.now(),
           propertyName:  activeReservation.propertyName,
           pricePerNight: activeReservation.pricePerNight,
           totalCost:     record.total_cost,
+          guest_name:    record.guest_name,
+          guest_phone:   record.guest_phone,
+          nights:        record.nights,
+          reservation_fee: record.reservation_fee,
           timestamp:     new Date().toISOString(),
         };
 
@@ -531,22 +532,22 @@ window.confirmReservation = async function() {
         saveData(records);
 
         closeModal();
-        setTimeout(() => openPrePay(localRecord), 300);
+        setTimeout(function() { openPrePay(localRecord); }, 300);
 
-      } catch (err) {
+      }).catch(function(err) {
         console.error('Reservation save failed', err);
-        alert('Payment received but reservation save failed. Please contact support with reference: ' + response.reference);
-      }
+        alert('Payment received but reservation save failed. Contact support with reference: ' + response.reference);
+      });
     },
+
     onClose: function() {
-      // User closed Paystack without paying — do nothing
       console.log('Paystack closed without payment');
     }
   });
 
   handler.openIframe();
 };
-
+  
 // ─── PRE-PAY FLOW ─────────────────────────────────────────────────────────────
  
 function openPrePay(record) {
