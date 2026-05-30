@@ -470,7 +470,7 @@ window.confirmReservation = async function() {
   const guests = document.getElementById('input-guests').value;
   const nights = parseInt(document.getElementById('input-nights').value, 10);
   const program = document.getElementById('program-select').value;
- 
+
   if (!name) {
     alert('Please enter your full name.');
     document.getElementById('input-name').focus();
@@ -481,7 +481,7 @@ window.confirmReservation = async function() {
     document.getElementById('input-phone').focus();
     return;
   }
- 
+
   const record = {
     listing_id:      activeReservation.listingId,
     guest_name:      name,
@@ -494,33 +494,59 @@ window.confirmReservation = async function() {
     program:         program || 'unspecified',
     status:          'pending',
   };
- 
-  try {
-    // Save reservation to Supabase
-    await db.insert('reservations', record);
- 
-    // Also save locally so the pre-pay sheet can read it
-    const localRecord = {
-      ...record,
-      id:           'res-' + Date.now(),
-      propertyName: activeReservation.propertyName,
-      pricePerNight: activeReservation.pricePerNight,
-      totalCost:    record.total_cost,
-      timestamp:    new Date().toISOString(),
-    };
-    const records = loadData();
-    records.push(localRecord);
-    saveData(records);
- 
-    closeModal();
-    setTimeout(() => openPrePay(localRecord), 300);
- 
-  } catch (err) {
-    console.error('LodgeLink: reservation save failed', err);
-    alert('Could not save your reservation. Please check your connection and try again.');
-  }
+
+  // Open Paystack checkout
+  const handler = PaystackPop.setup({
+    key: 'pk_live_3ce71a22fa041e5e931427644e0a0e3863e895e8',
+    email: `${phone}@lodgelink.app`,
+    amount: 150000, // ₦1,500 in kobo
+    currency: 'NGN',
+    ref: 'LDG-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: 'Guest Name', variable_name: 'guest_name', value: name },
+        { display_name: 'Property',   variable_name: 'property',   value: activeReservation.propertyName },
+        { display_name: 'Phone',      variable_name: 'phone',      value: phone },
+      ]
+    },
+    callback: async function(response) {
+      // Payment successful — save reservation
+      record.status          = 'paid';
+      record.paystack_ref    = response.reference;
+
+      try {
+        await db.insert('reservations', record);
+
+        const localRecord = {
+          ...record,
+          id:            'res-' + Date.now(),
+          propertyName:  activeReservation.propertyName,
+          pricePerNight: activeReservation.pricePerNight,
+          totalCost:     record.total_cost,
+          timestamp:     new Date().toISOString(),
+        };
+
+        const records = loadData();
+        records.push(localRecord);
+        saveData(records);
+
+        closeModal();
+        setTimeout(() => openPrePay(localRecord), 300);
+
+      } catch (err) {
+        console.error('Reservation save failed', err);
+        alert('Payment received but reservation save failed. Please contact support with reference: ' + response.reference);
+      }
+    },
+    onClose: function() {
+      // User closed Paystack without paying — do nothing
+      console.log('Paystack closed without payment');
+    }
+  });
+
+  handler.openIframe();
 };
- 
+
 // ─── PRE-PAY FLOW ─────────────────────────────────────────────────────────────
  
 function openPrePay(record) {
