@@ -518,45 +518,8 @@ window.open(paystackUrl, '_blank');
 // Close modal and show instruction
 closeModal();
 alert('A Paystack payment page has opened in a new tab. Complete your payment there to secure your room.');
+};  
     
-    callback: function(response) {
-      record.status       = 'paid';
-      record.paystack_ref = response.reference;
-
-      db.insert('reservations', record).then(function() {
-        const localRecord = {
-          id:            'res-' + Date.now(),
-          propertyName:  activeReservation.propertyName,
-          pricePerNight: activeReservation.pricePerNight,
-          totalCost:     record.total_cost,
-          guest_name:    record.guest_name,
-          guest_phone:   record.guest_phone,
-          nights:        record.nights,
-          reservation_fee: record.reservation_fee,
-          timestamp:     new Date().toISOString(),
-        };
-
-        const records = loadData();
-        records.push(localRecord);
-        saveData(records);
-
-        closeModal();
-        setTimeout(function() { openPrePay(localRecord); }, 300);
-
-      }).catch(function(err) {
-        console.error('Reservation save failed', err);
-        alert('Payment received but reservation save failed. Contact support with reference: ' + response.reference);
-      });
-    },
-
-    onClose: function() {
-      console.log('Paystack closed without payment');
-    }
-  });
-
-  handler.openIframe();
-};
-  
 // ─── PRE-PAY FLOW ─────────────────────────────────────────────────────────────
  
 function openPrePay(record) {
@@ -615,11 +578,11 @@ window.closeModal = function() {
   const overlay = document.getElementById('modal-overlay');
   if (overlay) {
     overlay.classList.remove('open');
-    overlay.setAttribute('aria-hidden', 'true');
+    overlay.setAttribute('afilterByLocationria-hidden', 'true');
   }
 };
  
-// filterByLocation — called by feature icon buttons
+//  — called by feature icon buttons
 // Shows listings for the selected location first, others below
 window.filterByLocation = function(location) {
   // Scroll down to listings
