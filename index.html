@@ -1138,21 +1138,46 @@
       <p class="hero-sub">Accommodation for church programs in Asese &amp; RCCG Camp</p>
       
       <!-- Program selector with visual cue (gold glow until selected) -->
-      <!-- Feature icons — what you can do with LodgeLink -->
-<div style="display:flex; gap:8px; margin-bottom:16px;">
-  <div style="flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 6px; text-align:center;">
+      <!-- Feature icons — responsive, clickable, filter listings -->
+<div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+  <button onclick="filterByLocation('Asese')" style="
+    flex:1; min-width:80px;
+    background:rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:10px;
+    padding:10px 6px;
+    text-align:center;
+    cursor:pointer;
+    transition: all 0.2s ease;">
     <div style="font-size:18px; margin-bottom:5px;">🔍</div>
-    <div style="font-size:9px; font-weight:600; color:rgba(255,255,255,0.7); line-height:1.4;">Search rooms near auditorium</div>
-  </div>
-  <div style="flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 6px; text-align:center;">
+    <div style="font-size:9px; font-weight:600; color:rgba(255,255,255,0.8); line-height:1.4;">Search Asese accommodations</div>
+  </button>
+  <button onclick="filterByLocation('RCCG Camp')" style="
+    flex:1; min-width:80px;
+    background:rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:10px;
+    padding:10px 6px;
+    text-align:center;
+    cursor:pointer;
+    transition: all 0.2s ease;">
     <div style="font-size:18px; margin-bottom:5px;">✅</div>
-    <div style="font-size:9px; font-weight:600; color:rgba(255,255,255,0.7); line-height:1.4;">Secure your room before you leave home</div>
-  </div>
-  <div style="flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 6px; text-align:center;">
+    <div style="font-size:9px; font-weight:600; color:rgba(255,255,255,0.8); line-height:1.4;">Search RCCG Camp accommodations</div>
+  </button>
+  <button onclick="window.location.href='host.html'" style="
+    flex:1; min-width:80px;
+    background:rgba(232,160,32,0.15);
+    border:1px solid rgba(232,160,32,0.3);
+    border-radius:10px;
+    padding:10px 6px;
+    text-align:center;
+    cursor:pointer;
+    transition: all 0.2s ease;">
     <div style="font-size:18px; margin-bottom:5px;">🏠</div>
-    <div style="font-size:9px; font-weight:600; color:rgba(255,255,255,0.7); line-height:1.4;">List your property — fill rooms early</div>
-  </div>
+    <div style="font-size:9px; font-weight:600; color:rgba(232,160,32,0.9); line-height:1.4;">Host listing — fill rooms early</div>
+  </button>
 </div>
+
       
       <div class="program-selector needs-attention" id="program-selector-wrap">
         <label for="program-select">

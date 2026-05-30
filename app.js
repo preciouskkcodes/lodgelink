@@ -114,6 +114,7 @@ async function fetchListings() {
       hostBankAccount:l.host_bank_account,
       hostBankBank:   l.host_bank_bank,
       available:      l.available,
+      location:       l.location || '',
       imageUrl:       l.image_url || '',
     }));
  
@@ -582,6 +583,31 @@ window.closeModal = function() {
   }
 };
  
+// filterByLocation — called by feature icon buttons
+// Shows listings for the selected location first, others below
+window.filterByLocation = function(location) {
+  // Scroll down to listings
+  const main = document.getElementById('main');
+  if (main) main.scrollIntoView({ behavior: 'smooth' });
+
+  const matched = allListings.filter(l => l.location === location);
+  const others  = allListings.filter(l => l.location !== location);
+
+  const noMatch  = document.getElementById('no-match-panel');
+  const listRoot = document.getElementById('list-root');
+  if (noMatch)  noMatch.classList.remove('visible');
+  if (listRoot) listRoot.style.display = '';
+
+  renderSearchResults(matched, others);
+  renderInsights(allListings);
+
+  // Update results count label
+  const countEl = document.getElementById('results-count-num');
+  if (countEl) countEl.textContent =
+    `${matched.length} in ${location}${others.length ? `, ${others.length} other` : ''}`;
+};
+
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
  
 function init() {
