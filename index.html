@@ -10,6 +10,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
  
+  <link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#E8A020" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="LodgeLink" />
+
   <style>
     /* ─── DESIGN TOKENS ─────────────────────────────────────────────────────── */
     :root {
@@ -1576,5 +1582,14 @@
  
   <script src="app.js"></script>
   <script src="https://js.paystack.co/v1/inline.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('LodgeLink SW registered'))
+          .catch(err => console.log('SW failed:', err));
+      });
+    }
+  </script>
 </body>
 </html>
