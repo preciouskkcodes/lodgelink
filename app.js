@@ -1,7 +1,7 @@
 // ─── SUPABASE CONFIG ─────────────────────────────────────────────────────────
 // Replace these two values with your actual Supabase project URL and publishable key
 const SUPABASE_URL = 'https://zomcrvfekwihqrrqvifi.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_lC9xUJnLXMF5saz5Y6JYag_JGzmP6fD';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvbWNydmZla3dpaHFycnF2aWZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjYxNzIsImV4cCI6MjA5NTQ0MjE3Mn0.ax-jkvdiDFK2t9H5phh4LZTtyeqxPqdrM1XJfFXr7Yk';
  
 // Lightweight Supabase REST helper — no SDK needed for MVP
 // All requests go through the auto-generated REST API Supabase provides
