@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="LodgeLink — Find, compare and reserve accommodation for church programs in Asese and RCCG Camp before the rush begins." />
+  <meta name="description" content="LodgeLink — Find, compare and reserve accommodation for programs & events." />
   <title>LodgeLink — Accommodation Finder</title>
  
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1065,6 +1065,57 @@
       #list-root { gap: 20px; }
       .card-image { height: 200px; }
     }
+    /* ── IMAGE SLIDER ── */
+.img-slider { position: absolute; inset: 0; }
+.slider-btn {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  background: rgba(11,31,58,0.55);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px; height: 30px;
+  font-size: 18px; line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.slider-btn:hover { background: rgba(11,31,58,0.85); }
+.slider-prev { left: 8px; }
+.slider-next { right: 8px; }
+.slider-dots {
+  position: absolute;
+  bottom: 8px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 5px; z-index: 2;
+}
+.slider-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  transition: background 0.2s, width 0.2s;
+}
+.slider-dot.active {
+  background: white;
+  width: 16px;
+  border-radius: 3px;
+}
+
+/* ── FULLY BOOKED OVERLAY ── */
+.fully-booked-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(11,31,58,0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: 0.5px;
+  z-index: 3;
+}
   </style>
 </head>
  
@@ -1141,7 +1192,7 @@
         Find your room<br />
         <em>before the rush.</em>
       </h1>
-      <p class="hero-sub">Accommodation for church programs in Asese &amp; RCCG Camp</p>
+      <p class="hero-sub">Accommodation for programs & events in Asese & RCCG Camp</p>
       
       <!-- Program selector with visual cue (gold glow until selected) -->
       <!-- Feature icons — responsive, clickable, filter listings -->
@@ -1191,6 +1242,9 @@
         </label>
         <select id="program-select" name="program" aria-label="Select upcoming program">
           <option value="">— Select a program —</option>
+          <option value="sc">Special Convention</option>
+          <option value="ac">Annual Conference</option>
+          <option value="other">Other Event</option>
           <option value="iclc">International Cell Leaders Conference</option>
           <option value="isw">International Staff Week</option>
           <option value="llc">Loveworld Ladies Convention</option>

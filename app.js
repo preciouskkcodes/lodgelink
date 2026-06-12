@@ -100,23 +100,25 @@ async function fetchListings() {
  
     // Map Supabase snake_case columns to camelCase for the rest of the app
     allListings = data.map(l => ({
-      id:             l.id,
-      name:           l.name,
-      type:           l.type,
-      roomType:       l.room_type,
-      pricePerNight:  l.price_per_night,
-      distanceM:      l.distance_m,
-      distanceLabel:  l.distance_label,
-      capacity:       l.capacity,
-      amenities:      l.amenities || [],
-      host:           l.host_name,
-      hostPhone:      l.host_phone,
-      hostBankName:   l.host_bank_name,
-      hostBankAccount:l.host_bank_account,
-      hostBankBank:   l.host_bank_bank,
-      available:      l.available,
-      location:       l.location || '',
-      imageUrl:       l.image_url || '',
+      id:              l.id,
+      name:            l.name,
+      type:            l.type,
+      roomType:        l.room_type,
+      pricePerNight:   l.price_per_night,
+      distanceM:       l.distance_m,
+      distanceLabel:   l.distance_label,
+      capacity:        l.capacity,
+      amenities:       l.amenities || [],
+      host:            l.host_name,
+      hostPhone:       l.host_phone,
+      hostBankName:    l.host_bank_name,
+      hostBankAccount: l.host_bank_account,
+      hostBankBank:    l.host_bank_bank,
+      available:       l.available,
+      location:        l.location || '',
+      imageUrl:        l.image_url || '',
+      images:          Array.isArray(l.images) ? l.images : (l.image_url ? [l.image_url] : []),
+      roomsAvailable:  l.rooms_available ?? l.total_rooms ?? 1,
     }));
  
     renderList(allListings);
@@ -179,18 +181,48 @@ function formatPrice(n) {
  
 function buildCard(listing, allPrices) {
   const { label, cls } = getPriceLabel(listing.pricePerNight, allPrices);
+  const isFullyBooked = listing.roomsAvailable === 0;
+
+  // Build image gallery — use images array, fallback to imageUrl, fallback to placeholder
+  const imgs = listing.images.length > 0 ? listing.images
+             : listing.imageUrl ? [listing.imageUrl]
+             : [];
+  const cardId = 'card-' + listing.id.substring(0, 8);
+
+  let galleryHtml;
+  if (imgs.length === 0) {
+    galleryHtml = `<div class="card-image-placeholder" aria-hidden="true">🏨</div>`;
+  } else if (imgs.length === 1) {
+    galleryHtml = `<img src="${imgs[0]}" alt="${listing.name}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" />`;
+  } else {
+    // Multi-image slider
+    galleryHtml = `
+      <div class="img-slider" id="${cardId}-slider" data-index="0">
+        ${imgs.map((src, i) => `
+          <img src="${src}" alt="${listing.name} photo ${i+1}"
+               class="slider-img ${i === 0 ? 'active' : ''}"
+               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+                      opacity:${i === 0 ? 1 : 0};transition:opacity 0.35s ease;" />
+        `).join('')}
+        <button class="slider-btn slider-prev" onclick="slideImg(event,'${cardId}-slider',-1)" aria-label="Previous photo">‹</button>
+        <button class="slider-btn slider-next" onclick="slideImg(event,'${cardId}-slider', 1)" aria-label="Next photo">›</button>
+        <div class="slider-dots">
+          ${imgs.map((_, i) => `<span class="slider-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></span>`).join('')}
+        </div>
+      </div>`;
+  }
+
   const card = document.createElement('article');
   card.className = 'listing-card';
   card.setAttribute('role', 'listitem');
   card.setAttribute('aria-label', `${listing.name} listing`);
+
   card.innerHTML = `
     <div class="card-image">
-        ${listing.imageUrl
-          ? `<img src="${listing.imageUrl}" alt="${listing.name}" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;" />`
-          : `<div class="card-image-placeholder" aria-hidden="true">🏨</div>`
-        }
+      ${galleryHtml}
       <div class="price-badge">${formatPrice(listing.pricePerNight)} <span>/night</span></div>
       <div class="fair-label ${cls}">${label}</div>
+      ${isFullyBooked ? `<div class="fully-booked-overlay">🚫 Fully Booked</div>` : ''}
     </div>
     <div class="card-body">
       <h2 class="card-title">${listing.name}</h2>
@@ -198,12 +230,17 @@ function buildCard(listing, allPrices) {
       <div class="card-meta">
         <div class="meta-item">
           <span class="meta-icon" aria-hidden="true">📍</span>
-          <span><strong>${listing.distanceLabel}</strong> from auditorium</span>
+          <span><strong>${listing.distanceLabel}</strong> from venue</span>
         </div>
         <div class="meta-item">
           <span class="meta-icon" aria-hidden="true">👥</span>
           <span>Up to <strong>${listing.capacity} guest${listing.capacity > 1 ? 's' : ''}</strong></span>
         </div>
+        ${!isFullyBooked ? `
+        <div class="meta-item">
+          <span class="meta-icon" aria-hidden="true">🛏️</span>
+          <span><strong>${listing.roomsAvailable}</strong> room${listing.roomsAvailable !== 1 ? 's' : ''} left</span>
+        </div>` : ''}
       </div>
       <div class="amenities">
         ${listing.amenities.map(a => `<span class="amenity-pill">${a}</span>`).join('')}
@@ -213,17 +250,34 @@ function buildCard(listing, allPrices) {
           <div class="host-avatar">${listing.host.substring(0,2).toUpperCase()}</div>
           <div class="host-name">Host: <strong>${listing.host}</strong></div>
         </div>
-        <button
-          class="reserve-btn"
-          type="button"
-          onclick="handleReservation('${listing.name}', ${listing.pricePerNight}, '${listing.id}')">
-          Reserve Room
-        </button>
+        ${isFullyBooked
+          ? `<button class="reserve-btn" disabled style="opacity:0.45;cursor:not-allowed;background:#ccc;color:#666;box-shadow:none;">Fully Booked</button>`
+          : `<button class="reserve-btn" type="button"
+               onclick="handleReservation('${listing.name}', ${listing.pricePerNight}, '${listing.id}')">
+               Reserve Room
+             </button>`
+        }
       </div>
     </div>`;
   return card;
 }
  
+window.slideImg = function(e, sliderId, direction) {
+  e.stopPropagation();
+  const slider = document.getElementById(sliderId);
+  if (!slider) return;
+  const imgs = slider.querySelectorAll('.slider-img');
+  const dots = slider.querySelectorAll('.slider-dot');
+  let idx = parseInt(slider.dataset.index || 0);
+  imgs[idx].style.opacity = 0;
+  if (dots[idx]) dots[idx].classList.remove('active');
+  idx = (idx + direction + imgs.length) % imgs.length;
+  imgs[idx].style.opacity = 1;
+  if (dots[idx]) dots[idx].classList.add('active');
+  slider.dataset.index = idx;
+};
+
+
 // ─── RENDER LIST ──────────────────────────────────────────────────────────────
  
 function renderList(listings) {
