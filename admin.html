@@ -627,18 +627,23 @@
       },
  
       async update(table, id, data) {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
-          method: 'PATCH',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
-        if (!res.ok) throw new Error(`UPDATE failed: ${res.status}`);
-        return true;
-      }
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',   // ← ADD THIS
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error('UPDATE error:', res.status, errText);
+    throw new Error(`UPDATE failed: ${res.status} — ${errText}`);
+  }
+  return true;
+}
     };
  
     // ─── TOAST ───────────────────────────────────────────────────────
@@ -821,15 +826,18 @@
     }
  
     // ─── APPROVE / DECLINE ────────────────────────────────────────────
+   
     async function approveListing(id) {
-      try {
-        await db.update('listings', id, { approved: true, available: true });
-        showToast('✓ Listing approved and live!', 'success');
-        loadDashboard();
-      } catch (err) {
-        showToast('Could not approve listing', 'error');
-      }
-    }
+  try {
+    console.log('Approving listing ID:', id);
+    await db.update('listings', id, { approved: true, available: true });
+    showToast('✓ Listing approved and live!', 'success');
+    loadDashboard();
+  } catch (err) {
+    console.error('Approve error:', err);
+    showToast('Could not approve listing: ' + err.message, 'error');
+  }
+}
  
     async function declineListing(id) {
       if (!confirm('Are you sure you want to decline or take down this listing?')) return;
