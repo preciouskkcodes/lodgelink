@@ -451,7 +451,9 @@ window.handleReservation = function(propertyName, pricePerNight, listingId) {
   if (phoneInput) {
     phoneInput.addEventListener('blur', () => {
       const v = phoneInput.value.trim();
-if (v.length >= 11 || (v.startsWith('+') && v.length >= 8)) setModalStep(3);
+const validNg = /^0\d{10}$/.test(v) || /^\+234\d{10}$/.test(v);
+const validIntl = /^\+(?!234)\d{7,14}$/.test(v);
+if (validNg || validIntl) setModalStep(3);
     });
   }
 };
@@ -478,9 +480,9 @@ window.confirmReservation = async function() {
     return;
   }
   const isNigerian = /^0\d{10}$/.test(phone) || /^\+234\d{10}$/.test(phone);
-const isInternational = /^\+[1-9]\d{6,14}$/.test(phone);
+const isInternational = /^\+(?!234)\d{7,14}$/.test(phone);
 if (!phone || (!isNigerian && !isInternational)) {
-    alert('Please enter a valid phone number (e.g. 08012345678, +2348012345678, or +447911123456).');
+    alert('Please enter a valid phone number.\n\nNigerian: 08012345678 or +2348012345678\nInternational: +447911123456');
     document.getElementById('input-phone').focus();
     return;
   }
