@@ -50,10 +50,7 @@
     }
  
     /* ── HEADER ── */
-    #header {
-      background: var(--navy);
-      padding: 20px 0;
-    }
+    #header { background: var(--navy); padding: 20px 0; }
  
     .header-inner {
       display: flex;
@@ -61,13 +58,7 @@
       justify-content: space-between;
     }
  
-    .logo {
-      font-family: var(--font-head);
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--white);
-    }
- 
+    .logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); }
     .logo span { color: var(--gold); }
  
     .host-badge {
@@ -94,20 +85,8 @@
       margin-bottom: 16px;
     }
  
-    .card-title {
-      font-family: var(--font-head);
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--text-dark);
-      margin-bottom: 6px;
-    }
- 
-    .card-sub {
-      font-size: 13px;
-      color: var(--text-light);
-      margin-bottom: 20px;
-      line-height: 1.5;
-    }
+    .card-title { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; }
+    .card-sub { font-size: 13px; color: var(--text-light); margin-bottom: 20px; line-height: 1.5; }
  
     /* ── FORM FIELDS ── */
     .field-group { margin-bottom: 16px; }
@@ -139,10 +118,7 @@
       -webkit-appearance: none;
     }
  
-    .field-group textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
+    .field-group textarea { resize: vertical; min-height: 80px; }
  
     .field-group input:focus,
     .field-group select:focus,
@@ -151,19 +127,10 @@
       box-shadow: 0 0 0 3px rgba(232,160,32,0.12);
     }
  
-    .field-helper {
-      font-size: 11px;
-      color: var(--text-light);
-      margin-top: 5px;
-    }
+    .field-helper { font-size: 11px; color: var(--text-light); margin-top: 5px; }
  
-    /* Amenity checkboxes */
-    .amenity-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 6px;
-    }
+    /* ── AMENITY CHECKBOXES ── */
+    .amenity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
  
     .amenity-check {
       display: flex;
@@ -180,12 +147,10 @@
     }
  
     .amenity-check input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
+      width: 16px; height: 16px;
       accent-color: var(--navy);
       flex-shrink: 0;
-      padding: 0;
-      border: none;
+      padding: 0; border: none;
     }
  
     .amenity-check:has(input:checked) {
@@ -193,6 +158,102 @@
       background: #EEF4FB;
       color: var(--navy);
       font-weight: 600;
+    }
+ 
+    /* ── IMAGE UPLOAD ── */
+    .image-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      background: #FAFCFF;
+      position: relative;
+    }
+ 
+    .image-upload-area:hover { border-color: var(--gold); background: rgba(232,160,32,0.04); }
+    .image-upload-area.dragover { border-color: var(--gold); background: rgba(232,160,32,0.08); }
+ 
+    .image-upload-area input[type="file"] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer;
+      width: 100%; height: 100%;
+      padding: 0; border: none;
+    }
+ 
+    .upload-icon { font-size: 32px; margin-bottom: 8px; }
+ 
+    .upload-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+ 
+    .upload-sub { font-size: 11px; color: var(--text-light); }
+ 
+    /* Image preview grid */
+    #image-previews {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+ 
+    .preview-item {
+      position: relative;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      aspect-ratio: 1;
+      background: #EEF4FB;
+    }
+ 
+    .preview-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+ 
+    .preview-item .preview-remove {
+      position: absolute;
+      top: 4px; right: 4px;
+      background: rgba(220,38,38,0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 22px; height: 22px;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+ 
+    .preview-item .preview-badge {
+      position: absolute;
+      bottom: 4px; left: 4px;
+      background: rgba(11,31,58,0.8);
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+ 
+    .preview-uploading {
+      position: absolute; inset: 0;
+      background: rgba(11,31,58,0.6);
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+    }
+ 
+    .upload-progress {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-mid);
+      display: none;
     }
  
     /* ── BUTTONS ── */
@@ -214,6 +275,7 @@
  
     .btn-primary:hover  { background: var(--gold); color: var(--navy); }
     .btn-primary:active { transform: scale(0.99); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
  
     .btn-secondary {
       width: 100%;
@@ -250,30 +312,21 @@
     .btn-gold:hover { background: var(--gold-light); }
  
     /* ── STATUS BADGES ── */
-    .badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-    }
- 
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
     .badge-pending  { background: rgba(232,160,32,0.15); color: #92600A; }
     .badge-approved { background: rgba(26,122,74,0.12);  color: var(--success); }
     .badge-declined { background: rgba(220,38,38,0.1);   color: var(--error); }
  
-    /* ── TOAST NOTIFICATION ── */
+    /* ── TOAST ── */
     #toast {
       position: fixed;
-      bottom: 24px;
-      left: 50%;
+      bottom: 24px; left: 50%;
       transform: translateX(-50%) translateY(80px);
       background: var(--navy);
       color: var(--white);
       padding: 12px 24px;
       border-radius: var(--radius-md);
-      font-size: 13px;
-      font-weight: 500;
+      font-size: 13px; font-weight: 500;
       z-index: 999;
       transition: transform 0.3s ease;
       white-space: nowrap;
@@ -293,49 +346,27 @@
       margin-bottom: 10px;
     }
  
-    .reservation-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 8px;
-    }
- 
+    .reservation-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
     .reservation-guest { font-size: 14px; font-weight: 700; color: var(--text-dark); }
     .reservation-detail { font-size: 12px; color: var(--text-light); margin-bottom: 3px; }
  
-    .reservation-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-    }
+    .reservation-actions { display: flex; gap: 8px; margin-top: 10px; }
  
     .btn-confirm {
-      flex: 1;
-      padding: 9px;
-      background: var(--success);
-      color: white;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-family: var(--font-body);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
+      flex: 1; padding: 9px;
+      background: var(--success); color: white;
+      border: none; border-radius: var(--radius-sm);
+      font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer;
     }
  
     .btn-decline {
-      flex: 1;
-      padding: 9px;
-      background: none;
-      color: var(--error);
-      border: 1.5px solid var(--error);
-      border-radius: var(--radius-sm);
-      font-family: var(--font-body);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
+      flex: 1; padding: 9px;
+      background: none; color: var(--error);
+      border: 1.5px solid var(--error); border-radius: var(--radius-sm);
+      font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer;
     }
  
-    /* ── LISTING SUMMARY CARD ── */
+    /* ── LISTING SUMMARY ── */
     .listing-summary {
       background: #EEF4FB;
       border-radius: var(--radius-md);
@@ -349,31 +380,21 @@
     .listing-summary-name { font-size: 14px; font-weight: 700; color: var(--text-dark); }
     .listing-summary-price { font-size: 13px; color: var(--text-mid); margin-top: 2px; }
  
-    /* ── SECTION DIVIDER ── */
+    /* ── SECTION TITLE ── */
     .section-title {
       font-family: var(--font-head);
-      font-size: 15px;
-      font-weight: 700;
+      font-size: 15px; font-weight: 700;
       color: var(--text-dark);
       margin: 24px 0 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      display: flex; align-items: center; gap: 8px;
     }
  
-    .empty-state {
-      text-align: center;
-      padding: 32px 20px;
-      color: var(--text-light);
-      font-size: 13px;
-    }
- 
+    .empty-state { text-align: center; padding: 32px 20px; color: var(--text-light); font-size: 13px; }
     .empty-state-icon { font-size: 32px; margin-bottom: 10px; }
  
     /* ── PROGRESS STEPS ── */
     .form-progress {
-      display: flex;
-      gap: 0;
+      display: flex; gap: 0;
       margin-bottom: 24px;
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
@@ -381,8 +402,7 @@
     }
  
     .form-step {
-      flex: 1;
-      padding: 10px 8px;
+      flex: 1; padding: 10px 8px;
       text-align: center;
       border-right: 1px solid var(--border);
       background: #F8FBFF;
@@ -396,8 +416,7 @@
       width: 20px; height: 20px;
       border-radius: 50%;
       border: 1.5px solid var(--border);
-      font-size: 10px;
-      font-weight: 700;
+      font-size: 10px; font-weight: 700;
       color: var(--text-light);
       display: flex; align-items: center; justify-content: center;
       margin: 0 auto 4px;
@@ -406,26 +425,14 @@
     .form-step.active .form-step-num { background: var(--gold); border-color: var(--gold); color: var(--navy); }
     .form-step.done   .form-step-num { background: var(--success); border-color: var(--success); color: white; }
  
-    .form-step-label {
-      font-size: 9px;
-      font-weight: 600;
-      color: var(--text-light);
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
- 
+    .form-step-label { font-size: 9px; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.4px; }
     .form-step.active .form-step-label { color: rgba(255,255,255,0.8); }
     .form-step.done   .form-step-label { color: var(--success); }
  
-    /* ── BACK LINK ── */
     .back-link {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      color: var(--text-mid);
-      cursor: pointer;
-      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--text-mid);
+      cursor: pointer; margin-bottom: 20px;
       width: fit-content;
     }
  
@@ -478,9 +485,7 @@
       </div>
  
       <div style="text-align:center; margin-top:16px;">
-        <a href="index.html" style="font-size:13px; color:var(--text-light);">
-          ← Back to search
-        </a>
+        <a href="index.html" style="font-size:13px; color:var(--text-light);">← Back to search</a>
       </div>
     </div>
   </div>
@@ -490,12 +495,8 @@
     <div class="container">
       <div style="padding: 20px 0 4px; display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <div style="font-family:var(--font-head); font-size:20px; font-weight:800;">
-            Welcome back 👋
-          </div>
-          <div style="font-size:13px; color:var(--text-light);" id="dashboard-host-name">
-            Loading...
-          </div>
+          <div style="font-family:var(--font-head); font-size:20px; font-weight:800;">Welcome back 👋</div>
+          <div style="font-size:13px; color:var(--text-light);" id="dashboard-host-name">Loading...</div>
         </div>
         <button onclick="showScreen('add-listing')" class="btn-gold"
                 style="width:auto; padding:10px 18px; font-size:13px;">
@@ -564,7 +565,7 @@
           </div>
         </div>
  
-        <!-- SECTION 1 -->
+        <!-- SECTION 1 — Room details + photos -->
         <div id="listing-section-1">
           <div class="field-group">
             <label for="listing-name">Property name</label>
@@ -612,6 +613,20 @@
             <p class="field-helper">How many rooms of this type do you have available?</p>
           </div>
  
+          <!-- ── MULTI-IMAGE UPLOAD ── -->
+          <div class="field-group">
+            <label>Property photos (up to 5)</label>
+            <div class="image-upload-area" id="upload-area">
+              <input type="file" id="image-input" accept="image/*" multiple />
+              <div class="upload-icon">📷</div>
+              <div class="upload-label">Tap to add photos</div>
+              <div class="upload-sub">Up to 5 images · JPG, PNG · Max 5MB each</div>
+            </div>
+            <div id="image-previews"></div>
+            <div class="upload-progress" id="upload-progress">Uploading images...</div>
+            <p class="field-helper">First photo will be the main cover image. More photos = more bookings!</p>
+          </div>
+ 
           <div class="field-group">
             <label>Amenities available</label>
             <div class="amenity-grid">
@@ -631,7 +646,7 @@
           <button class="btn-primary" onclick="goToSection(2)">Next — Add Pricing →</button>
         </div>
  
-        <!-- SECTION 2 -->
+        <!-- SECTION 2 — Pricing -->
         <div id="listing-section-2" style="display:none;">
           <div class="field-group">
             <label for="listing-price">Price per night (₦)</label>
@@ -640,9 +655,18 @@
           </div>
  
           <div class="field-group">
-            <label for="listing-distance">Distance from auditorium (metres)</label>
+            <label for="listing-distance">Distance from venue (metres)</label>
             <input type="number" id="listing-distance" placeholder="e.g. 800" min="0" />
             <p class="field-helper">Approximate walking distance to the main hall in metres</p>
+          </div>
+ 
+          <div class="field-group">
+            <label for="listing-location">Area</label>
+            <select id="listing-location">
+              <option value="">— Select area —</option>
+              <option value="Asese">Asese</option>
+              <option value="RCCG Camp">RCCG Camp</option>
+            </select>
           </div>
  
           <div class="field-group">
@@ -656,7 +680,7 @@
           </div>
         </div>
  
-        <!-- SECTION 3 -->
+        <!-- SECTION 3 — Bank details -->
         <div id="listing-section-3" style="display:none;">
           <div style="background:rgba(232,160,32,0.1); border:1px solid rgba(232,160,32,0.3); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:20px; font-size:12px; color:var(--text-mid); line-height:1.6;">
             💡 Bank details are shown to guests who want to pre-pay before arrival.
@@ -705,9 +729,11 @@
   <div id="toast"></div>
  
   <script>
-    // ─── SUPABASE CONFIG ─────────────────────────────────────────────
-    const SUPABASE_URL = 'https://zomcrvfekwihqrrqvifi.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_lC9xUJnLXMF5saz5Y6JYag_JGzmP6fD';
+    // ─── CONFIG ──────────────────────────────────────────────────────
+    const SUPABASE_URL  = 'https://zomcrvfekwihqrrqvifi.supabase.co';
+    const SUPABASE_KEY  = 'sb_publishable_lC9xUJnLXMF5saz5Y6JYag_JGzmP6fD';
+    const CLOUDINARY_CLOUD  = 'ddvkttnik';
+    const CLOUDINARY_PRESET = 'lodgelink_upload';
  
     const HEADERS = {
       'apikey': SUPABASE_KEY,
@@ -740,7 +766,7 @@
       async update(table, id, data) {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
           method: 'PATCH',
-          headers: HEADERS,
+          headers: { ...HEADERS, 'Prefer': 'return=representation' },
           body: JSON.stringify(data),
         });
         if (!res.ok) throw new Error(`UPDATE failed: ${res.status}`);
@@ -750,6 +776,7 @@
  
     // ─── STATE ───────────────────────────────────────────────────────
     let currentHost = null;
+    let uploadedImageUrls = []; // stores Cloudinary URLs after upload
  
     // ─── SCREEN NAVIGATION ───────────────────────────────────────────
     function showScreen(name) {
@@ -763,7 +790,112 @@
       const toast = document.getElementById('toast');
       toast.textContent = msg;
       toast.className = 'show ' + type;
-      setTimeout(() => toast.className = '', 3000);
+      setTimeout(() => toast.className = '', 3500);
+    }
+ 
+    // ─── IMAGE UPLOAD ─────────────────────────────────────────────────
+    document.getElementById('image-input').addEventListener('change', async function(e) {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+ 
+      const remaining = 5 - uploadedImageUrls.length;
+      if (remaining <= 0) {
+        showToast('Maximum 5 photos allowed', 'error');
+        return;
+      }
+ 
+      const toUpload = files.slice(0, remaining);
+      const progressEl = document.getElementById('upload-progress');
+      progressEl.style.display = 'block';
+      progressEl.textContent = `Uploading ${toUpload.length} image${toUpload.length > 1 ? 's' : ''}...`;
+ 
+      for (let i = 0; i < toUpload.length; i++) {
+        const file = toUpload[i];
+        progressEl.textContent = `Uploading image ${i + 1} of ${toUpload.length}...`;
+ 
+        // Show loading preview
+        const tempId = 'temp-' + Date.now() + i;
+        addPreviewLoading(tempId, i + 1 + uploadedImageUrls.length);
+ 
+        try {
+          const url = await uploadToCloudinary(file);
+          uploadedImageUrls.push(url);
+          updatePreview(tempId, url, uploadedImageUrls.length);
+        } catch (err) {
+          console.error('Upload failed:', err);
+          removePreview(tempId);
+          showToast(`Image ${i + 1} failed to upload`, 'error');
+        }
+      }
+ 
+      progressEl.style.display = 'none';
+      // Reset input so same file can be re-selected if needed
+      e.target.value = '';
+    });
+ 
+    async function uploadToCloudinary(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_PRESET);
+      formData.append('folder', 'lodgelink');
+ 
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,
+        { method: 'POST', body: formData }
+      );
+ 
+      if (!res.ok) throw new Error('Cloudinary upload failed');
+      const data = await res.json();
+      return data.secure_url;
+    }
+ 
+    function addPreviewLoading(tempId, position) {
+      const grid = document.getElementById('image-previews');
+      const div = document.createElement('div');
+      div.className = 'preview-item';
+      div.id = tempId;
+      div.innerHTML = `
+        <div class="preview-uploading">⏳ Uploading...</div>
+        ${position === 1 ? '<div class="preview-badge">Cover</div>' : ''}`;
+      grid.appendChild(div);
+    }
+ 
+    function updatePreview(tempId, url, position) {
+      const div = document.getElementById(tempId);
+      if (!div) return;
+      div.innerHTML = `
+        <img src="${url}" alt="Property photo ${position}" />
+        ${position === 1 ? '<div class="preview-badge">Cover</div>' : ''}
+        <button class="preview-remove" onclick="removeImage('${tempId}', '${url}')" title="Remove photo">✕</button>`;
+    }
+ 
+    function removePreview(tempId) {
+      const div = document.getElementById(tempId);
+      if (div) div.remove();
+    }
+ 
+    window.removeImage = function(tempId, url) {
+      uploadedImageUrls = uploadedImageUrls.filter(u => u !== url);
+      removePreview(tempId);
+      // Refresh cover badge — first remaining preview should show "Cover"
+      refreshCoverBadge();
+    };
+ 
+    function refreshCoverBadge() {
+      const previews = document.querySelectorAll('#image-previews .preview-item');
+      previews.forEach((item, i) => {
+        const badge = item.querySelector('.preview-badge');
+        if (i === 0) {
+          if (!badge) {
+            const b = document.createElement('div');
+            b.className = 'preview-badge';
+            b.textContent = 'Cover';
+            item.appendChild(b);
+          }
+        } else {
+          if (badge) badge.remove();
+        }
+      });
     }
  
     // ─── HOST LOGIN ───────────────────────────────────────────────────
@@ -771,8 +903,7 @@
       const phone = document.getElementById('login-phone').value.trim();
       const name  = document.getElementById('login-name').value.trim();
  
-      // Accept Nigerian (11 digits starting with 0) or international (+countrycode...)
-      const isNigerian = /^0\d{10}$/.test(phone);
+      const isNigerian      = /^0\d{10}$/.test(phone);
       const isInternational = /^\+\d{7,15}$/.test(phone);
  
       if (!phone || (!isNigerian && !isInternational)) {
@@ -823,8 +954,8 @@
         }
  
         renderReservations(allReservations);
-        document.getElementById('stat-listings').textContent = listings.length;
-        document.getElementById('stat-pending').textContent = allReservations.filter(r => r.status === 'pending').length;
+        document.getElementById('stat-listings').textContent  = listings.length;
+        document.getElementById('stat-pending').textContent   = allReservations.filter(r => r.status === 'pending').length;
         document.getElementById('stat-confirmed').textContent = allReservations.filter(r => r.status === 'confirmed').length;
  
       } catch (err) {
@@ -849,7 +980,9 @@
             <div class="listing-summary-name">${l.name}</div>
             <div class="listing-summary-price">₦${Number(l.price_per_night).toLocaleString('en-NG')}/night · ${l.room_type}</div>
             <div style="font-size:11px; color:var(--text-light); margin-top:2px;">
-              ${l.rooms_available > 0 ? `🟢 ${l.rooms_available} room${l.rooms_available !== 1 ? 's' : ''} available` : '🔴 Fully booked'}
+              ${l.rooms_available > 0
+                ? `🟢 ${l.rooms_available} room${l.rooms_available !== 1 ? 's' : ''} available`
+                : '🔴 Fully booked'}
             </div>
           </div>
           <span class="badge ${l.approved ? 'badge-approved' : 'badge-pending'}">
@@ -891,7 +1024,8 @@
     async function updateReservation(id, status) {
       try {
         await db.update('reservations', id, { status });
-        showToast(status === 'confirmed' ? '✓ Reservation confirmed!' : 'Reservation declined', status === 'confirmed' ? 'success' : '');
+        showToast(status === 'confirmed' ? '✓ Reservation confirmed!' : 'Reservation declined',
+                  status === 'confirmed' ? 'success' : '');
         loadDashboard();
       } catch (err) {
         showToast('Could not update reservation', 'error');
@@ -901,8 +1035,8 @@
     // ─── ADD LISTING FORM ─────────────────────────────────────────────
     function goToSection(num) {
       if (num === 2) {
-        const name = document.getElementById('listing-name').value.trim();
-        const type = document.getElementById('listing-type').value;
+        const name     = document.getElementById('listing-name').value.trim();
+        const type     = document.getElementById('listing-type').value;
         const roomType = document.getElementById('listing-room-type').value;
         if (!name || !type || !roomType) {
           showToast('Please fill in all room details', 'error');
@@ -941,12 +1075,16 @@
         document.querySelectorAll('.amenity-check input:checked')
       ).map(cb => cb.value);
  
-      const distanceM = parseInt(document.getElementById('listing-distance').value);
+      const distanceM     = parseInt(document.getElementById('listing-distance').value);
       const distanceLabel = distanceM >= 1000
         ? `${(distanceM / 1000).toFixed(1)}km`
         : `${distanceM}m`;
  
       const totalRooms = parseInt(document.getElementById('listing-total-rooms').value) || 1;
+ 
+      // Use uploaded images — first is cover, all go into images array
+      const imageUrl  = uploadedImageUrls[0] || '';
+      const imagesArr = uploadedImageUrls.length > 0 ? uploadedImageUrls : [];
  
       const listing = {
         name:              document.getElementById('listing-name').value.trim(),
@@ -957,6 +1095,7 @@
         distance_label:    distanceLabel,
         capacity:          parseInt(document.getElementById('listing-capacity').value),
         amenities:         amenities,
+        location:          document.getElementById('listing-location').value || '',
         host_name:         currentHost.name,
         host_phone:        currentHost.phone,
         host_bank_name:    bankName,
@@ -966,6 +1105,8 @@
         approved:          false,
         total_rooms:       totalRooms,
         rooms_available:   totalRooms,
+        image_url:         imageUrl,
+        images:            imagesArr,
       };
  
       const btn = document.getElementById('btn-submit-listing');
@@ -994,11 +1135,13 @@
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
-      ['listing-type','listing-room-type','listing-bank-bank'].forEach(id => {
+      ['listing-type','listing-room-type','listing-bank-bank','listing-location'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
       document.querySelectorAll('.amenity-check input').forEach(cb => cb.checked = false);
+      document.getElementById('image-previews').innerHTML = '';
+      uploadedImageUrls = [];
       goToSection(1);
     }
  
