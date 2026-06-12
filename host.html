@@ -81,8 +81,6 @@
     }
  
     /* ── SCREENS ── */
-    /* Three screens: login, dashboard, add-listing
-       Only one visible at a time — controlled by showScreen() */
     .screen { display: none; padding: 24px 0 48px; }
     .screen.active { display: block; }
  
@@ -446,31 +444,27 @@
     </div>
   </header>
  
-  <!-- ════════════════════════════════════════════════════════════════
-       SCREEN 1 — HOST LOGIN / REGISTER
-  ════════════════════════════════════════════════════════════════════ -->
+  <!-- SCREEN 1 — HOST LOGIN -->
   <div class="screen active" id="screen-login">
     <div class="container">
- 
       <div style="text-align:center; padding: 32px 0 24px;">
         <div style="font-size:40px; margin-bottom:12px;">🏠</div>
         <h1 style="font-family:var(--font-head); font-size:24px; font-weight:800; margin-bottom:8px;">
           Welcome, Host
         </h1>
         <p style="font-size:14px; color:var(--text-light); max-width:28ch; margin:0 auto;">
-          List your property and start receiving reservations from church program attendees.
+          List your property and start receiving reservations from attendees.
         </p>
       </div>
  
       <div class="card">
         <div class="card-title">Your phone number</div>
-        <div class="card-sub">No password needed — we'll verify you by SMS</div>
+        <div class="card-sub">No password needed — enter your number to continue</div>
  
         <div class="field-group">
           <label for="login-phone">Phone number</label>
-          <input type="tel" id="login-phone" placeholder="e.g. 08012345678"
-                 pattern="[0-9]{11}" maxlength="11" />
-          <p class="field-helper">📱 Nigerian number — 11 digits starting with 0</p>
+          <input type="tel" id="login-phone" placeholder="e.g. 08012345678 or +447911123456" />
+          <p class="field-helper">📱 Nigerian (08XXXXXXXXX) or international (+countrycode...)</p>
         </div>
  
         <div class="field-group">
@@ -485,20 +479,15 @@
  
       <div style="text-align:center; margin-top:16px;">
         <a href="index.html" style="font-size:13px; color:var(--text-light);">
-          ← Back to attendee search
+          ← Back to search
         </a>
       </div>
- 
     </div>
   </div>
  
-  <!-- ════════════════════════════════════════════════════════════════
-       SCREEN 2 — HOST DASHBOARD
-  ════════════════════════════════════════════════════════════════════ -->
+  <!-- SCREEN 2 — HOST DASHBOARD -->
   <div class="screen" id="screen-dashboard">
     <div class="container">
- 
-      <!-- Welcome bar -->
       <div style="padding: 20px 0 4px; display:flex; justify-content:space-between; align-items:center;">
         <div>
           <div style="font-family:var(--font-head); font-size:20px; font-weight:800;">
@@ -514,7 +503,6 @@
         </button>
       </div>
  
-      <!-- Stats row -->
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:20px 0;">
         <div class="card" style="padding:14px; text-align:center; margin-bottom:0;">
           <div style="font-family:var(--font-head); font-size:22px; font-weight:800; color:var(--navy);" id="stat-listings">0</div>
@@ -530,21 +518,15 @@
         </div>
       </div>
  
-      <!-- Pending reservations -->
-      <div class="section-title">
-        🔔 Reservation Requests
-      </div>
+      <div class="section-title">🔔 Reservation Requests</div>
       <div id="reservations-list">
         <div class="empty-state">
           <div class="empty-state-icon">📭</div>
-          <p>No reservation requests yet.<br/>They will appear here when attendees book your rooms.</p>
+          <p>No reservation requests yet.<br/>They will appear here when guests book your rooms.</p>
         </div>
       </div>
  
-      <!-- My listings -->
-      <div class="section-title">
-        🏠 My Listings
-      </div>
+      <div class="section-title">🏠 My Listings</div>
       <div id="listings-list">
         <div class="empty-state">
           <div class="empty-state-icon">🏠</div>
@@ -552,22 +534,14 @@
         </div>
       </div>
  
-      <button class="btn-secondary" onclick="handleLogout()">
-        Sign out
-      </button>
- 
+      <button class="btn-secondary" onclick="handleLogout()">Sign out</button>
     </div>
   </div>
  
-  <!-- ════════════════════════════════════════════════════════════════
-       SCREEN 3 — ADD LISTING FORM
-  ════════════════════════════════════════════════════════════════════ -->
+  <!-- SCREEN 3 — ADD LISTING FORM -->
   <div class="screen" id="screen-add-listing">
     <div class="container">
- 
-      <div class="back-link" onclick="showScreen('dashboard')">
-        ← Back to dashboard
-      </div>
+      <div class="back-link" onclick="showScreen('dashboard')">← Back to dashboard</div>
  
       <div class="card">
         <div class="card-title">List your property</div>
@@ -575,7 +549,6 @@
           Fill in your room details. Your listing goes live after a quick review — usually within the hour.
         </div>
  
-        <!-- Progress indicator -->
         <div class="form-progress">
           <div class="form-step active" id="form-step-1">
             <div class="form-step-num">1</div>
@@ -591,12 +564,12 @@
           </div>
         </div>
  
-        <!-- SECTION 1: Room details -->
+        <!-- SECTION 1 -->
         <div id="listing-section-1">
           <div class="field-group">
             <label for="listing-name">Property name</label>
             <input type="text" id="listing-name" placeholder="e.g. Graceland Guesthouse" />
-            <p class="field-helper">What attendees will see as the listing title</p>
+            <p class="field-helper">What guests will see as the listing title</p>
           </div>
  
           <div class="field-group">
@@ -634,6 +607,12 @@
           </div>
  
           <div class="field-group">
+            <label for="listing-total-rooms">Total rooms available</label>
+            <input type="number" id="listing-total-rooms" placeholder="e.g. 5" min="1" />
+            <p class="field-helper">How many rooms of this type do you have available?</p>
+          </div>
+ 
+          <div class="field-group">
             <label>Amenities available</label>
             <div class="amenity-grid">
               <label class="amenity-check"><input type="checkbox" value="AC" /> AC</label>
@@ -649,17 +628,15 @@
             </div>
           </div>
  
-          <button class="btn-primary" onclick="goToSection(2)">
-            Next — Add Pricing →
-          </button>
+          <button class="btn-primary" onclick="goToSection(2)">Next — Add Pricing →</button>
         </div>
  
-        <!-- SECTION 2: Pricing & location -->
+        <!-- SECTION 2 -->
         <div id="listing-section-2" style="display:none;">
           <div class="field-group">
             <label for="listing-price">Price per night (₦)</label>
             <input type="number" id="listing-price" placeholder="e.g. 15000" min="0" />
-            <p class="field-helper">The exact price attendees will pay on arrival. No hidden charges.</p>
+            <p class="field-helper">The exact price guests will pay on arrival. No hidden charges.</p>
           </div>
  
           <div class="field-group">
@@ -674,19 +651,15 @@
           </div>
  
           <div style="display:flex; gap:10px;">
-            <button class="btn-secondary" onclick="goToSection(1)" style="width:auto; flex:1; margin-top:0;">
-              ← Back
-            </button>
-            <button class="btn-primary" onclick="goToSection(3)" style="flex:2;">
-              Next — Bank Details →
-            </button>
+            <button class="btn-secondary" onclick="goToSection(1)" style="width:auto; flex:1; margin-top:0;">← Back</button>
+            <button class="btn-primary" onclick="goToSection(3)" style="flex:2;">Next — Bank Details →</button>
           </div>
         </div>
  
-        <!-- SECTION 3: Bank details -->
+        <!-- SECTION 3 -->
         <div id="listing-section-3" style="display:none;">
           <div style="background:rgba(232,160,32,0.1); border:1px solid rgba(232,160,32,0.3); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:20px; font-size:12px; color:var(--text-mid); line-height:1.6;">
-            💡 Bank details are shown to attendees who want to pre-pay before arrival. This removes the need for cash on the day.
+            💡 Bank details are shown to guests who want to pre-pay before arrival.
           </div>
  
           <div class="field-group">
@@ -715,23 +688,16 @@
  
           <div class="field-group">
             <label for="listing-bank-account">Account number</label>
-            <input type="tel" id="listing-bank-account" placeholder="e.g. 0123456789"
-                   maxlength="10" pattern="[0-9]{10}" />
+            <input type="tel" id="listing-bank-account" placeholder="e.g. 0123456789" maxlength="10" pattern="[0-9]{10}" />
             <p class="field-helper">10-digit NUBAN account number</p>
           </div>
  
           <div style="display:flex; gap:10px;">
-            <button class="btn-secondary" onclick="goToSection(2)" style="width:auto; flex:1; margin-top:0;">
-              ← Back
-            </button>
-            <button class="btn-primary" onclick="submitListing()" style="flex:2;" id="btn-submit-listing">
-              Submit Listing ✓
-            </button>
+            <button class="btn-secondary" onclick="goToSection(2)" style="width:auto; flex:1; margin-top:0;">← Back</button>
+            <button class="btn-primary" onclick="submitListing()" style="flex:2;" id="btn-submit-listing">Submit Listing ✓</button>
           </div>
         </div>
- 
       </div>
- 
     </div>
   </div>
  
@@ -741,7 +707,14 @@
   <script>
     // ─── SUPABASE CONFIG ─────────────────────────────────────────────
     const SUPABASE_URL = 'https://zomcrvfekwihqrrqvifi.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvbWNydmZla3dpaHFycnF2aWZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjYxNzIsImV4cCI6MjA5NTQ0MjE3Mn0.ax-jkvdiDFK2t9H5phh4LZTtyeqxPqdrM1XJfFXr7Yk';
+    const SUPABASE_KEY = 'sb_publishable_lC9xUJnLXMF5saz5Y6JYag_JGzmP6fD';
+ 
+    const HEADERS = {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'x-client-info': 'supabase-js/2.0.0',
+    };
  
     const db = {
       async get(table, filters = {}) {
@@ -749,12 +722,7 @@
         Object.entries(filters).forEach(([k, v]) => {
           url += `&${k}=eq.${encodeURIComponent(v)}`;
         });
-        const res = await fetch(url, {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-          }
-        });
+        const res = await fetch(url, { headers: HEADERS });
         if (!res.ok) throw new Error(`GET failed: ${res.status}`);
         return res.json();
       },
@@ -762,12 +730,7 @@
       async insert(table, data) {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
           method: 'POST',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation',
-          },
+          headers: { ...HEADERS, 'Prefer': 'return=representation' },
           body: JSON.stringify(data),
         });
         if (!res.ok) throw new Error(`INSERT failed: ${res.status}`);
@@ -777,11 +740,7 @@
       async update(table, id, data) {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
           method: 'PATCH',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-          },
+          headers: HEADERS,
           body: JSON.stringify(data),
         });
         if (!res.ok) throw new Error(`UPDATE failed: ${res.status}`);
@@ -812,8 +771,12 @@
       const phone = document.getElementById('login-phone').value.trim();
       const name  = document.getElementById('login-name').value.trim();
  
-      if (!phone || phone.length < 11 || !/^\d+$/.test(phone)) {
-        showToast('Please enter a valid 11-digit phone number', 'error');
+      // Accept Nigerian (11 digits starting with 0) or international (+countrycode...)
+      const isNigerian = /^0\d{10}$/.test(phone);
+      const isInternational = /^\+\d{7,15}$/.test(phone);
+ 
+      if (!phone || (!isNigerian && !isInternational)) {
+        showToast('Please enter a valid phone number (e.g. 08012345678 or +447911123456)', 'error');
         return;
       }
       if (!name) {
@@ -822,28 +785,18 @@
       }
  
       try {
-        // Check if host already exists
         let hosts = await db.get('users', { phone });
  
         if (hosts.length === 0) {
-          // New host — create account
-          const created = await db.insert('users', {
-            phone,
-            name,
-            role: 'host',
-          });
+          const created = await db.insert('users', { phone, name, role: 'host' });
           currentHost = created[0];
           showToast('Account created! Welcome to LodgeLink', 'success');
         } else {
           currentHost = hosts[0];
-          // Update name in case it changed
           showToast(`Welcome back, ${currentHost.name || name}!`, 'success');
         }
  
-        // Save to session
         sessionStorage.setItem('lodgelink_host', JSON.stringify(currentHost));
- 
-        // Load dashboard
         loadDashboard();
         showScreen('dashboard');
  
@@ -856,15 +809,12 @@
     // ─── DASHBOARD ────────────────────────────────────────────────────
     async function loadDashboard() {
       if (!currentHost) return;
- 
       document.getElementById('dashboard-host-name').textContent = currentHost.name || currentHost.phone;
  
       try {
-        // Load this host's listings
         const listings = await db.get('listings', { host_phone: currentHost.phone });
         renderListingsSummary(listings);
  
-        // Load reservations for this host's listings
         const allReservations = [];
         for (const listing of listings) {
           const res = await db.get('reservations', { listing_id: listing.id });
@@ -873,8 +823,6 @@
         }
  
         renderReservations(allReservations);
- 
-        // Update stats
         document.getElementById('stat-listings').textContent = listings.length;
         document.getElementById('stat-pending').textContent = allReservations.filter(r => r.status === 'pending').length;
         document.getElementById('stat-confirmed').textContent = allReservations.filter(r => r.status === 'confirmed').length;
@@ -895,12 +843,14 @@
           </div>`;
         return;
       }
- 
       container.innerHTML = listings.map(l => `
         <div class="listing-summary">
           <div>
             <div class="listing-summary-name">${l.name}</div>
             <div class="listing-summary-price">₦${Number(l.price_per_night).toLocaleString('en-NG')}/night · ${l.room_type}</div>
+            <div style="font-size:11px; color:var(--text-light); margin-top:2px;">
+              ${l.rooms_available > 0 ? `🟢 ${l.rooms_available} room${l.rooms_available !== 1 ? 's' : ''} available` : '🔴 Fully booked'}
+            </div>
           </div>
           <span class="badge ${l.approved ? 'badge-approved' : 'badge-pending'}">
             ${l.approved ? 'Live' : 'Under review'}
@@ -914,11 +864,10 @@
         container.innerHTML = `
           <div class="empty-state">
             <div class="empty-state-icon">📭</div>
-            <p>No reservation requests yet.<br/>They will appear here when attendees book your rooms.</p>
+            <p>No reservation requests yet.<br/>They will appear here when guests book your rooms.</p>
           </div>`;
         return;
       }
- 
       container.innerHTML = reservations.map(r => `
         <div class="reservation-card">
           <div class="reservation-card-header">
@@ -951,7 +900,6 @@
  
     // ─── ADD LISTING FORM ─────────────────────────────────────────────
     function goToSection(num) {
-      // Validate before advancing
       if (num === 2) {
         const name = document.getElementById('listing-name').value.trim();
         const type = document.getElementById('listing-type').value;
@@ -961,7 +909,6 @@
           return;
         }
       }
- 
       if (num === 3) {
         const price    = document.getElementById('listing-price').value;
         const distance = document.getElementById('listing-distance').value;
@@ -970,15 +917,12 @@
           return;
         }
       }
- 
-      // Hide all sections
       [1, 2, 3].forEach(i => {
         document.getElementById(`listing-section-${i}`).style.display = 'none';
         const step = document.getElementById(`form-step-${i}`);
         step.classList.remove('active', 'done');
         if (i < num) step.classList.add('done');
       });
- 
       document.getElementById(`listing-section-${num}`).style.display = 'block';
       document.getElementById(`form-step-${num}`).classList.add('active');
     }
@@ -993,7 +937,6 @@
         return;
       }
  
-      // Collect amenities
       const amenities = Array.from(
         document.querySelectorAll('.amenity-check input:checked')
       ).map(cb => cb.value);
@@ -1003,22 +946,26 @@
         ? `${(distanceM / 1000).toFixed(1)}km`
         : `${distanceM}m`;
  
+      const totalRooms = parseInt(document.getElementById('listing-total-rooms').value) || 1;
+ 
       const listing = {
-        name:             document.getElementById('listing-name').value.trim(),
-        type:             document.getElementById('listing-type').value,
-        room_type:        document.getElementById('listing-room-type').value,
-        price_per_night:  parseInt(document.getElementById('listing-price').value),
-        distance_m:       distanceM,
-        distance_label:   distanceLabel,
-        capacity:         parseInt(document.getElementById('listing-capacity').value),
-        amenities:        amenities,
-        host_name:        currentHost.name,
-        host_phone:       currentHost.phone,
-        host_bank_name:   bankName,
+        name:              document.getElementById('listing-name').value.trim(),
+        type:              document.getElementById('listing-type').value,
+        room_type:         document.getElementById('listing-room-type').value,
+        price_per_night:   parseInt(document.getElementById('listing-price').value),
+        distance_m:        distanceM,
+        distance_label:    distanceLabel,
+        capacity:          parseInt(document.getElementById('listing-capacity').value),
+        amenities:         amenities,
+        host_name:         currentHost.name,
+        host_phone:        currentHost.phone,
+        host_bank_name:    bankName,
         host_bank_account: bankAccount,
-        host_bank_bank:   bankBank,
-        available:        true,
-        approved:         false, // Goes through admin review first
+        host_bank_bank:    bankBank,
+        available:         true,
+        approved:          false,
+        total_rooms:       totalRooms,
+        rooms_available:   totalRooms,
       };
  
       const btn = document.getElementById('btn-submit-listing');
@@ -1028,14 +975,11 @@
       try {
         await db.insert('listings', listing);
         showToast('✓ Listing submitted for review!', 'success');
- 
-        // Reset form
         setTimeout(() => {
           showScreen('dashboard');
           loadDashboard();
           resetListingForm();
         }, 1500);
- 
       } catch (err) {
         console.error('Submit listing error:', err);
         showToast('Could not submit listing. Try again.', 'error');
@@ -1046,7 +990,7 @@
  
     function resetListingForm() {
       ['listing-name','listing-price','listing-distance','listing-address',
-       'listing-bank-name','listing-bank-account'].forEach(id => {
+       'listing-bank-name','listing-bank-account','listing-total-rooms'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
@@ -1068,7 +1012,6 @@
  
     // ─── INIT ────────────────────────────────────────────────────────
     function init() {
-      // Check if host is already logged in this session
       const saved = sessionStorage.getItem('lodgelink_host');
       if (saved) {
         try {
