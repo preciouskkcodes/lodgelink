@@ -30,12 +30,10 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Never cache Supabase API calls — always go to network
   if (event.request.url.includes('supabase.co')) {
     event.respondWith(fetch(event.request));
     return;
   }
-
   event.respondWith(
     caches.match(event.request).then(response => {
       return response || fetch(event.request);
