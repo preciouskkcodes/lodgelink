@@ -927,7 +927,7 @@
           showToast(`Welcome back, ${currentHost.name || name}!`, 'success');
         }
  
-        sessionStorage.setItem('lodgelink_host', JSON.stringify(currentHost));
+        localStorage.setItem('lodgelink_host', JSON.stringify(currentHost));
         loadDashboard();
         showScreen('dashboard');
  
@@ -1148,14 +1148,14 @@
     // ─── LOGOUT ──────────────────────────────────────────────────────
     function handleLogout() {
       currentHost = null;
-      sessionStorage.removeItem('lodgelink_host');
+      localStorage.removeItem('lodgelink_host');
       showScreen('login');
       showToast('Signed out successfully');
     }
  
     // ─── INIT ────────────────────────────────────────────────────────
     function init() {
-      const saved = sessionStorage.getItem('lodgelink_host');
+      const saved = localStorage.getItem('lodgelink_host');
       if (saved) {
         try {
           currentHost = JSON.parse(saved);
