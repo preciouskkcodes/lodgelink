@@ -550,7 +550,7 @@ if (!phone || (!isNigerian && !isInternational)) {
     nights:          nights,
     price_per_night: activeReservation.pricePerNight,
     total_cost:      nights * activeReservation.pricePerNight,
-    reservation_fee: 1500,
+    reservation_fee: 2000,
     program:         program || 'unspecified',
     status:          'pending',
   };
@@ -574,7 +574,7 @@ if (!phone || (!isNigerian && !isInternational)) {
     closeModal();
     setTimeout(() => {
       window.open('https://paystack.shop/pay/4c9yb89ptb', '_blank');
-      setTimeout(() => openPrePay(localRecord), 1500);
+      setTimeout(() => openPrePay(localRecord), 2000);
     }, 300);
 
   } catch (err) {
