@@ -368,18 +368,14 @@ function initProgramSelectorCue() {
   });
 }
  
-// ─── SEARCH ───────────────────────────────────────────────────────────────────
+// ─── SEARCH PARSERS ───────────────────────────────────────────────────────────
 function parseBudget(query) {
   const q = query.toLowerCase()
-    .replace(/₦/g, '')
-    .replace(/,/g, '')
-    .replace(/naira/g, '')
-    .trim();
+    .replace(/₦/g, '').replace(/,/g, '').replace(/naira/g, '').trim();
   const match = q.match(/(?:under|below|max|within)\s*(\d+)(k?)/);
   if (!match) return null;
   const num = parseInt(match[1]);
-  const isK = match[2] === 'k';
-  return isK ? num * 1000 : num;
+  return match[2] === 'k' ? num * 1000 : num;
 }
  
 function parseGuests(query) {
@@ -392,59 +388,80 @@ function parseDistance(query) {
   if (q.includes('close') || q.includes('near') || q.includes('walking')) return 'close';
   return null;
 }
-
+ 
+// ─── ROOM TYPE PARSER — checks both roomType and type fields ──────────────────
 function parseRoomType(query) {
-  const q = query.toLowerCase();
-  if (q.includes('family') || q.includes('suite'))        return 'family suite';
-  if (q.includes('single'))                               return 'single';
-  if (q.includes('double'))                               return 'double';
-  if (q.includes('shared'))                               return 'shared';
-  if (q.includes('self-contain') || q.includes('studio')) return 'self-contain';
-  if (q.includes('executive') || q.includes('hotel'))     return 'hotel';
-  if (q.includes('hostel'))                               return 'hostel';
-  if (q.includes('guesthouse') || q.includes('guest house')) return 'guesthouse';
+  const q = query.toLowerCase().trim();
+ 
+  // Property type keywords
+  if (q.includes('hotel'))                                  return { field: 'type', value: 'hotel' };
+  if (q.includes('guesthouse') || q.includes('guest house')) return { field: 'type', value: 'guesthouse' };
+  if (q.includes('hostel'))                                 return { field: 'type', value: 'hostel' };
+  if (q.includes('self-contain') || q.includes('self contain') || q.includes('studio')) return { field: 'type', value: 'self-contain' };
+ 
+  // Room type keywords
+  if (q.includes('family') || q.includes('suite'))         return { field: 'roomType', value: 'family suite' };
+  if (q.includes('single'))                                 return { field: 'roomType', value: 'single' };
+  if (q.includes('double'))                                 return { field: 'roomType', value: 'double' };
+  if (q.includes('shared'))                                 return { field: 'roomType', value: 'shared' };
+  if (q.includes('executive'))                              return { field: 'roomType', value: 'double' };
+ 
   return null;
 }
  
-// ─── FIX 1: AUTO-SCROLL TO RESULTS AFTER SEARCH ──────────────────────────────
-function scrollToListings() {
-  const main = document.getElementById('main');
-  if (main) {
-    setTimeout(() => {
-      main.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+// ─── LISTING MATCHER ─────────────────────────────────────────────────────────
+function listingMatchesRoomType(listing, roomTypeFilter) {
+  if (!roomTypeFilter) return true;
+  const { field, value } = roomTypeFilter;
+ 
+  if (field === 'type') {
+    return listing.type.toLowerCase().includes(value);
   }
+  if (field === 'roomType') {
+    return listing.roomType.toLowerCase().includes(value);
+  }
+  return true;
 }
  
+// ─── AUTO-SCROLL ─────────────────────────────────────────────────────────────
+function scrollToListings() {
+  const main = document.getElementById('main');
+  if (main) setTimeout(() => main.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+ 
+// ─── HANDLE SEARCH ───────────────────────────────────────────────────────────
 window.handleSearch = function(query) {
   const budget       = parseBudget(query);
   const guests       = parseGuests(query);
   const distancePref = parseDistance(query);
-  const roomType     = parseRoomType(query);  // ← ADD THIS
-
+  const roomType     = parseRoomType(query);
+ 
+  // Debug — remove after testing
+  console.log('Search:', query);
+  console.log('Parsed roomType:', roomType);
+  console.log('All listings roomTypes:', allListings.map(l => ({ name: l.name, type: l.type, roomType: l.roomType })));
+ 
   let pool = [...allListings];
   let matched = [...pool];
-
+ 
   if (budget)                   matched = matched.filter(l => l.pricePerNight <= budget);
   if (guests)                   matched = matched.filter(l => l.capacity >= guests);
   if (distancePref === 'close') matched = matched.filter(l => l.distanceM <= 1000);
-
-  // ── ADD THIS BLOCK ──
-  if (roomType) {
-    matched = matched.filter(l =>
-      l.roomType.toLowerCase().includes(roomType) ||
-      l.type.toLowerCase().includes(roomType)
-    );
-  }
-  // ────────────────────
-
+  if (roomType)                 matched = matched.filter(l => listingMatchesRoomType(l, roomType));
+ 
   const matchedIds = new Set(matched.map(l => l.id));
   const others = pool.filter(l => !matchedIds.has(l.id));
  
   const noMatchPanel = document.getElementById('no-match-panel');
   const listRoot     = document.getElementById('list-root');
  
-  if (matched.length === 0 && others.length === 0) {
+  // If roomType search returns 0 matches — show "no match" not all listings
+  if (matched.length === 0 && roomType) {
+    if (noMatchPanel) noMatchPanel.classList.add('visible');
+    if (listRoot)     listRoot.style.display = 'none';
+    const countEl = document.getElementById('results-count-num');
+    if (countEl) countEl.textContent = `0 matches for "${query}"`;
+  } else if (matched.length === 0 && others.length === 0) {
     if (noMatchPanel) noMatchPanel.classList.add('visible');
     if (listRoot)     listRoot.style.display = 'none';
   } else {
@@ -454,7 +471,6 @@ window.handleSearch = function(query) {
     renderInsights(pool);
   }
  
-  // ── AUTO-SCROLL to results ──
   scrollToListings();
 };
  
@@ -549,10 +565,6 @@ window.updateTotal = function() {
   if (brkEl)   brkEl.textContent   = `${nights} night${nights > 1 ? 's' : ''} × ${formatPrice(activeReservation.pricePerNight)} per night`;
 };
  
-// ─── FIX 2: RESERVATION STAYS PENDING UNTIL PAYSTACK PAYMENT ─────────────────
-// The reservation is saved to Supabase with status 'pending'
-// It only becomes visible to the host AFTER Paystack redirects to success.html
-// success.html reads the reservation from localStorage and confirms it
 window.confirmReservation = async function() {
   const name    = document.getElementById('input-name').value.trim();
   const phone   = document.getElementById('input-phone').value.trim();
@@ -584,11 +596,10 @@ window.confirmReservation = async function() {
     total_cost:      nights * activeReservation.pricePerNight,
     reservation_fee: 2000,
     program:         program || 'unspecified',
-    status:          'pending', // stays pending until Paystack confirms
+    status:          'pending',
   };
  
   try {
-    // Save to Supabase as pending
     const saved = await db.insert('reservations', record);
  
     const localRecord = {
@@ -600,14 +611,12 @@ window.confirmReservation = async function() {
       timestamp:     new Date().toISOString(),
     };
  
-    // Save to localStorage so success.html can read it
     const records = loadData();
     records.push(localRecord);
     saveData(records);
  
     closeModal();
  
-    // Open Paystack — reservation only becomes meaningful after payment
     setTimeout(() => {
       window.open('https://paystack.shop/pay/4c9yb89ptb', '_blank');
       setTimeout(() => openPrePay(localRecord), 2000);
