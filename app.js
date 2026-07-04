@@ -392,6 +392,19 @@ function parseDistance(query) {
   if (q.includes('close') || q.includes('near') || q.includes('walking')) return 'close';
   return null;
 }
+
+function parseRoomType(query) {
+  const q = query.toLowerCase();
+  if (q.includes('family') || q.includes('suite'))        return 'family suite';
+  if (q.includes('single'))                               return 'single';
+  if (q.includes('double'))                               return 'double';
+  if (q.includes('shared'))                               return 'shared';
+  if (q.includes('self-contain') || q.includes('studio')) return 'self-contain';
+  if (q.includes('executive') || q.includes('hotel'))     return 'hotel';
+  if (q.includes('hostel'))                               return 'hostel';
+  if (q.includes('guesthouse') || q.includes('guest house')) return 'guesthouse';
+  return null;
+}
  
 // ─── FIX 1: AUTO-SCROLL TO RESULTS AFTER SEARCH ──────────────────────────────
 function scrollToListings() {
@@ -407,14 +420,24 @@ window.handleSearch = function(query) {
   const budget       = parseBudget(query);
   const guests       = parseGuests(query);
   const distancePref = parseDistance(query);
- 
+  const roomType     = parseRoomType(query);  // ← ADD THIS
+
   let pool = [...allListings];
- 
   let matched = [...pool];
+
   if (budget)                   matched = matched.filter(l => l.pricePerNight <= budget);
   if (guests)                   matched = matched.filter(l => l.capacity >= guests);
   if (distancePref === 'close') matched = matched.filter(l => l.distanceM <= 1000);
- 
+
+  // ── ADD THIS BLOCK ──
+  if (roomType) {
+    matched = matched.filter(l =>
+      l.roomType.toLowerCase().includes(roomType) ||
+      l.type.toLowerCase().includes(roomType)
+    );
+  }
+  // ────────────────────
+
   const matchedIds = new Set(matched.map(l => l.id));
   const others = pool.filter(l => !matchedIds.has(l.id));
  
