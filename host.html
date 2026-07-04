@@ -9,439 +9,99 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --navy:       #0B1F3A;
-      --navy-mid:   #12294D;
-      --gold:       #E8A020;
-      --gold-light: #F5C254;
-      --cream:      #FDF6EC;
-      --white:      #FFFFFF;
-      --text-dark:  #0B1F3A;
-      --text-mid:   #3D5A80;
-      --text-light: #7A95B0;
-      --border:     #D9E6F2;
-      --success:    #1A7A4A;
-      --error:      #DC2626;
-      --radius-sm:  8px;
-      --radius-md:  14px;
-      --radius-lg:  22px;
-      --shadow-sm:  0 2px 8px rgba(11,31,58,0.08);
-      --shadow-md:  0 6px 24px rgba(11,31,58,0.13);
-      --font-head:  'Syne', sans-serif;
-      --font-body:  'Outfit', sans-serif;
-      --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
+      --navy:#0B1F3A;--navy-mid:#12294D;--gold:#E8A020;--gold-light:#F5C254;
+      --cream:#FDF6EC;--white:#FFFFFF;--text-dark:#0B1F3A;--text-mid:#3D5A80;
+      --text-light:#7A95B0;--border:#D9E6F2;--success:#1A7A4A;--error:#DC2626;
+      --radius-sm:8px;--radius-md:14px;--radius-lg:22px;
+      --shadow-sm:0 2px 8px rgba(11,31,58,0.08);--shadow-md:0 6px 24px rgba(11,31,58,0.13);
+      --font-head:'Syne',sans-serif;--font-body:'Outfit',sans-serif;
+      --transition:0.22s cubic-bezier(0.4,0,0.2,1);
     }
- 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: var(--font-body);
-      background: var(--cream);
-      color: var(--text-dark);
-      font-size: 16px;
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-    }
- 
-    .container {
-      width: 100%;
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
- 
-    /* ── HEADER ── */
-    #header { background: var(--navy); padding: 20px 0; }
- 
-    .header-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
- 
-    .logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); }
-    .logo span { color: var(--gold); }
- 
-    .host-badge {
-      background: rgba(232,160,32,0.15);
-      border: 1px solid rgba(232,160,32,0.3);
-      color: var(--gold);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-    }
- 
-    /* ── SCREENS ── */
-    .screen { display: none; padding: 24px 0 48px; }
-    .screen.active { display: block; }
- 
-    /* ── CARDS ── */
-    .card {
-      background: var(--white);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border);
-      margin-bottom: 16px;
-    }
- 
-    .card-title { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; }
-    .card-sub { font-size: 13px; color: var(--text-light); margin-bottom: 20px; line-height: 1.5; }
- 
-    /* ── FORM FIELDS ── */
-    .field-group { margin-bottom: 16px; }
- 
-    .field-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-mid);
-      margin-bottom: 5px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
- 
-    .field-group input,
-    .field-group select,
-    .field-group textarea {
-      width: 100%;
-      padding: 13px 16px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-md);
-      font-family: var(--font-body);
-      font-size: 15px;
-      color: var(--text-dark);
-      background: var(--white);
-      outline: none;
-      transition: border-color var(--transition), box-shadow var(--transition);
-      appearance: none;
-      -webkit-appearance: none;
-    }
- 
-    .field-group textarea { resize: vertical; min-height: 80px; }
- 
-    .field-group input:focus,
-    .field-group select:focus,
-    .field-group textarea:focus {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(232,160,32,0.12);
-    }
- 
-    .field-helper { font-size: 11px; color: var(--text-light); margin-top: 5px; }
- 
-    /* ── AMENITY CHECKBOXES ── */
-    .amenity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
- 
-    .amenity-check {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 12px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all var(--transition);
-      font-size: 13px;
-      color: var(--text-mid);
-      user-select: none;
-    }
- 
-    .amenity-check input[type="checkbox"] {
-      width: 16px; height: 16px;
-      accent-color: var(--navy);
-      flex-shrink: 0;
-      padding: 0; border: none;
-    }
- 
-    .amenity-check:has(input:checked) {
-      border-color: var(--navy);
-      background: #EEF4FB;
-      color: var(--navy);
-      font-weight: 600;
-    }
- 
-    /* ── IMAGE UPLOAD ── */
-    .image-upload-area {
-      border: 2px dashed var(--border);
-      border-radius: var(--radius-md);
-      padding: 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: all var(--transition);
-      background: #FAFCFF;
-      position: relative;
-    }
- 
-    .image-upload-area:hover { border-color: var(--gold); background: rgba(232,160,32,0.04); }
-    .image-upload-area.dragover { border-color: var(--gold); background: rgba(232,160,32,0.08); }
- 
-    .image-upload-area input[type="file"] {
-      position: absolute; inset: 0;
-      opacity: 0; cursor: pointer;
-      width: 100%; height: 100%;
-      padding: 0; border: none;
-    }
- 
-    .upload-icon { font-size: 32px; margin-bottom: 8px; }
- 
-    .upload-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-dark);
-      margin-bottom: 4px;
-    }
- 
-    .upload-sub { font-size: 11px; color: var(--text-light); }
- 
-    /* Image preview grid */
-    #image-previews {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 12px;
-    }
- 
-    .preview-item {
-      position: relative;
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-      aspect-ratio: 1;
-      background: #EEF4FB;
-    }
- 
-    .preview-item img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-    }
- 
-    .preview-item .preview-remove {
-      position: absolute;
-      top: 4px; right: 4px;
-      background: rgba(220,38,38,0.9);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 22px; height: 22px;
-      font-size: 13px;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      line-height: 1;
-    }
- 
-    .preview-item .preview-badge {
-      position: absolute;
-      bottom: 4px; left: 4px;
-      background: rgba(11,31,58,0.8);
-      color: white;
-      font-size: 9px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
- 
-    .preview-uploading {
-      position: absolute; inset: 0;
-      background: rgba(11,31,58,0.6);
-      display: flex; align-items: center; justify-content: center;
-      color: white;
-      font-size: 11px;
-      font-weight: 600;
-    }
- 
-    .upload-progress {
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--text-mid);
-      display: none;
-    }
- 
-    /* ── BUTTONS ── */
-    .btn-primary {
-      width: 100%;
-      padding: 16px;
-      background: var(--navy);
-      color: var(--white);
-      border: none;
-      border-radius: var(--radius-md);
-      font-family: var(--font-head);
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background var(--transition), transform var(--transition);
-      letter-spacing: 0.3px;
-      box-shadow: 0 4px 14px rgba(11,31,58,0.2);
-    }
- 
-    .btn-primary:hover  { background: var(--gold); color: var(--navy); }
-    .btn-primary:active { transform: scale(0.99); }
-    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
- 
-    .btn-secondary {
-      width: 100%;
-      padding: 13px;
-      background: none;
-      color: var(--text-mid);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-md);
-      font-family: var(--font-body);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all var(--transition);
-      margin-top: 10px;
-    }
- 
-    .btn-secondary:hover { border-color: var(--navy); color: var(--navy); }
- 
-    .btn-gold {
-      width: 100%;
-      padding: 16px;
-      background: var(--gold);
-      color: var(--navy);
-      border: none;
-      border-radius: var(--radius-md);
-      font-family: var(--font-head);
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background var(--transition);
-      box-shadow: 0 4px 14px rgba(232,160,32,0.3);
-    }
- 
-    .btn-gold:hover { background: var(--gold-light); }
- 
-    /* ── STATUS BADGES ── */
-    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .badge-pending  { background: rgba(232,160,32,0.15); color: #92600A; }
-    .badge-approved { background: rgba(26,122,74,0.12);  color: var(--success); }
-    .badge-declined { background: rgba(220,38,38,0.1);   color: var(--error); }
- 
-    /* ── TOAST ── */
-    #toast {
-      position: fixed;
-      bottom: 24px; left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--navy);
-      color: var(--white);
-      padding: 12px 24px;
-      border-radius: var(--radius-md);
-      font-size: 13px; font-weight: 500;
-      z-index: 999;
-      transition: transform 0.3s ease;
-      white-space: nowrap;
-      box-shadow: var(--shadow-md);
-    }
- 
-    #toast.show { transform: translateX(-50%) translateY(0); }
-    #toast.success { background: var(--success); }
-    #toast.error   { background: var(--error); }
- 
-    /* ── RESERVATION CARDS ── */
-    .reservation-card {
-      background: #F8FBFF;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
-      margin-bottom: 10px;
-    }
- 
-    .reservation-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .reservation-guest { font-size: 14px; font-weight: 700; color: var(--text-dark); }
-    .reservation-detail { font-size: 12px; color: var(--text-light); margin-bottom: 3px; }
- 
-    .reservation-actions { display: flex; gap: 8px; margin-top: 10px; }
- 
-    .btn-confirm {
-      flex: 1; padding: 9px;
-      background: var(--success); color: white;
-      border: none; border-radius: var(--radius-sm);
-      font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer;
-    }
- 
-    .btn-decline {
-      flex: 1; padding: 9px;
-      background: none; color: var(--error);
-      border: 1.5px solid var(--error); border-radius: var(--radius-sm);
-      font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer;
-    }
- 
-    /* ── LISTING SUMMARY ── */
-    .listing-summary {
-      background: #EEF4FB;
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
- 
-    .listing-summary-name { font-size: 14px; font-weight: 700; color: var(--text-dark); }
-    .listing-summary-price { font-size: 13px; color: var(--text-mid); margin-top: 2px; }
- 
-    /* ── SECTION TITLE ── */
-    .section-title {
-      font-family: var(--font-head);
-      font-size: 15px; font-weight: 700;
-      color: var(--text-dark);
-      margin: 24px 0 12px;
-      display: flex; align-items: center; gap: 8px;
-    }
- 
-    .empty-state { text-align: center; padding: 32px 20px; color: var(--text-light); font-size: 13px; }
-    .empty-state-icon { font-size: 32px; margin-bottom: 10px; }
- 
-    /* ── PROGRESS STEPS ── */
-    .form-progress {
-      display: flex; gap: 0;
-      margin-bottom: 24px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-    }
- 
-    .form-step {
-      flex: 1; padding: 10px 8px;
-      text-align: center;
-      border-right: 1px solid var(--border);
-      background: #F8FBFF;
-    }
- 
-    .form-step:last-child { border-right: none; }
-    .form-step.active { background: var(--navy); }
-    .form-step.done   { background: rgba(26,122,74,0.1); }
- 
-    .form-step-num {
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      border: 1.5px solid var(--border);
-      font-size: 10px; font-weight: 700;
-      color: var(--text-light);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 4px;
-    }
- 
-    .form-step.active .form-step-num { background: var(--gold); border-color: var(--gold); color: var(--navy); }
-    .form-step.done   .form-step-num { background: var(--success); border-color: var(--success); color: white; }
- 
-    .form-step-label { font-size: 9px; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.4px; }
-    .form-step.active .form-step-label { color: rgba(255,255,255,0.8); }
-    .form-step.done   .form-step-label { color: var(--success); }
- 
-    .back-link {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 13px; color: var(--text-mid);
-      cursor: pointer; margin-bottom: 20px;
-      width: fit-content;
-    }
- 
-    .back-link:hover { color: var(--navy); }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:var(--font-body);background:var(--cream);color:var(--text-dark);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+    .container{width:100%;max-width:480px;margin:0 auto;padding:0 20px;}
+    #header{background:var(--navy);padding:20px 0;}
+    .header-inner{display:flex;align-items:center;justify-content:space-between;}
+    .logo{font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--white);}
+    .logo span{color:var(--gold);}
+    .host-badge{background:rgba(232,160,32,0.15);border:1px solid rgba(232,160,32,0.3);color:var(--gold);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;}
+    .screen{display:none;padding:24px 0 48px;}
+    .screen.active{display:block;}
+    .card{background:var(--white);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-sm);border:1px solid var(--border);margin-bottom:16px;}
+    .card-title{font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--text-dark);margin-bottom:6px;}
+    .card-sub{font-size:13px;color:var(--text-light);margin-bottom:20px;line-height:1.5;}
+    .field-group{margin-bottom:16px;}
+    .field-group label{display:block;font-size:12px;font-weight:600;color:var(--text-mid);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;}
+    .field-group input,.field-group select,.field-group textarea{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--radius-md);font-family:var(--font-body);font-size:15px;color:var(--text-dark);background:var(--white);outline:none;transition:border-color var(--transition),box-shadow var(--transition);appearance:none;-webkit-appearance:none;}
+    .field-group textarea{resize:vertical;min-height:80px;}
+    .field-group input:focus,.field-group select:focus,.field-group textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,160,32,0.12);}
+    .field-helper{font-size:11px;color:var(--text-light);margin-top:5px;}
+    .amenity-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
+    .amenity-check{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);font-size:13px;color:var(--text-mid);user-select:none;}
+    .amenity-check input[type="checkbox"]{width:16px;height:16px;accent-color:var(--navy);flex-shrink:0;padding:0;border:none;}
+    .amenity-check:has(input:checked){border-color:var(--navy);background:#EEF4FB;color:var(--navy);font-weight:600;}
+    /* Other amenity text input */
+    .other-amenity-wrap{display:none;margin-top:8px;}
+    .other-amenity-wrap.visible{display:block;}
+    .image-upload-area{border:2px dashed var(--border);border-radius:var(--radius-md);padding:20px;text-align:center;cursor:pointer;transition:all var(--transition);background:#FAFCFF;position:relative;}
+    .image-upload-area:hover{border-color:var(--gold);background:rgba(232,160,32,0.04);}
+    .image-upload-area input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;padding:0;border:none;}
+    .upload-icon{font-size:32px;margin-bottom:8px;}
+    .upload-label{font-size:14px;font-weight:600;color:var(--text-dark);margin-bottom:4px;}
+    .upload-sub{font-size:11px;color:var(--text-light);}
+    #image-previews{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+    .preview-item{position:relative;border-radius:var(--radius-sm);overflow:hidden;aspect-ratio:1;background:#EEF4FB;}
+    .preview-item img{width:100%;height:100%;object-fit:cover;display:block;}
+    .preview-item .preview-remove{position:absolute;top:4px;right:4px;background:rgba(220,38,38,0.9);color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .preview-item .preview-badge{position:absolute;bottom:4px;left:4px;background:rgba(11,31,58,0.8);color:white;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;}
+    .preview-uploading{position:absolute;inset:0;background:rgba(11,31,58,0.6);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:600;}
+    .upload-progress{margin-top:10px;font-size:12px;color:var(--text-mid);display:none;}
+    .btn-primary{width:100%;padding:16px;background:var(--navy);color:var(--white);border:none;border-radius:var(--radius-md);font-family:var(--font-head);font-size:16px;font-weight:700;cursor:pointer;transition:background var(--transition),transform var(--transition);letter-spacing:0.3px;box-shadow:0 4px 14px rgba(11,31,58,0.2);}
+    .btn-primary:hover{background:var(--gold);color:var(--navy);}
+    .btn-primary:disabled{opacity:0.6;cursor:not-allowed;}
+    .btn-secondary{width:100%;padding:13px;background:none;color:var(--text-mid);border:1.5px solid var(--border);border-radius:var(--radius-md);font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;transition:all var(--transition);margin-top:10px;}
+    .btn-secondary:hover{border-color:var(--navy);color:var(--navy);}
+    .btn-gold{width:100%;padding:16px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--radius-md);font-family:var(--font-head);font-size:15px;font-weight:700;cursor:pointer;transition:background var(--transition);box-shadow:0 4px 14px rgba(232,160,32,0.3);}
+    .btn-gold:hover{background:var(--gold-light);}
+    .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+    .badge-pending{background:rgba(232,160,32,0.15);color:#92600A;}
+    .badge-approved{background:rgba(26,122,74,0.12);color:var(--success);}
+    .badge-declined{background:rgba(220,38,38,0.1);color:var(--error);}
+    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:var(--white);padding:12px 24px;border-radius:var(--radius-md);font-size:13px;font-weight:500;z-index:999;transition:transform 0.3s ease;white-space:nowrap;box-shadow:var(--shadow-md);}
+    #toast.show{transform:translateX(-50%) translateY(0);}
+    #toast.success{background:var(--success);}
+    #toast.error{background:var(--error);}
+    .reservation-card{background:#F8FBFF;border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:10px;}
+    .reservation-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+    .reservation-guest{font-size:14px;font-weight:700;color:var(--text-dark);}
+    .reservation-detail{font-size:12px;color:var(--text-light);margin-bottom:3px;}
+    .reservation-actions{display:flex;gap:8px;margin-top:10px;}
+    .btn-confirm{flex:1;padding:9px;background:var(--success);color:white;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;}
+    .btn-decline{flex:1;padding:9px;background:none;color:var(--error);border:1.5px solid var(--error);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;}
+    .listing-summary{background:#EEF4FB;border-radius:var(--radius-md);padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+    .listing-summary-name{font-size:14px;font-weight:700;color:var(--text-dark);}
+    .listing-summary-price{font-size:13px;color:var(--text-mid);margin-top:2px;}
+    .section-title{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--text-dark);margin:24px 0 12px;display:flex;align-items:center;gap:8px;}
+    .empty-state{text-align:center;padding:32px 20px;color:var(--text-light);font-size:13px;}
+    .empty-state-icon{font-size:32px;margin-bottom:10px;}
+    .form-progress{display:flex;gap:0;margin-bottom:24px;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+    .form-step{flex:1;padding:10px 8px;text-align:center;border-right:1px solid var(--border);background:#F8FBFF;}
+    .form-step:last-child{border-right:none;}
+    .form-step.active{background:var(--navy);}
+    .form-step.done{background:rgba(26,122,74,0.1);}
+    .form-step-num{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);font-size:10px;font-weight:700;color:var(--text-light);display:flex;align-items:center;justify-content:center;margin:0 auto 4px;}
+    .form-step.active .form-step-num{background:var(--gold);border-color:var(--gold);color:var(--navy);}
+    .form-step.done .form-step-num{background:var(--success);border-color:var(--success);color:white;}
+    .form-step-label{font-size:9px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.4px;}
+    .form-step.active .form-step-label{color:rgba(255,255,255,0.8);}
+    .form-step.done .form-step-label{color:var(--success);}
+    .back-link{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-mid);cursor:pointer;margin-bottom:20px;width:fit-content;}
+    .back-link:hover{color:var(--navy);}
   </style>
 </head>
 <body>
  
-  <!-- HEADER -->
   <header id="header">
     <div class="container">
       <div class="header-inner">
@@ -451,128 +111,91 @@
     </div>
   </header>
  
-  <!-- SCREEN 1 — HOST LOGIN -->
+  <!-- SCREEN 1 — LOGIN -->
   <div class="screen active" id="screen-login">
     <div class="container">
-      <div style="text-align:center; padding: 32px 0 24px;">
-        <div style="font-size:40px; margin-bottom:12px;">🏠</div>
-        <h1 style="font-family:var(--font-head); font-size:24px; font-weight:800; margin-bottom:8px;">
-          Welcome, Host
-        </h1>
-        <p style="font-size:14px; color:var(--text-light); max-width:28ch; margin:0 auto;">
-          List your property and start receiving reservations from attendees.
-        </p>
+      <div style="text-align:center;padding:32px 0 24px;">
+        <div style="font-size:40px;margin-bottom:12px;">🏠</div>
+        <h1 style="font-family:var(--font-head);font-size:24px;font-weight:800;margin-bottom:8px;">Welcome, Host</h1>
+        <p style="font-size:14px;color:var(--text-light);max-width:28ch;margin:0 auto;">List your property and start receiving reservations from attendees.</p>
       </div>
- 
       <div class="card">
         <div class="card-title">Your phone number</div>
         <div class="card-sub">No password needed — enter your number to continue</div>
- 
         <div class="field-group">
           <label for="login-phone">Phone number</label>
-          <input type="tel" id="login-phone" placeholder="e.g. 08012345678 or +447911123456" />
+          <input type="tel" id="login-phone" autocomplete="tel" placeholder="e.g. 08012345678 or +447911123456" />
           <p class="field-helper">📱 Nigerian (08XXXXXXXXX) or international (+countrycode...)</p>
         </div>
- 
         <div class="field-group">
           <label for="login-name">Your full name</label>
-          <input type="text" id="login-name" placeholder="e.g. Folake Bello" />
+          <input type="text" id="login-name" autocomplete="name" placeholder="e.g. Folake Bello" />
         </div>
- 
-        <button class="btn-primary" onclick="handleHostLogin()">
-          Continue as Host →
-        </button>
+        <button class="btn-primary" onclick="handleHostLogin()">Continue as Host →</button>
       </div>
- 
-      <div style="text-align:center; margin-top:16px;">
-        <a href="index.html" style="font-size:13px; color:var(--text-light);">← Back to search</a>
+      <div style="text-align:center;margin-top:16px;">
+        <a href="index.html" style="font-size:13px;color:var(--text-light);">← Back to search</a>
       </div>
     </div>
   </div>
  
-  <!-- SCREEN 2 — HOST DASHBOARD -->
+  <!-- SCREEN 2 — DASHBOARD -->
   <div class="screen" id="screen-dashboard">
     <div class="container">
-      <div style="padding: 20px 0 4px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="padding:20px 0 4px;display:flex;justify-content:space-between;align-items:center;">
         <div>
-          <div style="font-family:var(--font-head); font-size:20px; font-weight:800;">Welcome back 👋</div>
-          <div style="font-size:13px; color:var(--text-light);" id="dashboard-host-name">Loading...</div>
+          <div style="font-family:var(--font-head);font-size:20px;font-weight:800;">Welcome back 👋</div>
+          <div style="font-size:13px;color:var(--text-light);" id="dashboard-host-name">Loading...</div>
         </div>
-        <button onclick="showScreen('add-listing')" class="btn-gold"
-                style="width:auto; padding:10px 18px; font-size:13px;">
-          + Add Listing
-        </button>
+        <button onclick="showScreen('add-listing')" class="btn-gold" style="width:auto;padding:10px 18px;font-size:13px;">+ Add Listing</button>
       </div>
- 
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:20px 0;">
-        <div class="card" style="padding:14px; text-align:center; margin-bottom:0;">
-          <div style="font-family:var(--font-head); font-size:22px; font-weight:800; color:var(--navy);" id="stat-listings">0</div>
-          <div style="font-size:11px; color:var(--text-light);">Listings</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:20px 0;">
+        <div class="card" style="padding:14px;text-align:center;margin-bottom:0;">
+          <div style="font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--navy);" id="stat-listings">0</div>
+          <div style="font-size:11px;color:var(--text-light);">Listings</div>
         </div>
-        <div class="card" style="padding:14px; text-align:center; margin-bottom:0;">
-          <div style="font-family:var(--font-head); font-size:22px; font-weight:800; color:var(--gold);" id="stat-pending">0</div>
-          <div style="font-size:11px; color:var(--text-light);">Pending</div>
+        <div class="card" style="padding:14px;text-align:center;margin-bottom:0;">
+          <div style="font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--gold);" id="stat-pending">0</div>
+          <div style="font-size:11px;color:var(--text-light);">Pending</div>
         </div>
-        <div class="card" style="padding:14px; text-align:center; margin-bottom:0;">
-          <div style="font-family:var(--font-head); font-size:22px; font-weight:800; color:#15803D;" id="stat-confirmed">0</div>
-          <div style="font-size:11px; color:var(--text-light);">Confirmed</div>
+        <div class="card" style="padding:14px;text-align:center;margin-bottom:0;">
+          <div style="font-family:var(--font-head);font-size:22px;font-weight:800;color:#15803D;" id="stat-confirmed">0</div>
+          <div style="font-size:11px;color:var(--text-light);">Confirmed</div>
         </div>
       </div>
- 
       <div class="section-title">🔔 Reservation Requests</div>
       <div id="reservations-list">
-        <div class="empty-state">
-          <div class="empty-state-icon">📭</div>
-          <p>No reservation requests yet.<br/>They will appear here when guests book your rooms.</p>
-        </div>
+        <div class="empty-state"><div class="empty-state-icon">📭</div><p>No reservation requests yet.<br/>They will appear here when guests book your rooms.</p></div>
       </div>
- 
       <div class="section-title">🏠 My Listings</div>
       <div id="listings-list">
-        <div class="empty-state">
-          <div class="empty-state-icon">🏠</div>
-          <p>No listings yet.<br/>Tap "+ Add Listing" to list your first room.</p>
-        </div>
+        <div class="empty-state"><div class="empty-state-icon">🏠</div><p>No listings yet.<br/>Tap "+ Add Listing" to list your first room.</p></div>
       </div>
- 
       <button class="btn-secondary" onclick="handleLogout()">Sign out</button>
     </div>
   </div>
  
-  <!-- SCREEN 3 — ADD LISTING FORM -->
+  <!-- SCREEN 3 — ADD LISTING -->
   <div class="screen" id="screen-add-listing">
     <div class="container">
       <div class="back-link" onclick="showScreen('dashboard')">← Back to dashboard</div>
- 
       <div class="card">
         <div class="card-title">List your property</div>
-        <div class="card-sub">
-          Fill in your room details. Your listing goes live after a quick review — usually within the hour.
-        </div>
+        <div class="card-sub">Fill in your room details. Your listing goes live after a quick review — usually within the hour.</div>
  
         <div class="form-progress">
-          <div class="form-step active" id="form-step-1">
-            <div class="form-step-num">1</div>
-            <div class="form-step-label">Room details</div>
-          </div>
-          <div class="form-step" id="form-step-2">
-            <div class="form-step-num">2</div>
-            <div class="form-step-label">Pricing</div>
-          </div>
-          <div class="form-step" id="form-step-3">
-            <div class="form-step-num">3</div>
-            <div class="form-step-label">Bank details</div>
-          </div>
+          <div class="form-step active" id="form-step-1"><div class="form-step-num">1</div><div class="form-step-label">Room details</div></div>
+          <div class="form-step" id="form-step-2"><div class="form-step-num">2</div><div class="form-step-label">Pricing</div></div>
+          <div class="form-step" id="form-step-3"><div class="form-step-num">3</div><div class="form-step-label">Bank details</div></div>
         </div>
  
-        <!-- SECTION 1 — Room details + photos -->
+        <!-- SECTION 1 -->
         <div id="listing-section-1">
           <div class="field-group">
             <label for="listing-name">Property name</label>
             <input type="text" id="listing-name" placeholder="e.g. Graceland Guesthouse" />
             <p class="field-helper">What guests will see as the listing title</p>
           </div>
- 
           <div class="field-group">
             <label for="listing-type">Property type</label>
             <select id="listing-type">
@@ -583,7 +206,6 @@
               <option value="Self-contain">Self-contain</option>
             </select>
           </div>
- 
           <div class="field-group">
             <label for="listing-room-type">Room type</label>
             <select id="listing-room-type">
@@ -595,7 +217,6 @@
               <option value="Self-contained Studio">Self-contained Studio</option>
             </select>
           </div>
- 
           <div class="field-group">
             <label for="listing-capacity">Maximum guests</label>
             <select id="listing-capacity">
@@ -606,14 +227,13 @@
               <option value="6">6 guests</option>
             </select>
           </div>
- 
           <div class="field-group">
             <label for="listing-total-rooms">Total rooms available</label>
             <input type="number" id="listing-total-rooms" placeholder="e.g. 5" min="1" />
             <p class="field-helper">How many rooms of this type do you have available?</p>
           </div>
  
-          <!-- ── MULTI-IMAGE UPLOAD ── -->
+          <!-- MULTI-IMAGE UPLOAD -->
           <div class="field-group">
             <label>Property photos (up to 5)</label>
             <div class="image-upload-area" id="upload-area">
@@ -627,6 +247,7 @@
             <p class="field-helper">First photo will be the main cover image. More photos = more bookings!</p>
           </div>
  
+          <!-- AMENITIES with Other option -->
           <div class="field-group">
             <label>Amenities available</label>
             <div class="amenity-grid">
@@ -640,26 +261,34 @@
               <label class="amenity-check"><input type="checkbox" value="En-suite" /> En-suite</label>
               <label class="amenity-check"><input type="checkbox" value="Parking" /> Parking</label>
               <label class="amenity-check"><input type="checkbox" value="Shared Bathroom" /> Shared Bath</label>
+              <label class="amenity-check"><input type="checkbox" value="Gym" /> Gym</label>
+              <label class="amenity-check" style="grid-column:1/-1;">
+                <input type="checkbox" id="amenity-other-check" value="other" onchange="toggleOtherAmenity(this)" /> Other
+              </label>
+            </div>
+            <!-- Other amenity text input — shown when Other is checked -->
+            <div class="other-amenity-wrap" id="other-amenity-wrap">
+              <input type="text" id="other-amenity-input" placeholder="e.g. Swimming pool, Generator, Laundry"
+                style="margin-top:8px;" />
+              <p class="field-helper">Separate multiple amenities with a comma</p>
             </div>
           </div>
  
           <button class="btn-primary" onclick="goToSection(2)">Next — Add Pricing →</button>
         </div>
  
-        <!-- SECTION 2 — Pricing -->
+        <!-- SECTION 2 -->
         <div id="listing-section-2" style="display:none;">
           <div class="field-group">
             <label for="listing-price">Price per night (₦)</label>
             <input type="number" id="listing-price" placeholder="e.g. 15000" min="0" />
             <p class="field-helper">The exact price guests will pay on arrival. No hidden charges.</p>
           </div>
- 
           <div class="field-group">
-            <label for="listing-distance">Distance from venue (metres)</label>
+            <label for="listing-distance">Distance from venue (metres) <span style="font-weight:400;color:var(--text-light);">— optional</span></label>
             <input type="number" id="listing-distance" placeholder="e.g. 800" min="0" />
             <p class="field-helper">Approximate walking distance to the main hall in metres</p>
           </div>
- 
           <div class="field-group">
             <label for="listing-location">Area</label>
             <select id="listing-location">
@@ -668,29 +297,25 @@
               <option value="RCCG Camp">RCCG Camp</option>
             </select>
           </div>
- 
           <div class="field-group">
             <label for="listing-address">Property address</label>
             <textarea id="listing-address" placeholder="e.g. 5 Redemption Way, Asese, Ogun State"></textarea>
           </div>
- 
-          <div style="display:flex; gap:10px;">
-            <button class="btn-secondary" onclick="goToSection(1)" style="width:auto; flex:1; margin-top:0;">← Back</button>
+          <div style="display:flex;gap:10px;">
+            <button class="btn-secondary" onclick="goToSection(1)" style="width:auto;flex:1;margin-top:0;">← Back</button>
             <button class="btn-primary" onclick="goToSection(3)" style="flex:2;">Next — Bank Details →</button>
           </div>
         </div>
  
-        <!-- SECTION 3 — Bank details -->
+        <!-- SECTION 3 -->
         <div id="listing-section-3" style="display:none;">
-          <div style="background:rgba(232,160,32,0.1); border:1px solid rgba(232,160,32,0.3); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:20px; font-size:12px; color:var(--text-mid); line-height:1.6;">
+          <div style="background:rgba(232,160,32,0.1);border:1px solid rgba(232,160,32,0.3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:20px;font-size:12px;color:var(--text-mid);line-height:1.6;">
             💡 Bank details are shown to guests who want to pre-pay before arrival.
           </div>
- 
           <div class="field-group">
             <label for="listing-bank-name">Account name</label>
             <input type="text" id="listing-bank-name" placeholder="e.g. Folake Bello" />
           </div>
- 
           <div class="field-group">
             <label for="listing-bank-bank">Bank name</label>
             <select id="listing-bank-bank">
@@ -703,21 +328,30 @@
               <option>Kuda Bank</option>
               <option>Opay</option>
               <option>Palmpay</option>
+              <option>Moniepoint</option>
               <option>Sterling Bank</option>
               <option>Union Bank</option>
               <option>Wema Bank</option>
               <option>Fidelity Bank</option>
+              <option>Stanbic IBTC</option>
+              <option>Ecobank</option>
+              <option value="Other">Other Bank</option>
             </select>
           </div>
- 
+          <!-- Other bank input — shown when Other Bank is selected -->
+          <div id="other-bank-wrap" style="display:none;">
+            <div class="field-group">
+              <label for="other-bank-input">Enter your bank name</label>
+              <input type="text" id="other-bank-input" placeholder="e.g. Eyowo, VFD Microfinance Bank" />
+            </div>
+          </div>
           <div class="field-group">
             <label for="listing-bank-account">Account number</label>
             <input type="tel" id="listing-bank-account" placeholder="e.g. 0123456789" maxlength="10" pattern="[0-9]{10}" />
             <p class="field-helper">10-digit NUBAN account number</p>
           </div>
- 
-          <div style="display:flex; gap:10px;">
-            <button class="btn-secondary" onclick="goToSection(2)" style="width:auto; flex:1; margin-top:0;">← Back</button>
+          <div style="display:flex;gap:10px;">
+            <button class="btn-secondary" onclick="goToSection(2)" style="width:auto;flex:1;margin-top:0;">← Back</button>
             <button class="btn-primary" onclick="submitListing()" style="flex:2;" id="btn-submit-listing">Submit Listing ✓</button>
           </div>
         </div>
@@ -725,11 +359,9 @@
     </div>
   </div>
  
-  <!-- TOAST -->
   <div id="toast"></div>
  
   <script>
-    // ─── CONFIG ──────────────────────────────────────────────────────
     const SUPABASE_URL  = 'https://zomcrvfekwihqrrqvifi.supabase.co';
     const SUPABASE_KEY  = 'sb_publishable_lC9xUJnLXMF5saz5Y6JYag_JGzmP6fD';
     const CLOUDINARY_CLOUD  = 'ddvkttnik';
@@ -745,14 +377,11 @@
     const db = {
       async get(table, filters = {}) {
         let url = `${SUPABASE_URL}/rest/v1/${table}?select=*`;
-        Object.entries(filters).forEach(([k, v]) => {
-          url += `&${k}=eq.${encodeURIComponent(v)}`;
-        });
+        Object.entries(filters).forEach(([k, v]) => { url += `&${k}=eq.${encodeURIComponent(v)}`; });
         const res = await fetch(url, { headers: HEADERS });
         if (!res.ok) throw new Error(`GET failed: ${res.status}`);
         return res.json();
       },
- 
       async insert(table, data) {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
           method: 'POST',
@@ -762,7 +391,6 @@
         if (!res.ok) throw new Error(`INSERT failed: ${res.status}`);
         return res.json();
       },
- 
       async update(table, id, data) {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
           method: 'PATCH',
@@ -774,18 +402,15 @@
       }
     };
  
-    // ─── STATE ───────────────────────────────────────────────────────
     let currentHost = null;
-    let uploadedImageUrls = []; // stores Cloudinary URLs after upload
+    let uploadedImageUrls = [];
  
-    // ─── SCREEN NAVIGATION ───────────────────────────────────────────
     function showScreen(name) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(`screen-${name}`).classList.add('active');
       window.scrollTo(0, 0);
     }
  
-    // ─── TOAST ───────────────────────────────────────────────────────
     function showToast(msg, type = '') {
       const toast = document.getElementById('toast');
       toast.textContent = msg;
@@ -793,43 +418,45 @@
       setTimeout(() => toast.className = '', 3500);
     }
  
-    // ─── IMAGE UPLOAD ─────────────────────────────────────────────────
+    // ── OTHER AMENITY TOGGLE ──
+    window.toggleOtherAmenity = function(cb) {
+      const wrap = document.getElementById('other-amenity-wrap');
+      wrap.classList.toggle('visible', cb.checked);
+      if (!cb.checked) document.getElementById('other-amenity-input').value = '';
+    };
+ 
+    // ── OTHER BANK TOGGLE ──
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('listing-bank-bank').addEventListener('change', function() {
+        const wrap = document.getElementById('other-bank-wrap');
+        wrap.style.display = this.value === 'Other' ? 'block' : 'none';
+        if (this.value !== 'Other') document.getElementById('other-bank-input').value = '';
+      });
+    });
+ 
+    // ── IMAGE UPLOAD ──
     document.getElementById('image-input').addEventListener('change', async function(e) {
       const files = Array.from(e.target.files);
       if (!files.length) return;
- 
       const remaining = 5 - uploadedImageUrls.length;
-      if (remaining <= 0) {
-        showToast('Maximum 5 photos allowed', 'error');
-        return;
-      }
- 
+      if (remaining <= 0) { showToast('Maximum 5 photos allowed', 'error'); return; }
       const toUpload = files.slice(0, remaining);
       const progressEl = document.getElementById('upload-progress');
       progressEl.style.display = 'block';
-      progressEl.textContent = `Uploading ${toUpload.length} image${toUpload.length > 1 ? 's' : ''}...`;
- 
       for (let i = 0; i < toUpload.length; i++) {
-        const file = toUpload[i];
         progressEl.textContent = `Uploading image ${i + 1} of ${toUpload.length}...`;
- 
-        // Show loading preview
         const tempId = 'temp-' + Date.now() + i;
         addPreviewLoading(tempId, i + 1 + uploadedImageUrls.length);
- 
         try {
-          const url = await uploadToCloudinary(file);
+          const url = await uploadToCloudinary(toUpload[i]);
           uploadedImageUrls.push(url);
           updatePreview(tempId, url, uploadedImageUrls.length);
         } catch (err) {
-          console.error('Upload failed:', err);
           removePreview(tempId);
           showToast(`Image ${i + 1} failed to upload`, 'error');
         }
       }
- 
       progressEl.style.display = 'none';
-      // Reset input so same file can be re-selected if needed
       e.target.value = '';
     });
  
@@ -838,12 +465,7 @@
       formData.append('file', file);
       formData.append('upload_preset', CLOUDINARY_PRESET);
       formData.append('folder', 'lodgelink');
- 
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,
-        { method: 'POST', body: formData }
-      );
- 
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: formData });
       if (!res.ok) throw new Error('Cloudinary upload failed');
       const data = await res.json();
       return data.secure_url;
@@ -852,21 +474,15 @@
     function addPreviewLoading(tempId, position) {
       const grid = document.getElementById('image-previews');
       const div = document.createElement('div');
-      div.className = 'preview-item';
-      div.id = tempId;
-      div.innerHTML = `
-        <div class="preview-uploading">⏳ Uploading...</div>
-        ${position === 1 ? '<div class="preview-badge">Cover</div>' : ''}`;
+      div.className = 'preview-item'; div.id = tempId;
+      div.innerHTML = `<div class="preview-uploading">⏳ Uploading...</div>${position === 1 ? '<div class="preview-badge">Cover</div>' : ''}`;
       grid.appendChild(div);
     }
  
     function updatePreview(tempId, url, position) {
       const div = document.getElementById(tempId);
       if (!div) return;
-      div.innerHTML = `
-        <img src="${url}" alt="Property photo ${position}" />
-        ${position === 1 ? '<div class="preview-badge">Cover</div>' : ''}
-        <button class="preview-remove" onclick="removeImage('${tempId}', '${url}')" title="Remove photo">✕</button>`;
+      div.innerHTML = `<img src="${url}" alt="Property photo ${position}" />${position === 1 ? '<div class="preview-badge">Cover</div>' : ''}<button class="preview-remove" onclick="removeImage('${tempId}','${url}')" title="Remove">✕</button>`;
     }
  
     function removePreview(tempId) {
@@ -877,47 +493,26 @@
     window.removeImage = function(tempId, url) {
       uploadedImageUrls = uploadedImageUrls.filter(u => u !== url);
       removePreview(tempId);
-      // Refresh cover badge — first remaining preview should show "Cover"
-      refreshCoverBadge();
-    };
- 
-    function refreshCoverBadge() {
       const previews = document.querySelectorAll('#image-previews .preview-item');
       previews.forEach((item, i) => {
         const badge = item.querySelector('.preview-badge');
-        if (i === 0) {
-          if (!badge) {
-            const b = document.createElement('div');
-            b.className = 'preview-badge';
-            b.textContent = 'Cover';
-            item.appendChild(b);
-          }
-        } else {
-          if (badge) badge.remove();
-        }
+        if (i === 0) { if (!badge) { const b = document.createElement('div'); b.className = 'preview-badge'; b.textContent = 'Cover'; item.appendChild(b); } }
+        else { if (badge) badge.remove(); }
       });
-    }
+    };
  
-    // ─── HOST LOGIN ───────────────────────────────────────────────────
+    // ── HOST LOGIN ──
     async function handleHostLogin() {
       const phone = document.getElementById('login-phone').value.trim();
       const name  = document.getElementById('login-name').value.trim();
- 
       const isNigerian      = /^0\d{10}$/.test(phone);
       const isInternational = /^\+\d{7,15}$/.test(phone);
- 
       if (!phone || (!isNigerian && !isInternational)) {
-        showToast('Please enter a valid phone number (e.g. 08012345678 or +447911123456)', 'error');
-        return;
+        showToast('Please enter a valid phone number (e.g. 08012345678 or +447911123456)', 'error'); return;
       }
-      if (!name) {
-        showToast('Please enter your full name', 'error');
-        return;
-      }
- 
+      if (!name) { showToast('Please enter your full name', 'error'); return; }
       try {
         let hosts = await db.get('users', { phone });
- 
         if (hosts.length === 0) {
           const created = await db.insert('users', { phone, name, role: 'host' });
           currentHost = created[0];
@@ -926,38 +521,31 @@
           currentHost = hosts[0];
           showToast(`Welcome back, ${currentHost.name || name}!`, 'success');
         }
- 
         localStorage.setItem('lodgelink_host', JSON.stringify(currentHost));
-        loadDashboard();
-        showScreen('dashboard');
- 
+        loadDashboard(); showScreen('dashboard');
       } catch (err) {
         console.error('Login error:', err);
         showToast('Could not connect. Check your internet and try again.', 'error');
       }
     }
  
-    // ─── DASHBOARD ────────────────────────────────────────────────────
+    // ── DASHBOARD ──
     async function loadDashboard() {
       if (!currentHost) return;
       document.getElementById('dashboard-host-name').textContent = currentHost.name || currentHost.phone;
- 
       try {
         const listings = await db.get('listings', { host_phone: currentHost.phone });
         renderListingsSummary(listings);
- 
         const allReservations = [];
         for (const listing of listings) {
           const res = await db.get('reservations', { listing_id: listing.id });
           res.forEach(r => { r._listing_name = listing.name; });
           allReservations.push(...res);
         }
- 
         renderReservations(allReservations);
         document.getElementById('stat-listings').textContent  = listings.length;
         document.getElementById('stat-pending').textContent   = allReservations.filter(r => r.status === 'pending').length;
         document.getElementById('stat-confirmed').textContent = allReservations.filter(r => r.status === 'confirmed').length;
- 
       } catch (err) {
         console.error('Dashboard load error:', err);
         showToast('Could not load dashboard data', 'error');
@@ -967,11 +555,7 @@
     function renderListingsSummary(listings) {
       const container = document.getElementById('listings-list');
       if (!listings || listings.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state-icon">🏠</div>
-            <p>No listings yet.<br/>Tap "+ Add Listing" to list your first room.</p>
-          </div>`;
+        container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🏠</div><p>No listings yet.<br/>Tap "+ Add Listing" to list your first room.</p></div>`;
         return;
       }
       container.innerHTML = listings.map(l => `
@@ -979,26 +563,18 @@
           <div>
             <div class="listing-summary-name">${l.name}</div>
             <div class="listing-summary-price">₦${Number(l.price_per_night).toLocaleString('en-NG')}/night · ${l.room_type}</div>
-            <div style="font-size:11px; color:var(--text-light); margin-top:2px;">
-              ${l.rooms_available > 0
-                ? `🟢 ${l.rooms_available} room${l.rooms_available !== 1 ? 's' : ''} available`
-                : '🔴 Fully booked'}
+            <div style="font-size:11px;color:var(--text-light);margin-top:2px;">
+              ${l.rooms_available > 0 ? `🟢 ${l.rooms_available} room${l.rooms_available !== 1 ? 's' : ''} available` : '🔴 Fully booked'}
             </div>
           </div>
-          <span class="badge ${l.approved ? 'badge-approved' : 'badge-pending'}">
-            ${l.approved ? 'Live' : 'Under review'}
-          </span>
+          <span class="badge ${l.approved ? 'badge-approved' : 'badge-pending'}">${l.approved ? 'Live' : 'Under review'}</span>
         </div>`).join('');
     }
  
     function renderReservations(reservations) {
       const container = document.getElementById('reservations-list');
       if (!reservations || reservations.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state-icon">📭</div>
-            <p>No reservation requests yet.<br/>They will appear here when guests book your rooms.</p>
-          </div>`;
+        container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><p>No reservation requests yet.<br/>They will appear here when guests book your rooms.</p></div>`;
         return;
       }
       container.innerHTML = reservations.map(r => `
@@ -1015,8 +591,8 @@
           <div class="reservation-detail">💰 ₦${Number(r.total_cost).toLocaleString('en-NG')} on arrival</div>
           ${r.status === 'pending' ? `
           <div class="reservation-actions">
-            <button class="btn-confirm" onclick="updateReservation('${r.id}', 'confirmed')">✓ Confirm</button>
-            <button class="btn-decline" onclick="updateReservation('${r.id}', 'declined')">✕ Decline</button>
+            <button class="btn-confirm" onclick="updateReservation('${r.id}','confirmed')">✓ Confirm</button>
+            <button class="btn-decline" onclick="updateReservation('${r.id}','declined')">✕ Decline</button>
           </div>` : ''}
         </div>`).join('');
     }
@@ -1024,32 +600,22 @@
     async function updateReservation(id, status) {
       try {
         await db.update('reservations', id, { status });
-        showToast(status === 'confirmed' ? '✓ Reservation confirmed!' : 'Reservation declined',
-                  status === 'confirmed' ? 'success' : '');
+        showToast(status === 'confirmed' ? '✓ Reservation confirmed!' : 'Reservation declined', status === 'confirmed' ? 'success' : '');
         loadDashboard();
-      } catch (err) {
-        showToast('Could not update reservation', 'error');
-      }
+      } catch (err) { showToast('Could not update reservation', 'error'); }
     }
  
-    // ─── ADD LISTING FORM ─────────────────────────────────────────────
+    // ── ADD LISTING FORM ──
     function goToSection(num) {
       if (num === 2) {
-        const name     = document.getElementById('listing-name').value.trim();
-        const type     = document.getElementById('listing-type').value;
+        const name = document.getElementById('listing-name').value.trim();
+        const type = document.getElementById('listing-type').value;
         const roomType = document.getElementById('listing-room-type').value;
-        if (!name || !type || !roomType) {
-          showToast('Please fill in all room details', 'error');
-          return;
-        }
+        if (!name || !type || !roomType) { showToast('Please fill in all room details', 'error'); return; }
       }
       if (num === 3) {
-        const price    = document.getElementById('listing-price').value;
-        const distance = document.getElementById('listing-distance').value;
-        if (!price || !distance) {
-          showToast('Please enter price and distance', 'error');
-          return;
-        }
+        const price = document.getElementById('listing-price').value;
+        if (!price) { showToast('Please enter a price per night', 'error'); return; }
       }
       [1, 2, 3].forEach(i => {
         document.getElementById(`listing-section-${i}`).style.display = 'none';
@@ -1063,28 +629,43 @@
  
     async function submitListing() {
       const bankName    = document.getElementById('listing-bank-name').value.trim();
-      const bankBank    = document.getElementById('listing-bank-bank').value;
+      const bankSelect  = document.getElementById('listing-bank-bank').value;
       const bankAccount = document.getElementById('listing-bank-account').value.trim();
  
+      // Get actual bank name — either from select or other input
+      const bankBank = bankSelect === 'Other'
+        ? document.getElementById('other-bank-input').value.trim()
+        : bankSelect;
+ 
       if (!bankName || !bankBank || !bankAccount || bankAccount.length < 10) {
-        showToast('Please complete all bank details', 'error');
-        return;
+        showToast('Please complete all bank details', 'error'); return;
       }
  
+      // Collect amenities including custom "Other" ones
       const amenities = Array.from(
         document.querySelectorAll('.amenity-check input:checked')
-      ).map(cb => cb.value);
+      ).filter(cb => cb.value !== 'other').map(cb => cb.value);
  
-      const distanceM     = parseInt(document.getElementById('listing-distance').value);
-      const distanceLabel = distanceM >= 1000
-        ? `${(distanceM / 1000).toFixed(1)}km`
-        : `${distanceM}m`;
+      const otherCheck = document.getElementById('amenity-other-check');
+      if (otherCheck.checked) {
+        const otherText = document.getElementById('other-amenity-input').value.trim();
+        if (otherText) {
+          otherText.split(',').forEach(a => {
+            const trimmed = a.trim();
+            if (trimmed) amenities.push(trimmed);
+          });
+        }
+      }
+ 
+      const distanceRaw = document.getElementById('listing-distance').value;
+      const distanceM   = distanceRaw ? parseInt(distanceRaw) : null;
+      const distanceLabel = distanceM
+        ? (distanceM >= 1000 ? `${(distanceM / 1000).toFixed(1)}km` : `${distanceM}m`)
+        : 'Distance not specified';
  
       const totalRooms = parseInt(document.getElementById('listing-total-rooms').value) || 1;
- 
-      // Use uploaded images — first is cover, all go into images array
-      const imageUrl  = uploadedImageUrls[0] || '';
-      const imagesArr = uploadedImageUrls.length > 0 ? uploadedImageUrls : [];
+      const imageUrl   = uploadedImageUrls[0] || '';
+      const imagesArr  = uploadedImageUrls.length > 0 ? uploadedImageUrls : [];
  
       const listing = {
         name:              document.getElementById('listing-name').value.trim(),
@@ -1110,42 +691,36 @@
       };
  
       const btn = document.getElementById('btn-submit-listing');
-      btn.textContent = 'Submitting...';
-      btn.disabled = true;
+      btn.textContent = 'Submitting...'; btn.disabled = true;
  
       try {
         await db.insert('listings', listing);
         showToast('✓ Listing submitted for review!', 'success');
-        setTimeout(() => {
-          showScreen('dashboard');
-          loadDashboard();
-          resetListingForm();
-        }, 1500);
+        setTimeout(() => { showScreen('dashboard'); loadDashboard(); resetListingForm(); }, 1500);
       } catch (err) {
         console.error('Submit listing error:', err);
         showToast('Could not submit listing. Try again.', 'error');
-        btn.textContent = 'Submit Listing ✓';
-        btn.disabled = false;
+        btn.textContent = 'Submit Listing ✓'; btn.disabled = false;
       }
     }
  
     function resetListingForm() {
       ['listing-name','listing-price','listing-distance','listing-address',
-       'listing-bank-name','listing-bank-account','listing-total-rooms'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
+       'listing-bank-name','listing-bank-account','listing-total-rooms',
+       'other-amenity-input','other-bank-input'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
       });
       ['listing-type','listing-room-type','listing-bank-bank','listing-location'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
+        const el = document.getElementById(id); if (el) el.value = '';
       });
       document.querySelectorAll('.amenity-check input').forEach(cb => cb.checked = false);
+      document.getElementById('other-amenity-wrap').classList.remove('visible');
+      document.getElementById('other-bank-wrap').style.display = 'none';
       document.getElementById('image-previews').innerHTML = '';
       uploadedImageUrls = [];
       goToSection(1);
     }
  
-    // ─── LOGOUT ──────────────────────────────────────────────────────
     function handleLogout() {
       currentHost = null;
       localStorage.removeItem('lodgelink_host');
@@ -1153,22 +728,16 @@
       showToast('Signed out successfully');
     }
  
-    // ─── INIT ────────────────────────────────────────────────────────
     function init() {
       const saved = localStorage.getItem('lodgelink_host');
       if (saved) {
-        try {
-          currentHost = JSON.parse(saved);
-          loadDashboard();
-          showScreen('dashboard');
-        } catch (e) {
-          sessionStorage.removeItem('lodgelink_host');
-        }
+        try { currentHost = JSON.parse(saved); loadDashboard(); showScreen('dashboard'); }
+        catch (e) { localStorage.removeItem('lodgelink_host'); }
       }
     }
  
     document.addEventListener('DOMContentLoaded', init);
   </script>
- 
 </body>
 </html>
+ 

@@ -1,10 +1,7 @@
 // ─── SUPABASE CONFIG ─────────────────────────────────────────────────────────
-// Replace these two values with your actual Supabase project URL and publishable key
 const SUPABASE_URL = 'https://zomcrvfekwihqrrqvifi.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_lC9xUJnLXMF5saz5Y6JYag_JGzmP6fD';
  
-// Lightweight Supabase REST helper — no SDK needed for MVP
-// All requests go through the auto-generated REST API Supabase provides
 const db = {
   async get(table, filters = {}) {
     let url = `${SUPABASE_URL}/rest/v1/${table}?select=*`;
@@ -38,7 +35,7 @@ const db = {
   }
 };
  
-// ─── ONBOARDING — Option C ────────────────────────────────────────────────────
+// ─── ONBOARDING ───────────────────────────────────────────────────────────────
 const ONBOARDING_KEY = 'lodgelink_onboarded_v1';
 const STORAGE_KEY    = 'lodgelink_reservations_v1';
  
@@ -80,14 +77,11 @@ function initOnboarding() {
 }
  
 // ─── DATA LAYER ───────────────────────────────────────────────────────────────
-// allListings holds the listings fetched from Supabase
-// Used by search and filter functions throughout
 let allListings = [];
  
 async function fetchListings() {
   try {
     showLoadingState();
-    // Fetch only approved and available listings from Supabase
     const url = `${SUPABASE_URL}/rest/v1/listings?select=*&available=eq.true&approved=eq.true`;
     const res = await fetch(url, {
       headers: {
@@ -98,7 +92,6 @@ async function fetchListings() {
     if (!res.ok) throw new Error(`Failed to fetch listings: ${res.status}`);
     const data = await res.json();
  
-    // Map Supabase snake_case columns to camelCase for the rest of the app
     allListings = data.map(l => ({
       id:              l.id,
       name:            l.name,
@@ -179,44 +172,66 @@ function formatPrice(n) {
   return '₦' + n.toLocaleString('en-NG');
 }
  
+// ─── IMAGE SLIDER ─────────────────────────────────────────────────────────────
+window.slideImg = function(e, sliderId, direction) {
+  e.stopPropagation();
+  const slider = document.getElementById(sliderId);
+  if (!slider) return;
+  const imgs = slider.querySelectorAll('.slider-img');
+  const dots = slider.querySelectorAll('.slider-dot');
+  let idx = parseInt(slider.dataset.index || 0);
+  imgs[idx].style.opacity = '0';
+  if (dots[idx]) dots[idx].classList.remove('active');
+  idx = (idx + direction + imgs.length) % imgs.length;
+  imgs[idx].style.opacity = '1';
+  if (dots[idx]) dots[idx].classList.add('active');
+  slider.dataset.index = idx;
+};
+ 
+// ─── BUILD CARD ───────────────────────────────────────────────────────────────
 function buildCard(listing, allPrices) {
   const { label, cls } = getPriceLabel(listing.pricePerNight, allPrices);
   const isFullyBooked = listing.roomsAvailable === 0;
-
-  // Build image gallery — use images array, fallback to imageUrl, fallback to placeholder
+  const cardId = 'card-' + listing.id.substring(0, 8);
+ 
   const imgs = listing.images.length > 0 ? listing.images
              : listing.imageUrl ? [listing.imageUrl]
              : [];
-  const cardId = 'card-' + listing.id.substring(0, 8);
-
+ 
   let galleryHtml;
   if (imgs.length === 0) {
     galleryHtml = `<div class="card-image-placeholder" aria-hidden="true">🏨</div>`;
   } else if (imgs.length === 1) {
-    galleryHtml = `<img src="${imgs[0]}" alt="${listing.name}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" />`;
+    galleryHtml = `<img src="${imgs[0]}" alt="${listing.name}"
+      style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" />`;
   } else {
-    // Multi-image slider
     galleryHtml = `
       <div class="img-slider" id="${cardId}-slider" data-index="0">
         ${imgs.map((src, i) => `
-          <img src="${src}" alt="${listing.name} photo ${i+1}"
-               class="slider-img ${i === 0 ? 'active' : ''}"
+          <img src="${src}" alt="${listing.name} photo ${i + 1}"
+               class="slider-img"
                style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
                       opacity:${i === 0 ? 1 : 0};transition:opacity 0.35s ease;" />
         `).join('')}
-        <button class="slider-btn slider-prev" onclick="slideImg(event,'${cardId}-slider',-1)" aria-label="Previous photo">‹</button>
-        <button class="slider-btn slider-next" onclick="slideImg(event,'${cardId}-slider', 1)" aria-label="Next photo">›</button>
+        <button class="slider-btn slider-prev"
+                onclick="slideImg(event,'${cardId}-slider',-1)"
+                aria-label="Previous photo">&#8249;</button>
+        <button class="slider-btn slider-next"
+                onclick="slideImg(event,'${cardId}-slider', 1)"
+                aria-label="Next photo">&#8250;</button>
         <div class="slider-dots">
-          ${imgs.map((_, i) => `<span class="slider-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></span>`).join('')}
+          ${imgs.map((_, i) => `
+            <span class="slider-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></span>
+          `).join('')}
         </div>
       </div>`;
   }
-
+ 
   const card = document.createElement('article');
   card.className = 'listing-card';
   card.setAttribute('role', 'listitem');
   card.setAttribute('aria-label', `${listing.name} listing`);
-
+ 
   card.innerHTML = `
     <div class="card-image">
       ${galleryHtml}
@@ -247,11 +262,14 @@ function buildCard(listing, allPrices) {
       </div>
       <div class="card-footer">
         <div class="host-info">
-          <div class="host-avatar">${listing.host.substring(0,2).toUpperCase()}</div>
+          <div class="host-avatar">${listing.host.substring(0, 2).toUpperCase()}</div>
           <div class="host-name">Host: <strong>${listing.host}</strong></div>
         </div>
         ${isFullyBooked
-          ? `<button class="reserve-btn" disabled style="opacity:0.45;cursor:not-allowed;background:#ccc;color:#666;box-shadow:none;">Fully Booked</button>`
+          ? `<button class="reserve-btn" disabled
+               style="opacity:0.45;cursor:not-allowed;background:#ccc;color:#666;box-shadow:none;">
+               Fully Booked
+             </button>`
           : `<button class="reserve-btn" type="button"
                onclick="handleReservation('${listing.name}', ${listing.pricePerNight}, '${listing.id}')">
                Reserve Room
@@ -262,24 +280,7 @@ function buildCard(listing, allPrices) {
   return card;
 }
  
-window.slideImg = function(e, sliderId, direction) {
-  e.stopPropagation();
-  const slider = document.getElementById(sliderId);
-  if (!slider) return;
-  const imgs = slider.querySelectorAll('.slider-img');
-  const dots = slider.querySelectorAll('.slider-dot');
-  let idx = parseInt(slider.dataset.index || 0);
-  imgs[idx].style.opacity = 0;
-  if (dots[idx]) dots[idx].classList.remove('active');
-  idx = (idx + direction + imgs.length) % imgs.length;
-  imgs[idx].style.opacity = 1;
-  if (dots[idx]) dots[idx].classList.add('active');
-  slider.dataset.index = idx;
-};
-
-
 // ─── RENDER LIST ──────────────────────────────────────────────────────────────
- 
 function renderList(listings) {
   const root = document.getElementById('list-root');
   if (!root) return;
@@ -305,7 +306,6 @@ function renderList(listings) {
 }
  
 // ─── RENDER INSIGHTS ─────────────────────────────────────────────────────────
- 
 function renderInsights(listings) {
   const panel = document.getElementById('insights-panel');
   if (!panel || !listings || listings.length === 0) return;
@@ -335,7 +335,6 @@ function renderInsights(listings) {
 }
  
 // ─── PROGRAM SELECTOR VISUAL CUE ─────────────────────────────────────────────
- 
 function initProgramSelectorCue() {
   const sel     = document.getElementById('program-select');
   const wrap    = document.getElementById('program-selector-wrap');
@@ -370,19 +369,14 @@ function initProgramSelectorCue() {
 }
  
 // ─── SEARCH ───────────────────────────────────────────────────────────────────
- 
 function parseBudget(query) {
-  // Strip currency symbols, commas and spaces first
   const q = query.toLowerCase()
     .replace(/₦/g, '')
     .replace(/,/g, '')
     .replace(/naira/g, '')
     .trim();
-
-  // Match patterns like: under 20k, under 20000, below 20k, 20k budget
   const match = q.match(/(?:under|below|max|within)\s*(\d+)(k?)/);
   if (!match) return null;
-
   const num = parseInt(match[1]);
   const isK = match[2] === 'k';
   return isK ? num * 1000 : num;
@@ -399,6 +393,16 @@ function parseDistance(query) {
   return null;
 }
  
+// ─── FIX 1: AUTO-SCROLL TO RESULTS AFTER SEARCH ──────────────────────────────
+function scrollToListings() {
+  const main = document.getElementById('main');
+  if (main) {
+    setTimeout(() => {
+      main.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+}
+ 
 window.handleSearch = function(query) {
   const budget       = parseBudget(query);
   const guests       = parseGuests(query);
@@ -406,13 +410,11 @@ window.handleSearch = function(query) {
  
   let pool = [...allListings];
  
-  // Exact matches
   let matched = [...pool];
   if (budget)                   matched = matched.filter(l => l.pricePerNight <= budget);
   if (guests)                   matched = matched.filter(l => l.capacity >= guests);
   if (distancePref === 'close') matched = matched.filter(l => l.distanceM <= 1000);
  
-  // Other options
   const matchedIds = new Set(matched.map(l => l.id));
   const others = pool.filter(l => !matchedIds.has(l.id));
  
@@ -428,6 +430,9 @@ window.handleSearch = function(query) {
     renderSearchResults(matched, others);
     renderInsights(pool);
   }
+ 
+  // ── AUTO-SCROLL to results ──
+  scrollToListings();
 };
  
 function renderSearchResults(matched, others) {
@@ -464,7 +469,6 @@ function renderSearchResults(matched, others) {
 }
  
 // ─── RESERVATION ─────────────────────────────────────────────────────────────
- 
 let activeReservation = { propertyName: '', pricePerNight: 0, listingId: '' };
  
 function setModalStep(step) {
@@ -472,7 +476,7 @@ function setModalStep(step) {
     const el = document.getElementById(`modal-step-${i}`);
     if (!el) continue;
     el.classList.remove('active', 'done');
-    if (i < step)       el.classList.add('done');
+    if (i < step)        el.classList.add('done');
     else if (i === step) el.classList.add('active');
   }
 }
@@ -506,7 +510,7 @@ window.handleReservation = function(propertyName, pricePerNight, listingId) {
   if (phoneInput) {
     phoneInput.addEventListener('blur', () => {
       const v = phoneInput.value.trim();
-      const validNg = /^0\d{10}$/.test(v) || /^\+234\d{10}$/.test(v);
+      const validNg   = /^0\d{10}$/.test(v) || /^\+234\d{10}$/.test(v);
       const validIntl = /^\+(?!234)\d{6,13}$/.test(v);
       if (validNg || validIntl) setModalStep(3);
     });
@@ -522,26 +526,31 @@ window.updateTotal = function() {
   if (brkEl)   brkEl.textContent   = `${nights} night${nights > 1 ? 's' : ''} × ${formatPrice(activeReservation.pricePerNight)} per night`;
 };
  
+// ─── FIX 2: RESERVATION STAYS PENDING UNTIL PAYSTACK PAYMENT ─────────────────
+// The reservation is saved to Supabase with status 'pending'
+// It only becomes visible to the host AFTER Paystack redirects to success.html
+// success.html reads the reservation from localStorage and confirms it
 window.confirmReservation = async function() {
-  const name   = document.getElementById('input-name').value.trim();
-  const phone  = document.getElementById('input-phone').value.trim();
-  const guests = document.getElementById('input-guests').value;
-  const nights = parseInt(document.getElementById('input-nights').value, 10);
+  const name    = document.getElementById('input-name').value.trim();
+  const phone   = document.getElementById('input-phone').value.trim();
+  const guests  = document.getElementById('input-guests').value;
+  const nights  = parseInt(document.getElementById('input-nights').value, 10);
   const program = document.getElementById('program-select').value;
-
+ 
   if (!name) {
     alert('Please enter your full name.');
     document.getElementById('input-name').focus();
     return;
   }
-  const isNigerian = /^0\d{10}$/.test(phone) || /^\+234\d{10}$/.test(phone);
+ 
+  const isNigerian      = /^0\d{10}$/.test(phone) || /^\+234\d{10}$/.test(phone);
   const isInternational = /^\+(?!234)\d{6,13}$/.test(phone);
-if (!phone || (!isNigerian && !isInternational)) {
+  if (!phone || (!isNigerian && !isInternational)) {
     alert('Please enter a valid phone number.\n\nNigerian: 08012345678 or +2348012345678\nInternational: +447911123456');
     document.getElementById('input-phone').focus();
     return;
   }
-
+ 
   const record = {
     listing_id:      activeReservation.listingId,
     guest_name:      name,
@@ -552,40 +561,42 @@ if (!phone || (!isNigerian && !isInternational)) {
     total_cost:      nights * activeReservation.pricePerNight,
     reservation_fee: 2000,
     program:         program || 'unspecified',
-    status:          'pending',
+    status:          'pending', // stays pending until Paystack confirms
   };
-
+ 
   try {
-    await db.insert('reservations', record);
-
+    // Save to Supabase as pending
+    const saved = await db.insert('reservations', record);
+ 
     const localRecord = {
       ...record,
-      id:            'res-' + Date.now(),
+      id:            saved[0]?.id || 'res-' + Date.now(),
       propertyName:  activeReservation.propertyName,
       pricePerNight: activeReservation.pricePerNight,
       totalCost:     record.total_cost,
       timestamp:     new Date().toISOString(),
     };
-
+ 
+    // Save to localStorage so success.html can read it
     const records = loadData();
     records.push(localRecord);
     saveData(records);
-
+ 
     closeModal();
+ 
+    // Open Paystack — reservation only becomes meaningful after payment
     setTimeout(() => {
       window.open('https://paystack.shop/pay/4c9yb89ptb', '_blank');
       setTimeout(() => openPrePay(localRecord), 2000);
     }, 300);
-
+ 
   } catch (err) {
     console.error('LodgeLink: reservation save failed', err);
     alert('Could not save your reservation. Please check your connection and try again.');
   }
 };
-
-    
-// ─── PRE-PAY FLOW ─────────────────────────────────────────────────────────────
  
+// ─── PRE-PAY FLOW ─────────────────────────────────────────────────────────────
 function openPrePay(record) {
   const overlay = document.getElementById('prepay-overlay');
   if (!overlay) return;
@@ -603,7 +614,6 @@ function openPrePay(record) {
   if (bankPanel) bankPanel.style.display = 'none';
   if (btnPay)    btnPay.style.display    = '';
  
-  // Find host bank details from allListings
   const listing = allListings.find(l => l.name === record.propertyName);
   const detailsContent = document.getElementById('bank-details-content');
   if (detailsContent) {
@@ -646,35 +656,28 @@ window.closeModal = function() {
   }
 };
  
-//  — called by feature icon buttons
-// Shows listings for the selected location first, others below
 window.filterByLocation = function(location) {
-  // Scroll down to listings
   const main = document.getElementById('main');
   if (main) main.scrollIntoView({ behavior: 'smooth' });
-
+ 
   const matched = allListings.filter(l => l.location === location);
   const others  = allListings.filter(l => l.location !== location);
-
+ 
   const noMatch  = document.getElementById('no-match-panel');
   const listRoot = document.getElementById('list-root');
   if (noMatch)  noMatch.classList.remove('visible');
   if (listRoot) listRoot.style.display = '';
-
+ 
   renderSearchResults(matched, others);
   renderInsights(allListings);
-
-  // Update results count label
+ 
   const countEl = document.getElementById('results-count-num');
   if (countEl) countEl.textContent =
     `${matched.length} in ${location}${others.length ? `, ${others.length} other` : ''}`;
 };
-
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
  
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 function init() {
-  // Fetch listings from Supabase on load
   fetchListings();
  
   const footerYear = document.getElementById('footer-year');
@@ -703,6 +706,7 @@ function init() {
       if (listRoot) listRoot.style.display = '';
       renderList(filtered);
       renderInsights(filtered);
+      scrollToListings();
     });
   });
  
