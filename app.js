@@ -400,13 +400,13 @@ function parseRoomType(query) {
   if (q.includes('self-contain') || q.includes('self contain') || q.includes('studio')) return { field: 'type', value: 'self-contain' };
  
   // Room type keywords
-  if (q.includes('family') || q.includes('suite'))         return { field: 'roomType', value: 'family suite' };
-  if (q.includes('single'))                                 return { field: 'roomType', value: 'single' };
-  if (q.includes('double'))                                 return { field: 'roomType', value: 'double' };
-  if (q.includes('shared'))                                 return { field: 'roomType', value: 'shared' };
-  if (q.includes('executive'))                              return { field: 'roomType', value: 'double' };
- 
-  return null;
+if (q.includes('family suite') || (q.includes('family') && q.includes('suite'))) return { field: 'roomType', value: 'family suite' };
+if (q.includes('single'))                                 return { field: 'roomType', value: 'single' };
+if (q.includes('double'))                                 return { field: 'roomType', value: 'double' };
+if (q.includes('shared'))                                 return { field: 'roomType', value: 'shared' };
+if (q.includes('executive'))                              return { field: 'roomType', value: 'double' };
+
+return null;
 }
  
 // ─── LISTING MATCHER ─────────────────────────────────────────────────────────
