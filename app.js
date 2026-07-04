@@ -615,12 +615,10 @@ window.confirmReservation = async function() {
     records.push(localRecord);
     saveData(records);
  
-    closeModal();
- 
-    setTimeout(() => {
-      window.open('https://paystack.shop/pay/4c9yb89ptb', '_blank');
-      setTimeout(() => openPrePay(localRecord), 2000);
-    }, 300);
+  closeModal();
+setTimeout(() => {
+  window.open('https://paystack.shop/pay/4c9yb89ptb', '_blank');
+}, 300);
  
   } catch (err) {
     console.error('LodgeLink: reservation save failed', err);
