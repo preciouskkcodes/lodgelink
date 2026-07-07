@@ -1,0 +1,662 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LodgeLink</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:       #0B1F3A;
+      --navy-mid:   #12294D;
+      --gold:       #E8A020;
+      --gold-light: #F5C254;
+      --white:      #FFFFFF;
+      --text-light: #7A95B0;
+      --border:     #D9E6F2;
+      --font-head:  'Syne', sans-serif;
+      --font-body:  'Outfit', sans-serif;
+    }
+ 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body { font-family: var(--font-body); background: var(--navy); }
+ 
+    /* ── SCREEN SYSTEM ── */
+    .screen {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    .screen.active { opacity: 1; pointer-events: all; }
+ 
+    /* ════════════════════════════════
+       SPLASH SCREEN
+    ════════════════════════════════ */
+    #screen-splash {
+      background: var(--navy);
+      gap: 0;
+    }
+ 
+    .splash-logo-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      animation: splashIn 0.8s ease both;
+    }
+ 
+    .splash-icon {
+      width: 90px; height: 90px;
+      background: var(--white);
+      border-radius: 22px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 32px rgba(232,160,32,0.3);
+    }
+ 
+    .splash-icon svg { width: 52px; height: 52px; }
+ 
+    .splash-wordmark {
+      font-family: var(--font-head);
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: -0.5px;
+    }
+ 
+    .splash-tagline {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      font-weight: 300;
+      letter-spacing: 0.3px;
+      margin-top: -8px;
+    }
+ 
+    .splash-divider {
+      width: 48px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin-top: 16px;
+      animation: dividerGrow 1s 0.5s ease both;
+    }
+ 
+    /* Loading dots */
+    .splash-loader {
+      position: absolute;
+      bottom: 60px;
+      display: flex; gap: 8px;
+      animation: fadeIn 0.5s 1s ease both;
+    }
+ 
+    .loader-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(232,160,32,0.4);
+      animation: loaderPulse 1.2s infinite ease-in-out;
+    }
+ 
+    .loader-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loader-dot:nth-child(3) { animation-delay: 0.4s; }
+ 
+    @keyframes splashIn {
+      from { opacity: 0; transform: scale(0.85) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+ 
+    @keyframes dividerGrow {
+      from { width: 0; opacity: 0; }
+      to   { width: 48px; opacity: 1; }
+    }
+ 
+    @keyframes loaderPulse {
+      0%, 100% { background: rgba(232,160,32,0.3); transform: scale(1); }
+      50%       { background: rgba(232,160,32,0.9); transform: scale(1.3); }
+    }
+ 
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+ 
+    /* ════════════════════════════════
+       ONBOARDING SCREENS
+    ════════════════════════════════ */
+    .onboard-screen {
+      background: var(--white);
+      padding: 0;
+      justify-content: flex-end;
+    }
+ 
+    /* Image area — top half */
+    .onboard-image {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 55%;
+      overflow: hidden;
+    }
+ 
+    .onboard-image img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+ 
+    /* Illustration fallback */
+    .onboard-illustration {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+    }
+ 
+    /* Gradient overlay on image */
+    .onboard-image::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 40%;
+      background: linear-gradient(to bottom, transparent, var(--white));
+    }
+ 
+    /* Header bar */
+    .onboard-header {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 56px 28px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+ 
+    .onboard-brand {
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--white);
+      text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+    }
+ 
+    .onboard-skip {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      background: rgba(0,0,0,0.25);
+      border: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      text-shadow: none;
+      backdrop-filter: blur(4px);
+    }
+ 
+    /* Content card — bottom half */
+    .onboard-content {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      background: var(--white);
+      border-radius: 28px 28px 0 0;
+      padding: 36px 28px 48px;
+      margin-top: 48%;
+    }
+ 
+    .onboard-title {
+      font-family: var(--font-head);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+ 
+    .onboard-desc {
+      font-size: 14px;
+      color: var(--text-light);
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+ 
+    /* Progress dots */
+    .onboard-dots {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+ 
+    .onboard-dot {
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      transition: all 0.3s ease;
+      flex: 1;
+    }
+ 
+    .onboard-dot.active {
+      background: var(--navy);
+      flex: 2;
+    }
+ 
+    .onboard-dot.done {
+      background: var(--gold);
+    }
+ 
+    /* Next / Get Started button */
+    .onboard-btn {
+      width: 100%;
+      padding: 18px;
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: 16px;
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+ 
+    .onboard-btn:hover  { background: var(--gold); color: var(--navy); }
+    .onboard-btn:active { transform: scale(0.98); }
+ 
+    .onboard-btn svg { width: 18px; height: 18px; }
+ 
+    /* Illustration backgrounds for screens without photos */
+    .illus-availability {
+      background: linear-gradient(135deg, #EEF4FB 0%, #D9E6F2 100%);
+    }
+ 
+    .illus-booking {
+      background: linear-gradient(135deg, #0B1F3A 0%, #12294D 100%);
+    }
+ 
+    /* Floating card — illustration for screen 1 */
+    .float-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 8px 32px rgba(11,31,58,0.15);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 220px;
+      animation: floatUp 0.6s ease both;
+    }
+ 
+    .float-card-icon {
+      width: 44px; height: 44px;
+      background: var(--navy);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+ 
+    .float-card-text { flex: 1; }
+    .float-card-label { font-size: 11px; color: var(--text-light); margin-bottom: 3px; }
+    .float-card-value { font-size: 14px; font-weight: 700; color: var(--navy); }
+ 
+    .avail-badge {
+      background: var(--gold);
+      color: var(--navy);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      margin-top: 4px;
+      display: inline-block;
+    }
+ 
+    /* Booking confirmation card — screen 3 */
+    .booking-card {
+      background: var(--navy);
+      border-radius: 20px;
+      padding: 20px 22px;
+      width: 240px;
+      animation: floatUp 0.6s ease both;
+    }
+ 
+    .booking-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+ 
+    .booking-card-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+ 
+    .booking-card-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--white);
+    }
+ 
+    .booking-check {
+      width: 32px; height: 32px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+ 
+    .booking-check svg { width: 16px; height: 16px; }
+ 
+    .booking-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+      margin: 12px 0;
+    }
+ 
+    .booking-amount {
+      font-family: var(--font-head);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+ 
+    .booking-sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 2px;
+    }
+ 
+    @keyframes floatUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+ 
+    /* Screen transition animations */
+    .screen { transform: translateX(0); }
+    .screen.slide-in  { animation: slideIn 0.4s ease both; }
+    .screen.slide-out { animation: slideOut 0.4s ease both; }
+ 
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+ 
+    @keyframes slideOut {
+      from { opacity: 1; transform: translateX(0); }
+      to   { opacity: 0; transform: translateX(-40px); }
+    }
+ 
+    /* Unsplash photo overlays */
+    .photo-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(11,31,58,0.2) 0%, transparent 50%);
+      z-index: 1;
+    }
+ 
+    .photo-badge {
+      position: absolute;
+      bottom: 60px; left: 28px;
+      background: rgba(11,31,58,0.75);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      padding: 10px 14px;
+      z-index: 2;
+      color: var(--white);
+    }
+ 
+    .photo-badge-name {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+ 
+    .photo-badge-sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+    }
+ 
+    .rating-badge {
+      position: absolute;
+      top: 70px; right: 28px;
+      background: var(--gold);
+      border-radius: 12px;
+      padding: 8px 12px;
+      z-index: 2;
+      text-align: center;
+    }
+ 
+    .rating-num {
+      font-family: var(--font-head);
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1;
+    }
+ 
+    .rating-label {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--navy);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+ 
+  <!-- ════════════════════════════
+       SPLASH SCREEN
+  ════════════════════════════ -->
+  <div class="screen active" id="screen-splash">
+    <div class="splash-logo-wrap">
+      <div class="splash-icon">
+        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M26 6L4 22V46H20V32H32V46H48V22L26 6Z" fill="#0B1F3A"/>
+          <path d="M26 6L4 22V46H20V32H32V46H48V22L26 6Z" fill="#0B1F3A"/>
+          <circle cx="26" cy="24" r="5" fill="#E8A020"/>
+        </svg>
+      </div>
+      <div class="splash-wordmark">LodgeLink</div>
+      <div class="splash-tagline">Find your room before the rush</div>
+      <div class="splash-divider"></div>
+    </div>
+    <div class="splash-loader">
+      <div class="loader-dot"></div>
+      <div class="loader-dot"></div>
+      <div class="loader-dot"></div>
+    </div>
+  </div>
+ 
+  <!-- ════════════════════════════
+       ONBOARDING 1 — Find Your Perfect Stay
+  ════════════════════════════ -->
+  <div class="screen onboard-screen" id="screen-onboard-1">
+    <!-- Header -->
+    <div class="onboard-header">
+      <div class="onboard-brand">LodgeLink</div>
+      <button class="onboard-skip" onclick="goToApp()">Skip</button>
+    </div>
+ 
+    <!-- Photo -->
+    <div class="onboard-image">
+      <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80"
+           alt="Beautiful lodge accommodation" />
+      <div class="photo-overlay"></div>
+      <div class="rating-badge">
+        <div class="rating-num">4.9</div>
+        <div class="rating-label">Rating</div>
+      </div>
+      <div class="photo-badge">
+        <div class="photo-badge-name">Asese Premier Lodge</div>
+        <div class="photo-badge-sub">Luxury Suite Available</div>
+      </div>
+    </div>
+ 
+    <!-- Content -->
+    <div class="onboard-content">
+      <div class="onboard-dots">
+        <div class="onboard-dot active"></div>
+        <div class="onboard-dot"></div>
+        <div class="onboard-dot"></div>
+      </div>
+      <h2 class="onboard-title">Find Your Perfect Stay</h2>
+      <p class="onboard-desc">Discover verified rooms and guesthouses near your event venue — with real photos, exact prices and distance from the gate.</p>
+      <button class="onboard-btn" onclick="goToScreen('onboard-2')">
+        Next
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M5 12H19M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+ 
+  <!-- ════════════════════════════
+       ONBOARDING 2 — Real-Time Availability
+  ════════════════════════════ -->
+  <div class="screen onboard-screen" id="screen-onboard-2">
+    <div class="onboard-header">
+      <div class="onboard-brand">LodgeLink</div>
+      <button class="onboard-skip" onclick="goToApp()">Skip</button>
+    </div>
+ 
+    <div class="onboard-image">
+      <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80"
+           alt="Hotel room" />
+      <div class="photo-overlay"></div>
+ 
+      <!-- Floating availability card -->
+      <div style="position:absolute;bottom:70px;left:50%;transform:translateX(-50%);z-index:2;">
+        <div class="float-card">
+          <div class="float-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#E8A020" stroke-width="2" stroke-linecap="round"/>
+              <path d="M9 22V12h6v10" stroke="#E8A020" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="float-card-text">
+            <div class="float-card-label">Camp View Hostel</div>
+            <div class="float-card-value">300m from venue</div>
+            <div class="avail-badge">● AVAILABLE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="onboard-content">
+      <div class="onboard-dots">
+        <div class="onboard-dot done"></div>
+        <div class="onboard-dot active"></div>
+        <div class="onboard-dot"></div>
+      </div>
+      <h2 class="onboard-title">Real-Time Availability</h2>
+      <p class="onboard-desc">See exactly which rooms are available right now, how many are left, and how far they are from the main hall — before you travel.</p>
+      <button class="onboard-btn" onclick="goToScreen('onboard-3')">
+        Next
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M5 12H19M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+ 
+  <!-- ════════════════════════════
+       ONBOARDING 3 — Book with Ease
+  ════════════════════════════ -->
+  <div class="screen onboard-screen" id="screen-onboard-3">
+    <div class="onboard-header" style="z-index:10;">
+      <div class="onboard-brand" style="color:var(--gold);">LodgeLink</div>
+      <button class="onboard-skip" onclick="goToApp()" style="background:rgba(255,255,255,0.1);">Skip</button>
+    </div>
+ 
+    <!-- Dark illustration background -->
+    <div class="onboard-image illus-booking">
+      <div class="onboard-illustration">
+        <div class="booking-card">
+          <div class="booking-card-top">
+            <div>
+              <div class="booking-card-label">Reservation</div>
+              <div class="booking-card-value">Favored Lodge</div>
+            </div>
+            <div class="booking-check">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M5 13l4 4L19 7" stroke="#0B1F3A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="booking-card-label">3 nights · 2 guests</div>
+          <div class="booking-divider"></div>
+          <div class="booking-amount">₦2,000</div>
+          <div class="booking-sub">Reservation fee · Room secured</div>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="onboard-content">
+      <div class="onboard-dots">
+        <div class="onboard-dot done"></div>
+        <div class="onboard-dot done"></div>
+        <div class="onboard-dot active"></div>
+      </div>
+      <h2 class="onboard-title">Book with Ease</h2>
+      <p class="onboard-desc">Secure your room with a ₦2,000 reservation fee via Paystack. Get instant confirmation and host bank details — no surprises on arrival.</p>
+      <button class="onboard-btn" onclick="goToApp()" style="background:var(--gold);color:var(--navy);">
+        Get Started
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M5 12H19M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+ 
+  <script>
+    const SPLASH_DURATION = 2500; // ms
+    const ONBOARDING_KEY  = 'lodgelink_onboarded_v1';
+ 
+    function hasSeenOnboarding() {
+      try { return !!localStorage.getItem(ONBOARDING_KEY); }
+      catch (e) { return false; }
+    }
+ 
+    function markOnboardingDone() {
+      try { localStorage.setItem(ONBOARDING_KEY, '1'); }
+      catch (e) {}
+    }
+ 
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active', 'slide-in');
+      });
+      const target = document.getElementById('screen-' + id);
+      if (target) {
+        target.classList.add('active', 'slide-in');
+      }
+    }
+ 
+    window.goToScreen = function(id) {
+      showScreen(id);
+    };
+ 
+    window.goToApp = function() {
+      markOnboardingDone();
+      window.location.href = 'index.html';
+    };
+ 
+    function init() {
+      // If already onboarded — skip straight to app
+      if (hasSeenOnboarding()) {
+        window.location.href = 'index.html';
+        return;
+      }
+ 
+      // Show splash, then transition to onboarding
+      setTimeout(() => {
+        showScreen('onboard-1');
+      }, SPLASH_DURATION);
+    }
+ 
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
+ 
