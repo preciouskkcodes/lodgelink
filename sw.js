@@ -1,5 +1,6 @@
-const CACHE_NAME = 'lodgelink-v4';   // bump version
+const CACHE_NAME = 'lodgelink-v5';
 const ASSETS = [
+  '/splash.html',
   '/index.html',
   '/host.html',
   '/admin.html',
