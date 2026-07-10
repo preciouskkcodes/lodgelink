@@ -601,7 +601,7 @@ window.confirmReservation = async function() {
  
   try {
     const saved = await db.insert('reservations', record);
- 
+
     const localRecord = {
       ...record,
       id:            saved[0]?.id || 'res-' + Date.now(),
@@ -610,16 +610,33 @@ window.confirmReservation = async function() {
       totalCost:     record.total_cost,
       timestamp:     new Date().toISOString(),
     };
- 
+
     const records = loadData();
     records.push(localRecord);
     saveData(records);
- 
-  closeModal();
-setTimeout(() => {
-  window.open('https://paystack.shop/pay/4c9yb89ptb', '_blank');
-}, 300);
- 
+
+    // ── AUTO-DECREMENT rooms_available ──────────────────────────────────────
+    try {
+      const listings = await db.get('listings', { id: activeReservation.listingId });
+      if (listings && listings.length > 0) {
+        const current = listings[0].rooms_available ?? 1;
+        const newCount = Math.max(0, current - 1);
+        await db.update('listings', activeReservation.listingId, {
+          rooms_available: newCount,
+          available: newCount > 0,
+        });
+        console.log(`LodgeLink: rooms_available updated to ${newCount}`);
+      }
+    } catch (decrementErr) {
+      console.warn('LodgeLink: could not decrement rooms_available', decrementErr);
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
+    closeModal();
+    setTimeout(() => {
+      window.open('https://paystack.shop/pay/4c9yb89ptb', '_blank');
+    }, 300);
+
   } catch (err) {
     console.error('LodgeLink: reservation save failed', err);
     alert('Could not save your reservation. Please check your connection and try again.');
