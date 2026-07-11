@@ -598,10 +598,17 @@
             <span class="badge badge-${r.status}">${r.status}</span>
           </div>
           <div class="reservation-detail">🏠 ${r._listing_name || 'Your listing'}</div>
-          <div class="reservation-detail">🗓️ ${r.nights} night${r.nights !== 1 ? 's' : ''} · ${r.guests} guest${r.guests !== 1 ? 's' : ''}</div>
+          <div class="reservation-detail">🗓️ ${r.checkin ? `Check-in: ${new Date(r.checkin).toLocaleDateString()} · ` : ''}${r.nights} night${r.nights !== 1 ? 's' : ''} · ${r.guests} guest${r.guests !== 1 ? 's' : ''}</div>
           <div class="reservation-detail">💰 ₦${Number(r.total_cost).toLocaleString('en-NG')} on arrival</div>
+          
+          <div style="margin-top:10px;">
+            <a href="https://wa.me/${r.guest_phone.replace(/^0/, '234').replace('+', '')}?text=Hi%20${encodeURIComponent(r.guest_name)},%20about%20your%20reservation%20for%20${encodeURIComponent(r._listing_name || 'LodgeLink')}%20..." target="_blank" style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:#25D366; color:white; text-decoration:none; border-radius:6px; font-size:13px; font-weight:600;">
+              📱 Message Guest
+            </a>
+          </div>
+
           ${r.status === 'pending' ? `
-          <div class="reservation-actions">
+          <div class="reservation-actions" style="margin-top:10px;">
             <button class="btn-confirm" onclick="updateReservation('${r.id}','confirmed')">✓ Confirm</button>
             <button class="btn-decline" onclick="updateReservation('${r.id}','declined')">✕ Decline</button>
           </div>` : ''}

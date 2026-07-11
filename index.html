@@ -489,6 +489,11 @@
         <p class="field-helper">👥 Include yourself in the count</p>
       </div>
       <div class="field-group">
+        <label for="input-checkin">Check-in Date</label>
+        <input type="date" id="input-checkin" name="checkin" required style="width:100%; padding:14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); font-size:16px;">
+        <p class="field-helper">📅 Select the day you will arrive</p>
+      </div>
+      <div class="field-group">
         <label for="input-nights">Number of nights</label>
         <select id="input-nights" name="nights" onchange="updateTotal()">
           <option value="1">1 night</option>

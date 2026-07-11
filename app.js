@@ -569,12 +569,19 @@ window.confirmReservation = async function() {
   const name    = document.getElementById('input-name').value.trim();
   const phone   = document.getElementById('input-phone').value.trim();
   const guests  = document.getElementById('input-guests').value;
+  const checkin = document.getElementById('input-checkin').value;
   const nights  = parseInt(document.getElementById('input-nights').value, 10);
   const program = document.getElementById('program-select').value;
  
   if (!name) {
     alert('Please enter your full name.');
     document.getElementById('input-name').focus();
+    return;
+  }
+ 
+  if (!checkin) {
+    alert('Please select a check-in date.');
+    document.getElementById('input-checkin').focus();
     return;
   }
  
@@ -591,6 +598,7 @@ window.confirmReservation = async function() {
     guest_name:      name,
     guest_phone:     phone,
     guests:          parseInt(guests),
+    checkin:         checkin,
     nights:          nights,
     price_per_night: activeReservation.pricePerNight,
     total_cost:      nights * activeReservation.pricePerNight,
