@@ -408,7 +408,10 @@
         </div>
       </div>
       
-      <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+      <h1 class="hero-headline" style="font-size:32px; margin-bottom:8px;">Find your room<br /><em>before the rush.</em></h1>
+      <p class="hero-sub" style="font-size:12px; margin-bottom:20px;">Accommodation for programs &amp; events in Asese &amp; RCCG Camp</p>
+      
+      <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
         <button onclick="filterByLocation('Asese')" style="flex:1; min-width:80px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:10px 6px; text-align:center; cursor:pointer; transition: all 0.2s ease;">
           <div style="font-size:18px; margin-bottom:5px;">🔍</div>
           <div style="font-size:9px; font-weight:600; color:rgba(255,255,255,0.8); line-height:1.4;">Search Asese</div>
@@ -422,17 +425,25 @@
           <div style="font-size:9px; font-weight:600; color:rgba(232,160,32,0.9); line-height:1.4;">List property</div>
         </button>
       </div>
-      
-      <div class="search-wrap">
-        <input type="search" id="search-input" name="search"
-          placeholder="Search Asese or RCCG Camp..."
-          autocomplete="off" aria-label="Search for accommodation" style="width: 100%; padding: 12px 45px 12px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 14px; color: var(--white); outline: none; transition: border-color var(--transition);" />
-        <button id="btn-primary" type="button" aria-label="Search accommodation" style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
-            <path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-          </svg>
-        </button>
+
+      <div class="program-selector needs-attention" id="program-selector-wrap" style="margin-bottom:0;">
+        <label for="program-select">👆 Start here — which event are you attending?</label>
+        <select id="program-select" name="program" aria-label="Select upcoming event">
+          <option value="">— Select an event —</option>
+          <option value="program-1">Special Convention</option>
+          <option value="program-2">Annual Conference</option>
+          <option value="iclc">International Cell Leaders Conference</option>
+          <option value="isw">International Staff Week</option>
+          <option value="llc">Loveworld Ladies Convention</option>
+          <option value="ippc">International Pastors and Partners Conference</option>
+          <option value="haven">Haven Convention</option>
+          <option value="healing-school">Healing School Programs</option>
+          <option value="other">Other Event</option>
+        </select>
       </div>
+      <p class="program-nudge" id="program-nudge" aria-live="polite" style="margin-top:10px; margin-bottom:0;">
+        ⚡ Rooms fill up fast — pick your event first
+      </p>
     </div>
   </header>
  
