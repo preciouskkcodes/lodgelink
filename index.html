@@ -408,6 +408,21 @@
         </div>
       </div>
       
+      <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+        <button onclick="filterByLocation('Asese')" style="flex:1; min-width:80px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:10px 6px; text-align:center; cursor:pointer; transition: all 0.2s ease;">
+          <div style="font-size:18px; margin-bottom:5px;">🔍</div>
+          <div style="font-size:9px; font-weight:600; color:rgba(255,255,255,0.8); line-height:1.4;">Search Asese</div>
+        </button>
+        <button onclick="filterByLocation('RCCG Camp')" style="flex:1; min-width:80px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:10px 6px; text-align:center; cursor:pointer; transition: all 0.2s ease;">
+          <div style="font-size:18px; margin-bottom:5px;">✅</div>
+          <div style="font-size:9px; font-weight:600; color:rgba(255,255,255,0.8); line-height:1.4;">Search RCCG Camp</div>
+        </button>
+        <button onclick="window.location.href='host.html'" style="flex:1; min-width:80px; background:rgba(232,160,32,0.15); border:1px solid rgba(232,160,32,0.3); border-radius:10px; padding:10px 6px; text-align:center; cursor:pointer; transition: all 0.2s ease;">
+          <div style="font-size:18px; margin-bottom:5px;">🏠</div>
+          <div style="font-size:9px; font-weight:600; color:rgba(232,160,32,0.9); line-height:1.4;">List property</div>
+        </button>
+      </div>
+      
       <div class="search-wrap">
         <input type="search" id="search-input" name="search"
           placeholder="Search Asese or RCCG Camp..."
