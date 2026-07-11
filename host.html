@@ -598,7 +598,7 @@
             <span class="badge badge-${r.status}">${r.status}</span>
           </div>
           <div class="reservation-detail">🏠 ${r._listing_name || 'Your listing'}</div>
-          <div class="reservation-detail">🗓️ ${r.checkin ? `Check-in: ${new Date(r.checkin).toLocaleDateString()} · ` : ''}${r.nights} night${r.nights !== 1 ? 's' : ''} · ${r.guests} guest${r.guests !== 1 ? 's' : ''}</div>
+          <div class="reservation-detail">🗓️ ${r.checkin ? `${new Date(r.checkin).toLocaleDateString('en-GB', {day:'numeric', month:'short'})} - ${r.checkout ? new Date(r.checkout).toLocaleDateString('en-GB', {day:'numeric', month:'short'}) : '?'} (${r.nights} nights)` : `${r.nights} nights`} · ${r.guests} guest${r.guests !== 1 ? 's' : ''}</div>
           <div class="reservation-detail">💰 ₦${Number(r.total_cost).toLocaleString('en-NG')} on arrival</div>
           
           <div style="margin-top:10px;">

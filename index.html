@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
   <meta name="description" content="LodgeLink — Find, compare and reserve accommodation for programs & events." />
   <title>LodgeLink — Accommodation Finder</title>
  
@@ -46,7 +46,12 @@
       --transition:  0.22s cubic-bezier(0.4,0,0.2,1);
     }
  
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      -webkit-tap-highlight-color: transparent;
+    }
     html { scroll-behavior: smooth; }
     body {
       font-family: var(--font-body);
@@ -55,9 +60,80 @@
       font-size: 16px;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      user-select: none;
+      -webkit-user-select: none;
+      overscroll-behavior-y: none;
+      padding-bottom: 80px; /* Space for bottom nav */
     }
+    input, textarea, select { user-select: auto; -webkit-user-select: auto; }
     img { display: block; max-width: 100%; }
     a { color: inherit; text-decoration: none; }
+    
+    /* ── NATIVE APP HEADER ── */
+    #app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--navy);
+      padding: 20px 20px 16px;
+      box-shadow: var(--shadow-sm);
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-logo img {
+      width: 32px; height: 32px; border-radius: 6px;
+    }
+    .header-logo span {
+      font-family: var(--font-head);
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--white);
+    }
+    .header-logo span em {
+      font-style: normal;
+      color: var(--gold);
+    }
+    
+    /* ── BOTTOM NAVIGATION ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 12px 0 24px 0; /* extra padding for iOS home indicator */
+      box-shadow: 0 -2px 10px rgba(11,31,58,0.05);
+      z-index: 90;
+      border-top: 1px solid var(--border);
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .nav-item.active {
+      color: var(--navy);
+    }
+    .nav-icon {
+      font-size: 20px;
+    }
  
     .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 0 20px; }
  
@@ -323,70 +399,24 @@
     </div>
   </div>
  
-  <!-- HERO -->
-  <header id="hero" role="banner">
+  <header id="app-header">
     <div class="container">
-      <div class="hero-brand">
-        <img src="/icons/android-chrome-192x192.png" alt="LodgeLink" style="width: 40px; height: 40px; border-radius: 8px; margin-right: 12px;" />
-        <div class="logo-text">Lodge<span>Link</span></div>
+      <div class="header-top">
+        <div class="header-logo">
+          <img src="/icons/android-chrome-192x192.png" alt="LodgeLink Logo" />
+          <span>Lodge<em>Link</em></span>
+        </div>
       </div>
-      <h1 class="hero-headline">Find your room<br /><em>before the rush.</em></h1>
-      <p class="hero-sub">Accommodation for programs &amp; events in Asese &amp; RCCG Camp</p>
- 
-      <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
-        <button onclick="filterByLocation('Asese')" style="flex:1; min-width:80px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:10px 6px; text-align:center; cursor:pointer; transition: all 0.2s ease;">
-          <div style="font-size:18px; margin-bottom:5px;">🔍</div>
-          <div style="font-size:9px; font-weight:600; color:rgba(255,255,255,0.8); line-height:1.4;">Search Asese</div>
-        </button>
-        <button onclick="filterByLocation('RCCG Camp')" style="flex:1; min-width:80px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:10px 6px; text-align:center; cursor:pointer; transition: all 0.2s ease;">
-          <div style="font-size:18px; margin-bottom:5px;">✅</div>
-          <div style="font-size:9px; font-weight:600; color:rgba(255,255,255,0.8); line-height:1.4;">Search RCCG Camp</div>
-        </button>
-        <button onclick="window.location.href='host.html'" style="flex:1; min-width:80px; background:rgba(232,160,32,0.15); border:1px solid rgba(232,160,32,0.3); border-radius:10px; padding:10px 6px; text-align:center; cursor:pointer; transition: all 0.2s ease;">
-          <div style="font-size:18px; margin-bottom:5px;">🏠</div>
-          <div style="font-size:9px; font-weight:600; color:rgba(232,160,32,0.9); line-height:1.4;">List your property</div>
-        </button>
-      </div>
- 
-      <div class="program-selector needs-attention" id="program-selector-wrap">
-        <label for="program-select">👆 Start here — which event are you attending?</label>
-        <select id="program-select" name="program" aria-label="Select upcoming event">
-          <option value="">— Select an event —</option>
-          <option value="program-1">Special Convention</option>
-          <option value="program-2">Annual Conference</option>
-          <option value="iclc">International Cell Leaders Conference</option>
-          <option value="isw">International Staff Week</option>
-          <option value="llc">Loveworld Ladies Convention</option>
-          <option value="ippc">International Pastors and Partners Conference</option>
-          <option value="haven">Haven Convention</option>
-          <option value="healing-school">Healing School Programs</option>
-          <option value="other">Other Event</option>
-        </select>
-      </div>
- 
-      <p class="program-nudge" id="program-nudge" aria-live="polite">
-        ⚡ Rooms fill up fast — pick your event first to see what's available
-      </p>
- 
+      
       <div class="search-wrap">
-        <label for="search-input">Or describe what you need</label>
         <input type="search" id="search-input" name="search"
-          placeholder="e.g. Room for 2 under ₦20,000 close to venue"
-          autocomplete="off" aria-label="Search for accommodation" aria-describedby="search-hint" />
-        <button id="btn-primary" type="button" aria-label="Search accommodation">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
-              stroke="#0B1F3A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          placeholder="Search Asese or RCCG Camp..."
+          autocomplete="off" aria-label="Search for accommodation" style="width: 100%; padding: 12px 45px 12px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 14px; color: var(--white); outline: none; transition: border-color var(--transition);" />
+        <button id="btn-primary" type="button" aria-label="Search accommodation" style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
+            <path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
           </svg>
         </button>
-        <p id="search-hint" class="sr-only">Type your accommodation needs in plain language and tap search</p>
-      </div>
- 
-      <div class="search-hints" role="group" aria-label="Search suggestions">
-        <button class="hint-chip" type="button">Room for 2 under ₦20k</button>
-        <button class="hint-chip" type="button">AC + close to gate</button>
-        <button class="hint-chip" type="button">Budget single room</button>
-        <button class="hint-chip" type="button">Family suite</button>
       </div>
     </div>
   </header>
@@ -490,21 +520,13 @@
       </div>
       <div class="field-group">
         <label for="input-checkin">Check-in Date</label>
-        <input type="date" id="input-checkin" name="checkin" required style="width:100%; padding:14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); font-size:16px;">
-        <p class="field-helper">📅 Select the day you will arrive</p>
+        <input type="date" id="input-checkin" name="checkin" required onchange="updateTotal()" style="width:100%; padding:14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); font-size:16px;">
+        <p class="field-helper">📅 Check-in after 2:00 PM</p>
       </div>
       <div class="field-group">
-        <label for="input-nights">Number of nights</label>
-        <select id="input-nights" name="nights" onchange="updateTotal()">
-          <option value="1">1 night</option>
-          <option value="2" selected>2 nights</option>
-          <option value="3">3 nights</option>
-          <option value="4">4 nights</option>
-          <option value="5">5 nights</option>
-          <option value="6">6 nights</option>
-          <option value="7">7 nights</option>
-        </select>
-        <p class="field-helper">🗓️ You pay the host directly on arrival for your full stay</p>
+        <label for="input-checkout">Check-out Date</label>
+        <input type="date" id="input-checkout" name="checkout" required onchange="updateTotal()" style="width:100%; padding:14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); font-size:16px;">
+        <p class="field-helper">🗓️ Check-out before 12:00 PM</p>
       </div>
       <div class="fee-summary" aria-label="Cost breakdown" aria-live="polite">
         <div>
@@ -573,20 +595,20 @@
     </div>
   </div>
  
-  <!-- FOOTER — simplified, app-style -->
-  <footer id="footer" role="contentinfo">
-    <div class="container">
-      <div class="footer-logo">Lodge<span>Link</span></div>
-      <p class="footer-tagline">Find your room before the rush — Asese &amp; RCCG Camp</p>
-      <nav class="footer-links" aria-label="Footer navigation">
-        <a href="#hero">Home</a>
-        <a href="#main">Listings</a>
-        <a href="host.html">List your property</a>
-      </nav>
-      <div class="footer-divider" aria-hidden="true"></div>
-      <p class="footer-legal">© 2026 LodgeLink. All rights reserved.</p>
-    </div>
-  </footer>
+  <nav class="bottom-nav" aria-label="Bottom navigation">
+    <a href="#" class="nav-item active">
+      <div class="nav-icon">🏠</div>
+      <span>Explore</span>
+    </a>
+    <a href="#" class="nav-item" onclick="alert('My Bookings view coming soon!')">
+      <div class="nav-icon">🗓️</div>
+      <span>Bookings</span>
+    </a>
+    <a href="host.html" class="nav-item">
+      <div class="nav-icon">👤</div>
+      <span>Host</span>
+    </a>
+  </nav>
  
   <script src="app.js"></script>
   <script src="https://js.paystack.co/v1/inline.js"></script>

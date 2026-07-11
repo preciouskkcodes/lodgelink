@@ -557,7 +557,19 @@ window.handleReservation = function(propertyName, pricePerNight, listingId) {
 };
  
 window.updateTotal = function() {
-  const nights  = parseInt(document.getElementById('input-nights').value, 10) || 1;
+  const checkinVal = document.getElementById('input-checkin').value;
+  const checkoutVal = document.getElementById('input-checkout').value;
+  let nights = 1;
+  
+  if (checkinVal && checkoutVal) {
+    const d1 = new Date(checkinVal);
+    const d2 = new Date(checkoutVal);
+    const diffTime = d2 - d1;
+    if (diffTime > 0) {
+      nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+  }
+
   const total   = nights * activeReservation.pricePerNight;
   const totalEl = document.getElementById('modal-total');
   const brkEl   = document.getElementById('nights-breakdown');
@@ -570,8 +582,8 @@ window.confirmReservation = async function() {
   const phone   = document.getElementById('input-phone').value.trim();
   const guests  = document.getElementById('input-guests').value;
   const checkin = document.getElementById('input-checkin').value;
-  const nights  = parseInt(document.getElementById('input-nights').value, 10);
-  const program = document.getElementById('program-select').value;
+  const checkout = document.getElementById('input-checkout').value;
+  const program = document.getElementById('program-select') ? document.getElementById('program-select').value : 'unspecified';
  
   if (!name) {
     alert('Please enter your full name.');
@@ -584,6 +596,23 @@ window.confirmReservation = async function() {
     document.getElementById('input-checkin').focus();
     return;
   }
+ 
+  if (!checkout) {
+    alert('Please select a check-out date.');
+    document.getElementById('input-checkout').focus();
+    return;
+  }
+  
+  const d1 = new Date(checkin);
+  const d2 = new Date(checkout);
+  const diffTime = d2 - d1;
+  
+  if (diffTime <= 0) {
+    alert('Check-out date must be after check-in date.');
+    return;
+  }
+  
+  const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
  
   const isNigerian      = /^0\d{10}$/.test(phone) || /^\+234\d{10}$/.test(phone);
   const isInternational = /^\+(?!234)\d{6,13}$/.test(phone);
@@ -599,6 +628,7 @@ window.confirmReservation = async function() {
     guest_phone:     phone,
     guests:          parseInt(guests),
     checkin:         checkin,
+    checkout:        checkout,
     nights:          nights,
     price_per_night: activeReservation.pricePerNight,
     total_cost:      nights * activeReservation.pricePerNight,
