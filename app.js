@@ -36,7 +36,7 @@ const db = {
 };
  
 // ─── ONBOARDING ───────────────────────────────────────────────────────────────
-const ONBOARDING_KEY = 'lodgelink_onboarded_v1';
+const ONBOARDING_KEY = 'lodgelink_onboarded_v2';
 const STORAGE_KEY    = 'lodgelink_reservations_v1';
  
 function hasSeenOnboarding() {
@@ -67,10 +67,22 @@ function initOnboarding() {
     overlay.classList.add('open');
     overlay.setAttribute('aria-hidden', 'false');
   }, 400);
+  
+  const carousel = document.getElementById('onboarding-carousel');
+  const dots = document.querySelectorAll('.onboarding-dot');
+  if (carousel && dots.length) {
+    carousel.addEventListener('scroll', () => {
+      const scrollPos = carousel.scrollLeft;
+      const slideWidth = carousel.clientWidth;
+      const activeIndex = Math.round(scrollPos / slideWidth);
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === activeIndex);
+      });
+    });
+  }
+
   const btnStart = document.getElementById('btn-onboarding-start');
-  const btnSkip  = document.getElementById('btn-onboarding-skip');
   if (btnStart) btnStart.addEventListener('click', dismissOnboarding);
-  if (btnSkip)  btnSkip.addEventListener('click',  dismissOnboarding);
   overlay.addEventListener('click', function(e) {
     if (e.target === overlay) dismissOnboarding();
   });

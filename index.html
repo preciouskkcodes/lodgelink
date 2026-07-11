@@ -174,6 +174,9 @@
     .onboarding-eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); margin-bottom: 6px; }
     .onboarding-title { font-family: var(--font-head); font-size: 22px; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; line-height: 1.2; }
     .onboarding-sub { font-size: 13px; color: var(--text-light); margin-bottom: 28px; }
+    .onboarding-carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; margin-bottom: 24px; padding-bottom: 10px; }
+    .onboarding-carousel::-webkit-scrollbar { display: none; }
+    .onboarding-slide { flex: 0 0 100%; scroll-snap-align: start; padding: 0 12px; text-align: center; }
     .steps-row { display: flex; gap: 0; margin-bottom: 28px; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
     .step { flex: 1; padding: 16px 12px; text-align: center; border-right: 1px solid var(--border); background: var(--white); }
     .step:last-child { border-right: none; }
@@ -364,38 +367,37 @@
   <div id="onboarding-overlay" role="dialog" aria-modal="true" aria-labelledby="onboarding-title" aria-hidden="true">
     <div class="onboarding-sheet">
       <div class="onboarding-handle" aria-hidden="true"></div>
-      <p class="onboarding-eyebrow">Welcome to LodgeLink</p>
-      <h2 class="onboarding-title" id="onboarding-title">Find your room<br />before you travel.</h2>
-      <p class="onboarding-sub">Here's how it works — takes 60 seconds</p>
-      <div class="steps-row" role="list">
-        <div class="step" role="listitem">
-          <div class="step-num">1</div>
-          <div class="step-icon">📅</div>
-          <div class="step-title">Pick your event</div>
-          <div class="step-desc">Select the event you are attending</div>
+      
+      <div class="onboarding-carousel" id="onboarding-carousel">
+        <div class="onboarding-slide">
+          <p class="onboarding-eyebrow">Welcome to LodgeLink</p>
+          <h2 class="onboarding-title">Find your room<br />before the rush.</h2>
+          <p class="onboarding-sub" style="margin-bottom:0">Accommodation for programs &amp; events in Asese &amp; RCCG Camp</p>
         </div>
-        <div class="step" role="listitem">
-          <div class="step-num">2</div>
-          <div class="step-icon">🏨</div>
-          <div class="step-title">Browse rooms</div>
-          <div class="step-desc">See real photos, prices and distances</div>
+        <div class="onboarding-slide">
+          <div style="font-size:40px; margin-bottom:12px;">📍</div>
+          <h2 class="onboarding-title">Where do you want to stay?</h2>
+          <p class="onboarding-sub" style="margin-bottom:0">Easily filter verified listings around Asese or inside the RCCG Camp.</p>
         </div>
-        <div class="step" role="listitem">
-          <div class="step-num">3</div>
-          <div class="step-icon">✅</div>
-          <div class="step-title">Reserve it</div>
-          <div class="step-desc">Secure your room for ₦2,000</div>
+        <div class="onboarding-slide">
+          <div style="font-size:40px; margin-bottom:12px;">🤖</div>
+          <h2 class="onboarding-title">Know you're getting a fair price</h2>
+          <p class="onboarding-sub" style="margin-bottom:0">Our AI Price Insights instantly tell you if a room is a great deal or overpriced.</p>
+        </div>
+        <div class="onboarding-slide">
+          <div style="font-size:40px; margin-bottom:12px;">✅</div>
+          <h2 class="onboarding-title">Reserve instantly for just ₦2,000</h2>
+          <p class="onboarding-sub" style="margin-bottom:0">Lock in your room ahead of time. Pay the host directly when you arrive.</p>
         </div>
       </div>
-      <div class="onboarding-dots" aria-hidden="true">
+      
+      <div class="onboarding-dots" aria-hidden="true" id="onboarding-dots">
         <div class="onboarding-dot active"></div>
+        <div class="onboarding-dot"></div>
         <div class="onboarding-dot"></div>
         <div class="onboarding-dot"></div>
       </div>
       <button id="btn-onboarding-start" type="button">Let's Find a Room →</button>
-      <div class="onboarding-skip">
-        <button type="button" id="btn-onboarding-skip">Skip — I know how this works</button>
-      </div>
     </div>
   </div>
  
@@ -407,9 +409,7 @@
           <span>Lodge<em>Link</em></span>
         </div>
       </div>
-      
-      <h1 class="hero-headline" style="font-size:32px; margin-bottom:8px;">Find your room<br /><em>before the rush.</em></h1>
-      <p class="hero-sub" style="font-size:12px; margin-bottom:20px;">Accommodation for programs &amp; events in Asese &amp; RCCG Camp</p>
+
       
       <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
         <button onclick="filterByLocation('Asese')" style="flex:1; min-width:80px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:10px 6px; text-align:center; cursor:pointer; transition: all 0.2s ease;">
