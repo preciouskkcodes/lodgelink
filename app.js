@@ -573,13 +573,24 @@ window.updateTotal = function() {
   const checkoutVal = document.getElementById('input-checkout').value;
   let nights = 1;
   
+  const displayBox = document.getElementById('calculated-nights-display');
+  const displayText = document.getElementById('calculated-nights-text');
+
   if (checkinVal && checkoutVal) {
     const d1 = new Date(checkinVal);
     const d2 = new Date(checkoutVal);
     const diffTime = d2 - d1;
     if (diffTime > 0) {
       nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (displayBox && displayText) {
+        displayBox.style.display = 'flex';
+        displayText.textContent = `Staying for ${nights} night${nights !== 1 ? 's' : ''}`;
+      }
+    } else {
+      if (displayBox) displayBox.style.display = 'none';
     }
+  } else {
+    if (displayBox) displayBox.style.display = 'none';
   }
 
   const total   = nights * activeReservation.pricePerNight;
