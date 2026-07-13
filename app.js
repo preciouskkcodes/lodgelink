@@ -243,7 +243,10 @@ function buildCard(listing, allPrices) {
   card.className = 'listing-card';
   card.setAttribute('role', 'listitem');
   card.setAttribute('aria-label', `${listing.name} listing`);
- 
+
+  const locClass = listing.location.toLowerCase().includes('asese') ? 'loc-asese' : 'loc-camp';
+  const locText = listing.location ? listing.location : 'Lodge Venue';
+
   card.innerHTML = `
     <div class="card-image">
       ${galleryHtml}
@@ -252,12 +255,17 @@ function buildCard(listing, allPrices) {
       ${isFullyBooked ? `<div class="fully-booked-overlay">🚫 Fully Booked</div>` : ''}
     </div>
     <div class="card-body">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px;">
+        <span class="loc-badge ${locClass}">📍 ${locText}</span>
+        <span style="font-size:10px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.5px;">${listing.type}</span>
+      </div>
       <h2 class="card-title">${listing.name}</h2>
-      <p class="card-type">${listing.type} · ${listing.roomType}</p>
+      <p class="card-type" style="margin-bottom:12px; font-size:11px;">${listing.roomType}</p>
+      
       <div class="card-meta">
         <div class="meta-item">
-          <span class="meta-icon" aria-hidden="true">📍</span>
-          <span><strong>${listing.distanceLabel}</strong> from venue</span>
+          <span class="meta-icon" aria-hidden="true">🚗</span>
+          <span><strong>${listing.distanceLabel}</strong> from event</span>
         </div>
         <div class="meta-item">
           <span class="meta-icon" aria-hidden="true">👥</span>
@@ -269,13 +277,18 @@ function buildCard(listing, allPrices) {
           <span><strong>${listing.roomsAvailable}</strong> room${listing.roomsAvailable !== 1 ? 's' : ''} left</span>
         </div>` : ''}
       </div>
+      
       <div class="amenities">
         ${listing.amenities.map(a => `<span class="amenity-pill">${a}</span>`).join('')}
       </div>
+      
       <div class="card-footer">
         <div class="host-info">
           <div class="host-avatar">${listing.host.substring(0, 2).toUpperCase()}</div>
-          <div class="host-name">Host: <strong>${listing.host}</strong></div>
+          <div>
+            <div class="host-name">Host: <strong>${listing.host}</strong></div>
+            <div style="font-size:10px; color:#1A7A4A; font-weight:600; display:flex; align-items:center; gap:2px;">🛡️ Verified</div>
+          </div>
         </div>
         ${isFullyBooked
           ? `<button class="reserve-btn" disabled
@@ -676,6 +689,15 @@ window.confirmReservation = async function() {
     records.push(localRecord);
     saveData(records);
 
+    // Trigger in-app notification to host
+    if (window.addNotification) {
+      window.addNotification(
+        'host',
+        'New Booking Request 🏠',
+        `Guest ${name} has reserved ${activeReservation.propertyName} for ${nights} night${nights !== 1 ? 's' : ''} (${checkin} to ${checkout}).`
+      );
+    }
+
     // ── AUTO-DECREMENT rooms_available ──────────────────────────────────────
     try {
       const listings = await db.get('listings', { id: activeReservation.listingId });
@@ -793,6 +815,10 @@ function init() {
  
   initOnboarding();
   initProgramSelectorCue();
+  
+  if (typeof setupNotificationsUI === 'function') {
+    setupNotificationsUI('guest');
+  }
  
   document.querySelectorAll('.hint-chip').forEach(chip => {
     chip.addEventListener('click', () => {
@@ -858,6 +884,126 @@ function init() {
     renderInsights(filtered);
   });
 }
- 
+
+// ─── IN-APP NOTIFICATIONS ENGINE ───────────────────────────────────────────────
+const NOTIF_STORAGE_KEY = 'lodgelink_notifications_v1';
+
+window.addNotification = function(recipient, title, message) {
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem(NOTIF_STORAGE_KEY) || '[]');
+  } catch(e) {}
+  
+  list.unshift({
+    id: 'notif-' + Math.random().toString(36).substr(2, 9),
+    recipient: recipient, // 'guest' or 'host'
+    title: title,
+    message: message,
+    timestamp: Date.now(),
+    read: false
+  });
+  
+  localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(list));
+  window.dispatchEvent(new Event('storage'));
+};
+
+window.clearNotifications = function(recipient) {
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem(NOTIF_STORAGE_KEY) || '[]');
+  } catch(e) {}
+  
+  list = list.filter(n => n.recipient !== recipient);
+  localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(list));
+  window.dispatchEvent(new Event('storage'));
+};
+
+window.renderNotifications = function(recipient) {
+  const badge = document.getElementById('notif-badge');
+  const listEl = document.getElementById('notifications-list');
+  if (!listEl) return;
+
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem(NOTIF_STORAGE_KEY) || '[]');
+  } catch(e) {}
+
+  const filtered = list.filter(n => n.recipient === recipient);
+  const unreadCount = filtered.filter(n => !n.read).length;
+
+  if (badge) {
+    badge.style.display = unreadCount > 0 ? 'block' : 'none';
+  }
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-light); font-size:13px;">No notifications yet</div>`;
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(n => `
+    <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); background: ${n.read ? 'white' : '#EEF4FB'}; transition: background 0.2s; position: relative;" onclick="window.markNotifAsRead('${n.id}', '${recipient}')">
+      <div style="font-family: var(--font-head); font-weight: 700; font-size: 13px; color: var(--navy); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+        ${!n.read ? `<span style="width:6px; height:6px; background:#FF4D4D; border-radius:50%;"></span>` : ''}
+        ${n.title}
+      </div>
+      <div style="font-size: 12px; color: var(--text-mid); line-height: 1.4;">${n.message}</div>
+      <div style="font-size: 10px; color: var(--text-light); margin-top: 6px;">
+        ${new Date(n.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+      </div>
+    </div>
+  `).join('');
+};
+
+window.markNotifAsRead = function(id, recipient) {
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem(NOTIF_STORAGE_KEY) || '[]');
+  } catch(e) {}
+  
+  const idx = list.findIndex(n => n.id === id);
+  if (idx !== -1) {
+    list[idx].read = true;
+    localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(list));
+    window.renderNotifications(recipient);
+  }
+};
+
+function setupNotificationsUI(recipient) {
+  const btn = document.getElementById('btn-notifications');
+  const drawer = document.getElementById('notifications-drawer');
+  if (!btn || !drawer) return;
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isVisible = drawer.style.display === 'block';
+    drawer.style.display = isVisible ? 'none' : 'block';
+    
+    if (!isVisible) {
+      // Mark all currently listed notifications as read when opening drawer
+      let list = [];
+      try {
+        list = JSON.parse(localStorage.getItem(NOTIF_STORAGE_KEY) || '[]');
+      } catch(e) {}
+      list.forEach(n => {
+        if (n.recipient === recipient) n.read = true;
+      });
+      localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(list));
+      window.renderNotifications(recipient);
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!drawer.contains(e.target) && !btn.contains(e.target)) {
+      drawer.style.display = 'none';
+    }
+  });
+  
+  window.addEventListener('storage', () => {
+    window.renderNotifications(recipient);
+  });
+  
+  window.renderNotifications(recipient);
+}
+
 document.addEventListener('DOMContentLoaded', init);
  
