@@ -672,7 +672,7 @@ window.confirmReservation = async function() {
     program:         program || 'unspecified',
     status:          'pending',
   };
- 
+
   // ── Build the local record first (always works, no network needed) ──────────
   const localRecord = {
     ...record,
