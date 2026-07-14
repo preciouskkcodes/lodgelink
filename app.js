@@ -673,65 +673,85 @@ window.confirmReservation = async function() {
     status:          'pending',
   };
  
-  try {
-    const saved = await db.insert('reservations', record);
+  // ── Build the local record first (always works, no network needed) ──────────
+  const localRecord = {
+    ...record,
+    id:              'res-' + Date.now(),
+    propertyName:    activeReservation.propertyName,
+    pricePerNight:   activeReservation.pricePerNight,
+    totalCost:       record.total_cost,
+    total:           record.total_cost,
+    guestName:       name,
+    paymentMethod:   'arrival',
+    image:           activeReservation.imageUrl || activeReservation.image || '',
+    hostPhone:       activeReservation.hostPhone || '',
+    hostBankName:    activeReservation.hostBankName || '',
+    hostBankAccount: activeReservation.hostBankAccount || '',
+    hostBankBank:    activeReservation.hostBankBank || '',
+    timestamp:       new Date().toISOString(),
+  };
 
-    const localRecord = {
-      ...record,
-      id:              saved[0]?.id || 'res-' + Date.now(),
-      propertyName:    activeReservation.propertyName,
-      pricePerNight:   activeReservation.pricePerNight,
-      totalCost:       record.total_cost,
-      total:           record.total_cost,
-      guestName:       name,
-      paymentMethod:   'arrival',
-      image:           activeReservation.imageUrl || activeReservation.image || '',
-      hostPhone:       activeReservation.hostPhone || '',
-      hostBankName:    activeReservation.hostBankName || '',
-      hostBankAccount: activeReservation.hostBankAccount || '',
-      hostBankBank:    activeReservation.hostBankBank || '',
-      timestamp:       new Date().toISOString(),
-    };
+  // Save to localStorage immediately — no network required
+  const records = loadData();
+  records.push(localRecord);
+  saveData(records);
 
-    const records = loadData();
-    records.push(localRecord);
-    saveData(records);
+  // Trigger in-app notification to host
+  if (window.addNotification) {
+    window.addNotification(
+      'host',
+      'New Booking Request 🏠',
+      `Guest ${name} has reserved ${activeReservation.propertyName} for ${nights} night${nights !== 1 ? 's' : ''} (${checkin} to ${checkout}).`
+    );
+  }
 
-    // Trigger in-app notification to host
-    if (window.addNotification) {
-      window.addNotification(
-        'host',
-        'New Booking Request 🏠',
-        `Guest ${name} has reserved ${activeReservation.propertyName} for ${nights} night${nights !== 1 ? 's' : ''} (${checkin} to ${checkout}).`
-      );
+  // Close modal and redirect to Paystack — do this immediately
+  closeModal();
+  setTimeout(() => {
+    window.open('https://paystack.shop/pay/4c9yb89ptb', '_blank');
+  }, 300);
+
+  // ── Attempt Supabase sync silently in background (non-blocking) ─────────────
+  (async () => {
+    try {
+      const saved = await db.insert('reservations', record);
+      if (saved && saved[0] && saved[0].id) {
+        // Update local record ID with the real Supabase ID
+        const currentRecords = loadData();
+        const idx = currentRecords.findIndex(r => r.id === localRecord.id);
+        if (idx !== -1) {
+          currentRecords[idx].id = saved[0].id;
+          saveData(currentRecords);
+        }
+      }
+    } catch (dbErr) {
+      // Silent fail — record already saved locally, guest is not affected
+      console.warn('LodgeLink: Supabase sync failed (booking saved locally):', dbErr.message);
     }
 
-    // ── AUTO-DECREMENT rooms_available ──────────────────────────────────────
+    // Silently attempt to decrement rooms_available
     try {
       const listings = await db.get('listings', { id: activeReservation.listingId });
       if (listings && listings.length > 0) {
         const current = listings[0].rooms_available ?? 1;
         const newCount = Math.max(0, current - 1);
-        await db.update('listings', activeReservation.listingId, {
-          rooms_available: newCount,
-          available: newCount > 0,
+        // PATCH via REST since db object has no update method
+        await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${activeReservation.listingId}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify({ rooms_available: newCount, available: newCount > 0 }),
         });
-        console.log(`LodgeLink: rooms_available updated to ${newCount}`);
       }
-    } catch (decrementErr) {
-      console.warn('LodgeLink: could not decrement rooms_available', decrementErr);
+    } catch (patchErr) {
+      console.warn('LodgeLink: could not decrement rooms_available:', patchErr.message);
     }
-    // ────────────────────────────────────────────────────────────────────────
+  })();
 
-    closeModal();
-    setTimeout(() => {
-      window.open('https://paystack.shop/pay/4c9yb89ptb', '_blank');
-    }, 300);
-
-  } catch (err) {
-    console.error('LodgeLink: reservation save failed', err);
-    alert('Could not save your reservation. Please check your connection and try again.');
-  }
 };
  
 // ─── PRE-PAY FLOW ─────────────────────────────────────────────────────────────
