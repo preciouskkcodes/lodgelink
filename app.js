@@ -1006,7 +1006,7 @@ window.showListingDetails = function(listingId) {
 
     </div>
     
-    <div class="details-sticky-footer" style="z-index:9999;">
+    <div class="details-sticky-footer" style="z-index:50;">
       <div>
         <div style="font-size:12px;color:var(--text-light);font-weight:600;text-transform:uppercase;margin-bottom:2px;">Total</div>
         <div style="font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--text-dark);">${formatPrice(listing.pricePerNight)} <span style="font-family:var(--font-body);font-size:12px;font-weight:400;">/night</span></div>
