@@ -644,14 +644,15 @@
  
     window.goToApp = function() {
       markOnboardingDone();
-      window.location.href = 'index.html';
+      window.location.href = 'app.html';
     };
  
     function init() {
       // If already onboarded — skip straight to app
       if (hasSeenOnboarding()) {
-        window.location.href = 'index.html';
-        return;
+        setTimeout(() => {
+          window.location.href = 'app.html';
+        }, 1500);
       }
  
       // Show splash, then transition to onboarding

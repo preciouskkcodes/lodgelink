@@ -1,7 +1,9 @@
 const CACHE_NAME = 'lodgelink-v5';
 const ASSETS = [
-  '/splash.html',
+  '/',
   '/index.html',
+  '/app.html',
+  '/splash.html',
   '/host.html',
   '/admin.html',
   '/success.html',
