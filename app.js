@@ -816,7 +816,7 @@ window.closeModal = function() {
  
 window.filterByLocation = function(location) {
   const main = document.getElementById('main');
-  if (main) main.scrollIntoView({ behavior: 'smooth' });
+  if (main) main.scrollIntoView({ behavior: 'auto' });
  
   const matched = allListings.filter(l => l.location === location);
   const others  = allListings.filter(l => l.location !== location);
@@ -840,11 +840,17 @@ window.showScreen = function(screenName) {
   const exploreScreen  = document.getElementById('screen-explore');
   const bookingsScreen = document.getElementById('screen-bookings');
   const detailsScreen  = document.getElementById('screen-listing-details');
+  const bottomNav      = document.querySelector('.bottom-nav');
   if (!exploreScreen || !bookingsScreen) return;
 
   exploreScreen.classList.remove('active');
   bookingsScreen.classList.remove('active');
   if (detailsScreen) detailsScreen.classList.remove('active');
+
+  // Show/Hide bottom nav
+  if (bottomNav) {
+    bottomNav.style.display = screenName === 'listing-details' ? 'none' : 'flex';
+  }
 
   // Update screens
   if (screenName === 'bookings') {
@@ -917,9 +923,29 @@ window.showListingDetails = function(listingId) {
 
   const isFullyBooked = listing.roomsAvailable === 0;
   const imgs = listing.images.length > 0 ? listing.images : listing.imageUrl ? [listing.imageUrl] : [];
-  const coverHtml = imgs.length > 0 
-    ? `<img src="${imgs[0]}" alt="${listing.name}" />`
-    : `<div style="width:100%;height:100%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:40px;">🏨</div>`;
+  
+  let coverHtml;
+  const detailsId = 'details-' + listing.id.substring(0, 8);
+  if (imgs.length === 0) {
+    coverHtml = `<div style="width:100%;height:100%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:40px;">🏨</div>`;
+  } else if (imgs.length === 1) {
+    coverHtml = `<img src="${imgs[0]}" alt="${listing.name}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" />`;
+  } else {
+    coverHtml = `
+      <div class="img-slider" id="${detailsId}-slider" data-index="0" style="width:100%;height:100%;position:absolute;inset:0;">
+        ${imgs.map((src, i) => `
+          <img src="${src}" alt="${listing.name} photo ${i + 1}"
+               class="slider-img"
+               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+                      opacity:${i === 0 ? 1 : 0};transition:opacity 0.35s ease;" />
+        `).join('')}
+        <button class="slider-btn slider-prev" onclick="slideImg(event,'${detailsId}-slider',-1)" style="left:10px;top:50%;transform:translateY(-50%);">&#8249;</button>
+        <button class="slider-btn slider-next" onclick="slideImg(event,'${detailsId}-slider', 1)" style="right:10px;top:50%;transform:translateY(-50%);">&#8250;</button>
+        <div class="slider-dots">
+          ${imgs.map((_, i) => `<span class="slider-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></span>`).join('')}
+        </div>
+      </div>`;
+  }
 
   const locText = listing.location ? listing.location : 'Lodge Venue';
 
@@ -980,7 +1006,7 @@ window.showListingDetails = function(listingId) {
 
     </div>
     
-    <div class="details-sticky-footer">
+    <div class="details-sticky-footer" style="z-index:9999;">
       <div>
         <div style="font-size:12px;color:var(--text-light);font-weight:600;text-transform:uppercase;margin-bottom:2px;">Total</div>
         <div style="font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--text-dark);">${formatPrice(listing.pricePerNight)} <span style="font-family:var(--font-body);font-size:12px;font-weight:400;">/night</span></div>

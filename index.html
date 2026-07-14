@@ -610,22 +610,27 @@
     }
     .details-back-btn {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      width: 40px;
-      height: 40px;
+      top: 24px;
+      left: 16px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 4px 12px rgba(11,31,58,0.15);
       cursor: pointer;
-      font-size: 20px;
+      font-size: 22px;
+      font-weight: 800;
       color: var(--navy);
       z-index: 10;
       border: none;
       text-decoration: none;
+      transition: transform 0.2s ease;
+    }
+    .details-back-btn:hover {
+      transform: scale(1.05);
     }
     .details-body {
       padding: 24px 20px;
