@@ -636,7 +636,7 @@ window.confirmReservation = async function() {
 
     // Launch Paystack Inline
     let handler = PaystackPop.setup({
-      key: 'pk_test_placeholder_key', // TODO: User needs to update this with their real key
+      key: 'pk_test_863e695831f43384967c770b0be8eeb58340956b',
       email: email,
       amount: 200000, // ₦2,000 in kobo
       currency: 'NGN',
