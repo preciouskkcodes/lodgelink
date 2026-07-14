@@ -296,8 +296,8 @@ function buildCard(listing, allPrices) {
                Fully Booked
              </button>`
           : `<button class="reserve-btn" type="button"
-               onclick="handleReservation('${listing.name}', ${listing.pricePerNight}, '${listing.id}')">
-               Reserve Room
+               onclick="showListingDetails('${listing.id}')">
+               View Details
              </button>`
         }
       </div>
@@ -839,16 +839,23 @@ window.showScreen = function(screenName) {
   // Toggle screens
   const exploreScreen  = document.getElementById('screen-explore');
   const bookingsScreen = document.getElementById('screen-bookings');
+  const detailsScreen  = document.getElementById('screen-listing-details');
   if (!exploreScreen || !bookingsScreen) return;
+
+  exploreScreen.classList.remove('active');
+  bookingsScreen.classList.remove('active');
+  if (detailsScreen) detailsScreen.classList.remove('active');
 
   // Update screens
   if (screenName === 'bookings') {
-    exploreScreen.classList.remove('active');
     bookingsScreen.classList.add('active');
     renderGuestBookings();
+    syncLocalBookingsWithBackend();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (screenName === 'listing-details') {
+    if (detailsScreen) detailsScreen.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
-    bookingsScreen.classList.remove('active');
     exploreScreen.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -858,6 +865,133 @@ window.showScreen = function(screenName) {
   const activeNavId = screenName === 'bookings' ? 'nav-bookings' : 'nav-explore';
   const activeNav = document.getElementById(activeNavId);
   if (activeNav) activeNav.classList.add('active');
+};
+
+// ─── BACKGROUND SYNC ───────────────────────────────────────────────────────────
+window.syncLocalBookingsWithBackend = async function() {
+  const records = loadData();
+  const pendingIds = records.filter(r => r.status === 'pending').map(r => r.id);
+  if (pendingIds.length === 0) return;
+
+  try {
+    const list = pendingIds.map(id => `"${id}"`).join(',');
+    const url = `${SUPABASE_URL}/rest/v1/reservations?id=in.(${list})&select=id,status`;
+    const res = await fetch(url, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    if (!res.ok) return;
+    const updates = await res.json();
+    
+    let changed = false;
+    updates.forEach(u => {
+      const idx = records.findIndex(r => r.id === u.id);
+      if (idx !== -1 && records[idx].status !== u.status) {
+        records[idx].status = u.status;
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      saveData(records);
+      // Re-render if we are on the bookings screen
+      if (document.getElementById('screen-bookings').classList.contains('active')) {
+        renderGuestBookings();
+      }
+    }
+  } catch (err) {
+    console.warn('LodgeLink: Silent sync failed', err);
+  }
+};
+
+// ─── LISTING DETAILS ───────────────────────────────────────────────────────────
+window.showListingDetails = function(listingId) {
+  const listing = allListings.find(l => l.id === listingId);
+  if (!listing) return;
+  
+  const content = document.getElementById('listing-details-content');
+  if (!content) return;
+
+  const isFullyBooked = listing.roomsAvailable === 0;
+  const imgs = listing.images.length > 0 ? listing.images : listing.imageUrl ? [listing.imageUrl] : [];
+  const coverHtml = imgs.length > 0 
+    ? `<img src="${imgs[0]}" alt="${listing.name}" />`
+    : `<div style="width:100%;height:100%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:40px;">🏨</div>`;
+
+  const locText = listing.location ? listing.location : 'Lodge Venue';
+
+  content.innerHTML = `
+    <div class="details-cover">
+      <button class="details-back-btn" onclick="showScreen('explore')">←</button>
+      ${coverHtml}
+    </div>
+    <div class="details-body">
+      <div class="details-type-loc">
+        <span style="text-transform:uppercase;font-weight:700;color:var(--navy);">${listing.type}</span>
+        <span>·</span>
+        <span>📍 ${locText}</span>
+      </div>
+      <h1 class="details-title">${listing.name}</h1>
+      <div style="font-size:14px;color:var(--text-mid);margin-bottom:16px;">${listing.roomType}</div>
+      
+      <div class="details-price">
+        ${formatPrice(listing.pricePerNight)} <span>/ night</span>
+      </div>
+
+      <div class="details-host-card">
+        <div class="details-host-avatar">${listing.host.substring(0, 2).toUpperCase()}</div>
+        <div>
+          <div style="font-size:14px;color:var(--text-dark);">Hosted by <strong>${listing.host}</strong></div>
+          <div style="font-size:11px;color:#1A7A4A;font-weight:600;margin-top:2px;">🛡️ Identity Verified</div>
+        </div>
+      </div>
+
+      <div class="details-section-title">About this room</div>
+      <div style="display:flex;gap:12px;margin-bottom:24px;">
+        <div style="flex:1;padding:12px;background:#FAFCFF;border:1px solid var(--border);border-radius:var(--radius-sm);text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px;">👥</div>
+          <div style="font-size:11px;color:var(--text-light);font-weight:600;text-transform:uppercase;">Capacity</div>
+          <div style="font-size:13px;color:var(--text-dark);font-weight:600;margin-top:2px;">Up to ${listing.capacity}</div>
+        </div>
+        <div style="flex:1;padding:12px;background:#FAFCFF;border:1px solid var(--border);border-radius:var(--radius-sm);text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px;">🚗</div>
+          <div style="font-size:11px;color:var(--text-light);font-weight:600;text-transform:uppercase;">Distance</div>
+          <div style="font-size:13px;color:var(--text-dark);font-weight:600;margin-top:2px;">${listing.distanceLabel}</div>
+        </div>
+      </div>
+
+      <div class="details-section-title">Amenities</div>
+      <div class="details-amenities-grid">
+        ${listing.amenities.map(a => `
+          <div class="details-amenity-item">
+            <div class="details-amenity-icon">✓</div>
+            ${a}
+          </div>
+        `).join('')}
+      </div>
+      
+      ${!isFullyBooked ? `
+      <div style="margin-top:32px;padding:12px;background:rgba(232,160,32,0.1);border-radius:var(--radius-sm);text-align:center;font-size:12px;color:#92600A;font-weight:600;">
+        Only ${listing.roomsAvailable} room${listing.roomsAvailable !== 1 ? 's' : ''} left!
+      </div>` : ''}
+
+    </div>
+    
+    <div class="details-sticky-footer">
+      <div>
+        <div style="font-size:12px;color:var(--text-light);font-weight:600;text-transform:uppercase;margin-bottom:2px;">Total</div>
+        <div style="font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--text-dark);">${formatPrice(listing.pricePerNight)} <span style="font-family:var(--font-body);font-size:12px;font-weight:400;">/night</span></div>
+      </div>
+      ${isFullyBooked 
+        ? `<button disabled style="background:#ccc;color:#666;border:none;padding:14px 24px;border-radius:var(--radius-md);font-family:var(--font-head);font-size:15px;font-weight:700;">Fully Booked</button>`
+        : `<button onclick="handleReservation('${listing.name.replace(/'/g, "\\'")}', ${listing.pricePerNight}, '${listing.id}')" style="background:var(--navy);color:var(--white);border:none;padding:14px 28px;border-radius:var(--radius-md);font-family:var(--font-head);font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(11,31,58,0.2);">Reserve Room</button>`
+      }
+    </div>
+  `;
+  showScreen('listing-details');
 };
 
 // ─── BOOKINGS SCREEN RENDERER ──────────────────────────────────────────────────
