@@ -364,6 +364,229 @@
       #list-root { gap: 20px; }
       .card-image { height: 200px; }
     }
+
+    /* ── SCREEN SYSTEM ── */
+    .app-screen { display: none; }
+    .app-screen.active { display: block; }
+
+    /* ── BOOKINGS SCREEN ── */
+    #screen-bookings {
+      padding: 24px 20px;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 60vh;
+    }
+    .bookings-header {
+      margin-bottom: 20px;
+    }
+    .bookings-header h1 {
+      font-family: var(--font-head);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+    .bookings-header p {
+      font-size: 13px;
+      color: var(--text-light);
+    }
+    .bookings-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    .bookings-empty-icon {
+      font-size: 52px;
+      margin-bottom: 16px;
+      opacity: 0.6;
+    }
+    .bookings-empty h2 {
+      font-family: var(--font-head);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+    .bookings-empty p {
+      font-size: 13px;
+      color: var(--text-light);
+      line-height: 1.6;
+      max-width: 240px;
+      margin-bottom: 24px;
+    }
+    .bookings-empty-btn {
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 14px 28px;
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .bookings-empty-btn:hover { background: var(--gold); color: var(--navy); }
+    .booking-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .booking-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      animation: fadeUp 0.4s ease both;
+    }
+    .booking-card-image {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+      background: linear-gradient(135deg, var(--navy-mid), var(--navy));
+    }
+    .booking-card-image-placeholder {
+      width: 100%;
+      height: 140px;
+      background: linear-gradient(135deg, #0B1F3A, #12294D);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+    .booking-card-body {
+      padding: 16px;
+    }
+    .booking-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+    .booking-card-name {
+      font-family: var(--font-head);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-dark);
+      line-height: 1.3;
+      flex: 1;
+    }
+    .booking-status-badge {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-pending-payment {
+      background: rgba(232,160,32,0.15);
+      color: #B87A00;
+      border: 1px solid rgba(232,160,32,0.3);
+    }
+    .status-pending-host {
+      background: rgba(61,90,128,0.12);
+      color: var(--text-mid);
+      border: 1px solid rgba(61,90,128,0.2);
+    }
+    .status-confirmed {
+      background: rgba(26,122,74,0.12);
+      color: var(--success);
+      border: 1px solid rgba(26,122,74,0.25);
+    }
+    .booking-dates {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--text-mid);
+    }
+    .booking-dates-divider {
+      color: var(--text-light);
+      font-size: 11px;
+    }
+    .booking-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .booking-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    .booking-bank-panel {
+      background: #EEF4FB;
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .booking-bank-panel.visible { display: block; }
+    .booking-bank-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-mid);
+      margin-bottom: 8px;
+    }
+    .booking-bank-row {
+      font-size: 13px;
+      color: var(--text-dark);
+      line-height: 1.9;
+    }
+    .booking-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .booking-action-btn {
+      flex: 1;
+      padding: 11px 12px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: var(--white);
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-mid);
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .booking-action-btn:hover { border-color: var(--navy); color: var(--navy); }
+    .booking-action-btn.primary {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: var(--white);
+    }
+    .booking-action-btn.primary:hover { background: var(--gold); border-color: var(--gold); color: var(--navy); }
+    .booking-action-btn.whatsapp {
+      background: #25D366;
+      border-color: #25D366;
+      color: white;
+    }
+    .booking-action-btn.whatsapp:hover { background: #1ebe5d; border-color: #1ebe5d; }
+
+    /* Active nav item indicator */
+    .nav-item.active .nav-icon { transform: scale(1.15); }
+    .nav-item { transition: color 0.2s ease; }
+    .nav-item .nav-icon { transition: transform 0.2s ease; }
   </style>
 </head>
 <body>
@@ -471,6 +694,7 @@
   </header>
  
   <!-- MAIN -->
+  <div id="screen-explore" class="app-screen active">
   <main id="main" role="main">
     <div class="container">
       <section id="insights-panel" aria-label="AI price insights">
@@ -525,6 +749,18 @@
       </div>
     </div>
   </main>
+  </div><!-- /#screen-explore -->
+
+  <!-- BOOKINGS SCREEN -->
+  <div id="screen-bookings" class="app-screen">
+    <div id="screen-bookings-inner">
+      <div class="bookings-header">
+        <h1>My Bookings</h1>
+        <p>Your reservations and stays</p>
+      </div>
+      <div id="bookings-list-root"></div>
+    </div>
+  </div>
  
   <!-- RESERVATION MODAL -->
   <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
@@ -649,18 +885,18 @@
   </div>
  
   <nav class="bottom-nav" aria-label="Bottom navigation">
-    <a href="#" class="nav-item active">
+    <button type="button" class="nav-item active" id="nav-explore" onclick="showScreen('explore')">
       <div class="nav-icon">🏠</div>
       <span>Explore</span>
-    </a>
-    <a href="#" class="nav-item" onclick="alert('My Bookings view coming soon!')">
+    </button>
+    <button type="button" class="nav-item" id="nav-bookings" onclick="showScreen('bookings')">
       <div class="nav-icon">🗓️</div>
       <span>Bookings</span>
-    </a>
-    <a href="host.html" class="nav-item">
+    </button>
+    <button type="button" class="nav-item" id="nav-host" onclick="window.location.href='host.html'">
       <div class="nav-icon">👤</div>
       <span>Host</span>
-    </a>
+    </button>
   </nav>
  
   <script src="app.js"></script>

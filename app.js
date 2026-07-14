@@ -678,11 +678,19 @@ window.confirmReservation = async function() {
 
     const localRecord = {
       ...record,
-      id:            saved[0]?.id || 'res-' + Date.now(),
-      propertyName:  activeReservation.propertyName,
-      pricePerNight: activeReservation.pricePerNight,
-      totalCost:     record.total_cost,
-      timestamp:     new Date().toISOString(),
+      id:              saved[0]?.id || 'res-' + Date.now(),
+      propertyName:    activeReservation.propertyName,
+      pricePerNight:   activeReservation.pricePerNight,
+      totalCost:       record.total_cost,
+      total:           record.total_cost,
+      guestName:       name,
+      paymentMethod:   'arrival',
+      image:           activeReservation.imageUrl || activeReservation.image || '',
+      hostPhone:       activeReservation.hostPhone || '',
+      hostBankName:    activeReservation.hostBankName || '',
+      hostBankAccount: activeReservation.hostBankAccount || '',
+      hostBankBank:    activeReservation.hostBankBank || '',
+      timestamp:       new Date().toISOString(),
     };
 
     const records = loadData();
@@ -806,6 +814,157 @@ window.filterByLocation = function(location) {
     `${matched.length} in ${location}${others.length ? `, ${others.length} other` : ''}`;
 };
  
+// ─── SCREEN NAVIGATION ────────────────────────────────────────────────────────
+window.showScreen = function(screenName) {
+  // Toggle screens
+  const exploreScreen  = document.getElementById('screen-explore');
+  const bookingsScreen = document.getElementById('screen-bookings');
+  if (!exploreScreen || !bookingsScreen) return;
+
+  // Update screens
+  if (screenName === 'bookings') {
+    exploreScreen.classList.remove('active');
+    bookingsScreen.classList.add('active');
+    renderGuestBookings();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    bookingsScreen.classList.remove('active');
+    exploreScreen.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Update nav active states
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  const activeNavId = screenName === 'bookings' ? 'nav-bookings' : 'nav-explore';
+  const activeNav = document.getElementById(activeNavId);
+  if (activeNav) activeNav.classList.add('active');
+};
+
+// ─── BOOKINGS SCREEN RENDERER ──────────────────────────────────────────────────
+function renderGuestBookings() {
+  const root = document.getElementById('bookings-list-root');
+  if (!root) return;
+
+  let reservations = [];
+  try {
+    reservations = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  } catch(e) { reservations = []; }
+
+  if (reservations.length === 0) {
+    root.innerHTML = `
+      <div class="bookings-empty">
+        <div class="bookings-empty-icon">🛏️</div>
+        <h2>No bookings yet</h2>
+        <p>Find and reserve accommodation for your upcoming event — rooms fill fast!</p>
+        <button class="bookings-empty-btn" onclick="showScreen('explore')">
+          🔍 Explore Rooms
+        </button>
+      </div>`;
+    return;
+  }
+
+  // Sort: most recent first
+  const sorted = [...reservations].reverse();
+
+  root.innerHTML = `<div class="booking-list">${sorted.map((r, i) => {
+    // Determine status
+    let statusLabel, statusClass;
+    const payMethod = (r.paymentMethod || '').toLowerCase();
+    if (payMethod === 'paystack' || payMethod === 'online') {
+      statusLabel = '✅ Confirmed';
+      statusClass = 'status-confirmed';
+    } else {
+      // Pay on arrival — pending host confirmation
+      statusLabel = '⏳ Pending Host';
+      statusClass = 'status-pending-host';
+    }
+
+    // Format dates
+    const checkinDisplay  = r.checkin  ? formatBookingDate(r.checkin)  : 'Not set';
+    const checkoutDisplay = r.checkout ? formatBookingDate(r.checkout) : 'Not set';
+
+    // Nights
+    let nightsText = '';
+    if (r.checkin && r.checkout) {
+      const d1 = new Date(r.checkin);
+      const d2 = new Date(r.checkout);
+      const nights = Math.max(1, Math.round((d2 - d1) / (1000 * 60 * 60 * 24)));
+      nightsText = `${nights} night${nights !== 1 ? 's' : ''}`;
+    }
+
+    // Image
+    const imageHtml = r.image
+      ? `<img class="booking-card-image" src="${r.image}" alt="${r.propertyName || 'Room photo'}" onerror="this.parentNode.innerHTML='<div class=booking-card-image-placeholder>🏠</div>'">`
+      : `<div class="booking-card-image-placeholder">🏠</div>`;
+
+    // Bank details panel (only show for pay-on-arrival bookings)
+    const showBank = r.hostBankAccount || r.hostBankName;
+    const bankPanel = showBank ? `
+      <div class="booking-bank-panel" id="bank-panel-${i}">
+        <div class="booking-bank-title">Host Bank Details</div>
+        <div class="booking-bank-row">
+          ${r.hostBankName ? `<strong>Account Name:</strong> ${r.hostBankName}<br>` : ''}
+          ${r.hostBankAccount ? `<strong>Account No:</strong> ${r.hostBankAccount}<br>` : ''}
+          ${r.hostBankBank ? `<strong>Bank:</strong> ${r.hostBankBank}` : ''}
+        </div>
+      </div>` : '';
+
+    // WhatsApp link
+    const phone = (r.hostPhone || '').replace(/[^0-9]/g, '');
+    const waMsg = encodeURIComponent(`Hi, I reserved *${r.propertyName || 'a room'}* on LodgeLink. My check-in is ${checkinDisplay}. Please confirm my booking.`);
+    const waUrl = phone ? `https://wa.me/${phone.startsWith('0') ? '234' + phone.slice(1) : phone}?text=${waMsg}` : '#';
+
+    // Actions
+    const bankBtnHtml = showBank && payMethod !== 'paystack' ? `
+      <button class="booking-action-btn primary" onclick="toggleBankPanel(${i})">
+        🏦 Bank Details
+      </button>` : '';
+    const waBtnHtml = phone ? `
+      <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="booking-action-btn whatsapp">
+        💬 WhatsApp Host
+      </a>` : '';
+
+    return `
+      <div class="booking-card">
+        ${imageHtml}
+        <div class="booking-card-body">
+          <div class="booking-card-top">
+            <div class="booking-card-name">${r.propertyName || 'Room Reservation'}</div>
+            <span class="booking-status-badge ${statusClass}">${statusLabel}</span>
+          </div>
+          <div class="booking-dates">
+            <span>📅 ${checkinDisplay}</span>
+            <span class="booking-dates-divider">→</span>
+            <span>${checkoutDisplay}</span>
+          </div>
+          <div class="booking-meta">
+            ${nightsText ? `<span class="booking-meta-item">🌙 ${nightsText}</span>` : ''}
+            ${r.guests ? `<span class="booking-meta-item">👤 ${r.guests} guest${r.guests > 1 ? 's' : ''}</span>` : ''}
+            ${r.total ? `<span class="booking-meta-item">💰 ₦${Number(r.total).toLocaleString('en-NG')}</span>` : ''}
+            ${r.guestName ? `<span class="booking-meta-item">🙋 ${r.guestName}</span>` : ''}
+          </div>
+          ${bankPanel}
+          <div class="booking-actions">
+            ${bankBtnHtml}
+            ${waBtnHtml}
+          </div>
+        </div>
+      </div>`;
+  }).join('')}</div>`;
+}
+
+function formatBookingDate(dateStr) {
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch(e) { return dateStr; }
+}
+
+window.toggleBankPanel = function(index) {
+  const panel = document.getElementById(`bank-panel-${index}`);
+  if (panel) panel.classList.toggle('visible');
+};
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function init() {
   fetchListings();
