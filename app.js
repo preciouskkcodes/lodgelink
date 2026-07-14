@@ -583,52 +583,32 @@ window.updateTotal = function() {
  
 window.confirmReservation = async function() {
   const name    = document.getElementById('input-name').value.trim();
+  const email   = document.getElementById('input-email').value.trim();
   const phone   = document.getElementById('input-phone').value.trim();
   const guests  = document.getElementById('input-guests').value;
   const checkin = document.getElementById('input-checkin').value;
   const checkout = document.getElementById('input-checkout').value;
   const program = document.getElementById('program-select') ? document.getElementById('program-select').value : 'unspecified';
- 
-  if (!name) {
-    alert('Please enter your full name.');
-    document.getElementById('input-name').focus();
-    return;
-  }
- 
-  if (!checkin) {
-    alert('Please select a check-in date.');
-    document.getElementById('input-checkin').focus();
-    return;
-  }
- 
-  if (!checkout) {
-    alert('Please select a check-out date.');
-    document.getElementById('input-checkout').focus();
+
+  if (!name || !email || !phone || !checkin || !checkout) {
+    alert('Please fill in all required fields.');
     return;
   }
   
   const d1 = new Date(checkin);
   const d2 = new Date(checkout);
   const diffTime = d2 - d1;
+  const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
-  if (diffTime <= 0) {
+  if (nights <= 0) {
     alert('Check-out date must be after check-in date.');
     return;
   }
-  
-  const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
- 
-  const isNigerian      = /^0\d{10}$/.test(phone) || /^\+234\d{10}$/.test(phone);
-  const isInternational = /^\+(?!234)\d{6,13}$/.test(phone);
-  if (!phone || (!isNigerian && !isInternational)) {
-    alert('Please enter a valid phone number.\n\nNigerian: 08012345678 or +2348012345678\nInternational: +447911123456');
-    document.getElementById('input-phone').focus();
-    return;
-  }
- 
+
   const record = {
     listing_id:      activeReservation.listingId,
     guest_name:      name,
+    guest_email:     email,
     guest_phone:     phone,
     guests:          parseInt(guests),
     checkin:         checkin,
@@ -641,85 +621,76 @@ window.confirmReservation = async function() {
     status:          'pending',
   };
 
-  // ── Build the local record first (always works, no network needed) ──────────
-  const localRecord = {
-    ...record,
-    id:              'res-' + Date.now(),
-    propertyName:    activeReservation.propertyName,
-    pricePerNight:   activeReservation.pricePerNight,
-    totalCost:       record.total_cost,
-    total:           record.total_cost,
-    guestName:       name,
-    paymentMethod:   'arrival',
-    image:           activeReservation.imageUrl || activeReservation.image || '',
-    hostPhone:       activeReservation.hostPhone || '',
-    hostBankName:    activeReservation.hostBankName || '',
-    hostBankAccount: activeReservation.hostBankAccount || '',
-    hostBankBank:    activeReservation.hostBankBank || '',
-    timestamp:       new Date().toISOString(),
-  };
+  const btn = document.getElementById('btn-reserve-confirm');
+  const originalText = btn.textContent;
+  btn.textContent = 'Processing...';
+  btn.disabled = true;
 
-  // Save to localStorage immediately — no network required
-  const records = loadData();
-  records.push(localRecord);
-  saveData(records);
+  try {
+    // Save to Supabase FIRST to get a real ID for Paystack metadata
+    const saved = await db.insert('reservations', record);
+    if (!saved || !saved[0] || !saved[0].id) {
+      throw new Error("Could not connect to server. Check your internet.");
+    }
+    const realId = saved[0].id;
 
-  // Trigger in-app notification to host
-  if (window.addNotification) {
-    window.addNotification(
-      'host',
-      'New Booking Request 🏠',
-      `Guest ${name} has reserved ${activeReservation.propertyName} for ${nights} night${nights !== 1 ? 's' : ''} (${checkin} to ${checkout}).`
-    );
+    // Launch Paystack Inline
+    let handler = PaystackPop.setup({
+      key: 'pk_test_placeholder_key', // TODO: User needs to update this with their real key
+      email: email,
+      amount: 200000, // ₦2,000 in kobo
+      currency: 'NGN',
+      ref: 'LL_' + Math.floor((Math.random() * 1000000000) + 1),
+      metadata: {
+        custom_fields: [
+          {
+            display_name: "Reservation ID",
+            variable_name: "reservation_id",
+            value: realId
+          }
+        ]
+      },
+      callback: function(response) {
+        // Payment successful! Create local record
+        const localRecord = {
+          ...record,
+          id:              realId,
+          propertyName:    activeReservation.propertyName,
+          pricePerNight:   activeReservation.pricePerNight,
+          totalCost:       record.total_cost,
+          total:           record.total_cost,
+          guestName:       name,
+          paymentMethod:   'arrival',
+          image:           activeReservation.imageUrl || activeReservation.image || '',
+          hostPhone:       activeReservation.hostPhone || '',
+          hostBankName:    activeReservation.hostBankName || '',
+          hostBankAccount: activeReservation.hostBankAccount || '',
+          hostBankBank:    activeReservation.hostBankBank || '',
+          timestamp:       new Date().toISOString(),
+          status:          'paid' // Optimistic update, webhook will also do this
+        };
+        const records = loadData();
+        records.push(localRecord);
+        saveData(records);
+
+        closeModal();
+        alert('Payment complete! Reference: ' + response.reference);
+        showScreen('bookings');
+        renderGuestBookings();
+      },
+      onClose: function() {
+        alert('Payment cancelled. Your reservation is still pending.');
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    });
+
+    handler.openIframe();
+  } catch (err) {
+    alert(err.message);
+    btn.textContent = originalText;
+    btn.disabled = false;
   }
-
-  // Close modal and redirect to Paystack — do this immediately
-  closeModal();
-  setTimeout(() => {
-    window.open('https://paystack.shop/pay/4c9yb89ptb', '_blank');
-  }, 300);
-
-  // ── Attempt Supabase sync silently in background (non-blocking) ─────────────
-  (async () => {
-    try {
-      const saved = await db.insert('reservations', record);
-      if (saved && saved[0] && saved[0].id) {
-        // Update local record ID with the real Supabase ID
-        const currentRecords = loadData();
-        const idx = currentRecords.findIndex(r => r.id === localRecord.id);
-        if (idx !== -1) {
-          currentRecords[idx].id = saved[0].id;
-          saveData(currentRecords);
-        }
-      }
-    } catch (dbErr) {
-      // Silent fail — record already saved locally, guest is not affected
-      console.warn('LodgeLink: Supabase sync failed (booking saved locally):', dbErr.message);
-    }
-
-    // Silently attempt to decrement rooms_available
-    try {
-      const listings = await db.get('listings', { id: activeReservation.listingId });
-      if (listings && listings.length > 0) {
-        const current = listings[0].rooms_available ?? 1;
-        const newCount = Math.max(0, current - 1);
-        // PATCH via REST since db object has no update method
-        await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${activeReservation.listingId}`, {
-          method: 'PATCH',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal',
-          },
-          body: JSON.stringify({ rooms_available: newCount, available: newCount > 0 }),
-        });
-      }
-    } catch (patchErr) {
-      console.warn('LodgeLink: could not decrement rooms_available:', patchErr.message);
-    }
-  })();
-
 };
  
 // ─── PRE-PAY FLOW ─────────────────────────────────────────────────────────────
