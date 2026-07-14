@@ -255,15 +255,14 @@
     .sort-btn { background: none; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 6px 12px; font-family: var(--font-body); font-size: 12px; color: var(--text-mid); cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all var(--transition); }
     .sort-btn:hover { border-color: var(--navy); color: var(--navy); }
  
-    /* ── LISTING CARDS ── */
-    #list-root { display: flex; flex-direction: column; gap: 16px; animation: fadeUp 0.5s 0.25s ease both; }
-    .listing-card { background: var(--white); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--border); transition: transform var(--transition), box-shadow var(--transition); cursor: pointer; }
-    .listing-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-    .card-image { position: relative; height: 180px; background: linear-gradient(135deg, #D9E6F2 0%, #B8CDE0 100%); overflow: hidden; }
+    /* ── LISTING CARDS (PREMIUM AIRBNB STYLE) ── */
+    #list-root { display: flex; flex-direction: column; gap: 32px; animation: fadeUp 0.5s 0.25s ease both; }
+    .listing-card { background: transparent; border-radius: 0; overflow: visible; box-shadow: none; border: none; transition: transform var(--transition); cursor: pointer; display: flex; flex-direction: column; }
+    .listing-card:hover { transform: translateY(-2px); }
+    .card-image { position: relative; height: 280px; background: #e2e8f0; overflow: hidden; border-radius: 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .card-image-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 48px; opacity: 0.3; }
-    .price-badge { position: absolute; top: 12px; right: 12px; background: var(--navy); color: var(--white); padding: 5px 10px; border-radius: var(--radius-sm); font-family: var(--font-head); font-size: 13px; font-weight: 700; z-index: 1; }
-    .price-badge span { font-size: 10px; font-weight: 400; opacity: 0.7; }
-    .fair-label { position: absolute; top: 12px; left: 12px; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; z-index: 1; text-transform: uppercase; letter-spacing: 0.5px; }
+    .price-badge { display: none; /* Removed from image, now in body */ }
+    .fair-label { position: absolute; top: 16px; left: 16px; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; z-index: 1; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     .fair-label.fair  { background: rgba(26,122,74,0.9);  color: #fff; }
     .fair-label.above { background: rgba(220,38,38,0.85); color: #fff; }
     .fair-label.best  { background: rgba(232,160,32,0.95); color: var(--navy); }
@@ -284,24 +283,16 @@
     .slider-dot.active { background: white; width: 16px; border-radius: 3px; }
  
     /* ── FULLY BOOKED OVERLAY ── */
-    .fully-booked-overlay { position: absolute; inset: 0; background: rgba(11,31,58,0.72); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 16px; font-weight: 800; color: white; letter-spacing: 0.5px; z-index: 3; }
+    .fully-booked-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 16px; font-weight: 800; color: var(--navy); letter-spacing: 0.5px; z-index: 3; }
  
-    .card-body { padding: 16px; }
-    .card-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; line-height: 1.2; }
-    .card-type { font-size: 12px; color: var(--text-light); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .card-meta { display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
-    .meta-item { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text-mid); }
-    .meta-icon { font-size: 14px; }
-    .meta-item strong { color: var(--text-dark); font-weight: 600; }
-    .amenities { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
-    .amenity-pill { background: #EEF4FB; color: var(--text-mid); border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 500; }
-    .card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--border); }
-    .host-info { display: flex; align-items: center; gap: 8px; }
-    .host-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--navy)); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--white); flex-shrink: 0; }
-    .host-name { font-size: 12px; color: var(--text-light); }
-    .host-name strong { color: var(--text-mid); font-weight: 600; }
-    .reserve-btn { background: var(--navy); color: var(--white); border: none; border-radius: var(--radius-sm); padding: 12px 22px; font-family: var(--font-body); font-size: 14px; font-weight: 700; cursor: pointer; transition: background var(--transition), transform var(--transition), box-shadow var(--transition); box-shadow: 0 3px 10px rgba(11,31,58,0.2); }
-    .reserve-btn:hover { background: var(--gold); color: var(--navy); box-shadow: 0 5px 16px rgba(232,160,32,0.35); }
+    .card-body { padding: 0 4px; }
+    .card-title { font-family: var(--font-head); font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 2px; line-height: 1.2; display: flex; justify-content: space-between; align-items: flex-start; }
+    .card-type { font-size: 14px; color: var(--text-mid); margin-bottom: 4px; }
+    .card-meta { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; font-size: 14px; color: var(--text-mid); align-items: center; }
+    .card-price-row { margin-top: 6px; font-family: var(--font-head); font-size: 16px; font-weight: 800; color: var(--text-dark); }
+    .card-price-row span { font-family: var(--font-body); font-weight: 400; font-size: 14px; color: var(--text-mid); }
+    
+    .amenities, .card-footer { display: none; /* Removed for cleaner look */ }
  
     /* ── NO MATCH PANEL ── */
     .no-match-panel { background: var(--white); border-radius: var(--radius-lg); padding: 28px 20px; text-align: center; border: 1.5px dashed var(--border); display: none; }

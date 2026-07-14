@@ -248,58 +248,25 @@ function buildCard(listing, allPrices) {
   const locText = listing.location ? listing.location : 'Lodge Venue';
 
   card.innerHTML = `
-    <div class="card-image">
+    <div class="card-image" onclick="showListingDetails('${listing.id}')">
       ${galleryHtml}
-      <div class="price-badge">${formatPrice(listing.pricePerNight)} <span>/night</span></div>
       <div class="fair-label ${cls}">${label}</div>
+      <!-- Heart Icon overlay -->
+      <div style="position: absolute; top: 16px; right: 16px; z-index: 2; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: white; opacity: 0.8; transition: opacity 0.2s;">
+        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="display: block; fill: rgba(0, 0, 0, 0.5); height: 24px; width: 24px; stroke: white; stroke-width: 2px; overflow: visible;"><path d="M16 28c7-4.73 14-10 14-17a6.98 6.98 0 0 0-7-6.91c-2.5 0-4.73 1.18-6 3.09-1.27-1.91-3.5-3.09-6-3.09a6.98 6.98 0 0 0-7 6.91c0 7 7 12.27 14 17z"></path></svg>
+      </div>
       ${isFullyBooked ? `<div class="fully-booked-overlay">🚫 Fully Booked</div>` : ''}
     </div>
-    <div class="card-body">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px;">
-        <span class="loc-badge ${locClass}">📍 ${locText}</span>
-        <span style="font-size:10px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.5px;">${listing.type}</span>
-      </div>
-      <h2 class="card-title">${listing.name}</h2>
-      <p class="card-type" style="margin-bottom:12px; font-size:11px;">${listing.roomType}</p>
-      
+    <div class="card-body" onclick="showListingDetails('${listing.id}')">
+      <h2 class="card-title">
+        <span>${listing.name}</span>
+      </h2>
+      <div class="card-type">${locText} • ${listing.roomType}</div>
       <div class="card-meta">
-        <div class="meta-item">
-          <span class="meta-icon" aria-hidden="true">🚗</span>
-          <span><strong>${listing.distanceLabel}</strong> from event</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-icon" aria-hidden="true">👥</span>
-          <span>Up to <strong>${listing.capacity} guest${listing.capacity > 1 ? 's' : ''}</strong></span>
-        </div>
-        ${!isFullyBooked ? `
-        <div class="meta-item">
-          <span class="meta-icon" aria-hidden="true">🛏️</span>
-          <span><strong>${listing.roomsAvailable}</strong> room${listing.roomsAvailable !== 1 ? 's' : ''} left</span>
-        </div>` : ''}
+        ${listing.distanceLabel} away • Up to ${listing.capacity} guests
       </div>
-      
-      <div class="amenities">
-        ${listing.amenities.map(a => `<span class="amenity-pill">${a}</span>`).join('')}
-      </div>
-      
-      <div class="card-footer">
-        <div class="host-info">
-          <div class="host-avatar">${listing.host.substring(0, 2).toUpperCase()}</div>
-          <div>
-            <div class="host-name">Host: <strong>${listing.host}</strong></div>
-            <div style="font-size:10px; color:#1A7A4A; font-weight:600; display:flex; align-items:center; gap:2px;">🛡️ Verified</div>
-          </div>
-        </div>
-        ${isFullyBooked
-          ? `<button class="reserve-btn" disabled
-               style="opacity:0.45;cursor:not-allowed;background:#ccc;color:#666;box-shadow:none;">
-               Fully Booked
-             </button>`
-          : `<button class="reserve-btn" type="button"
-               onclick="showListingDetails('${listing.id}')">
-               View Details
-             </button>`
-        }
+      <div class="card-price-row">
+        ${formatPrice(listing.pricePerNight)} <span>/night</span>
       </div>
     </div>`;
   return card;
@@ -898,6 +865,15 @@ window.syncLocalBookingsWithBackend = async function() {
       if (idx !== -1 && records[idx].status !== u.status) {
         records[idx].status = u.status;
         changed = true;
+        
+        // Trigger notification
+        if (typeof addNotification === 'function') {
+          if (u.status === 'confirmed') {
+            addNotification('guest', 'Reservation Confirmed! 🎉', `Your reservation for ${records[idx].propertyName} was confirmed by the host.`);
+          } else if (u.status === 'declined') {
+            addNotification('guest', 'Reservation Declined', `Unfortunately, your reservation for ${records[idx].propertyName} was declined.`);
+          }
+        }
       }
     });
 
