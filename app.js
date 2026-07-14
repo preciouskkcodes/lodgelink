@@ -265,8 +265,9 @@ function buildCard(listing, allPrices) {
       <div class="card-meta">
         ${listing.distanceLabel} away • Up to ${listing.capacity} guests
       </div>
-      <div class="card-price-row">
-        ${formatPrice(listing.pricePerNight)} <span>/night</span>
+      <div class="card-price-row" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>${formatPrice(listing.pricePerNight)} <span>/night</span></div>
+        <div style="font-size:13px; font-weight:700; color:var(--navy); text-decoration:underline;">View details</div>
       </div>
     </div>`;
   return card;
