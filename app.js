@@ -310,174 +310,59 @@ function renderList(listings) {
   listings.forEach(l => root.appendChild(buildCard(l, allPrices)));
 }
  
-// ─── RENDER INSIGHTS ─────────────────────────────────────────────────────────
-function renderInsights(listings) {
-  const panel = document.getElementById('insights-panel');
-  if (!panel || !listings || listings.length === 0) return;
- 
-  const prices = listings.map(l => l.pricePerNight);
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
-  const sorted = [...prices].sort((a, b) => a - b);
-  const fairCeiling = sorted[0] + (sorted[sorted.length - 1] - sorted[0]) * 0.55;
- 
-  const subtitle = panel.querySelector('.insights-subtitle');
-  if (subtitle) subtitle.textContent = `Based on ${listings.length} listing${listings.length !== 1 ? 's' : ''}`;
- 
-  const priceLabels = panel.querySelectorAll('.price-label');
-  if (priceLabels.length >= 2) {
-    priceLabels[0].textContent = formatPrice(min);
-    priceLabels[1].textContent = formatPrice(max);
-  }
- 
-  const tagsContainer = panel.querySelector('.insight-tags');
-  if (tagsContainer) {
-    tagsContainer.innerHTML = `
-      <span class="insight-tag tag-fair"  role="listitem">✓ Fair: ${formatPrice(min)}–${formatPrice(Math.round(fairCeiling))}</span>
-      <span class="insight-tag tag-best"  role="listitem">★ Best: ${formatPrice(min)}</span>
-      <span class="insight-tag tag-above" role="listitem">↑ Above avg: ${formatPrice(Math.round(fairCeiling))}+</span>`;
-  }
-}
- 
-// ─── PROGRAM SELECTOR VISUAL CUE ─────────────────────────────────────────────
-function initProgramSelectorCue() {
-  const sel     = document.getElementById('program-select');
-  const wrap    = document.getElementById('program-selector-wrap');
-  const nudge   = document.getElementById('program-nudge');
-  const filterH = document.getElementById('filter-hint');
-  let filterHintDismissed = false;
- 
-  if (!sel) return;
- 
-  sel.addEventListener('change', () => {
-    if (sel.value) {
-      if (wrap)  wrap.classList.remove('needs-attention');
-      if (nudge) nudge.classList.add('hidden');
-      if (!filterHintDismissed) {
-        setTimeout(() => {
-          if (filterH) filterH.classList.add('hidden');
-          filterHintDismissed = true;
-        }, 8000);
-      }
-    } else {
-      if (wrap)  wrap.classList.add('needs-attention');
-      if (nudge) nudge.classList.remove('hidden');
-    }
-  });
- 
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (filterH) filterH.classList.add('hidden');
-      filterHintDismissed = true;
-    }, { once: true });
-  });
-}
- 
-// ─── SEARCH PARSERS ───────────────────────────────────────────────────────────
-function parseBudget(query) {
-  const q = query.toLowerCase()
-    .replace(/₦/g, '').replace(/,/g, '').replace(/naira/g, '').trim();
-  const match = q.match(/(?:under|below|max|within)\s*(\d+)(k?)/);
-  if (!match) return null;
-  const num = parseInt(match[1]);
-  return match[2] === 'k' ? num * 1000 : num;
-}
- 
-function parseGuests(query) {
-  const match = query.match(/for\s*(\d+)\s*(person|people|guest|guests)?/i);
-  return match ? parseInt(match[1]) : null;
-}
- 
-function parseDistance(query) {
-  const q = query.toLowerCase();
-  if (q.includes('close') || q.includes('near') || q.includes('walking')) return 'close';
-  return null;
-}
- 
-// ─── ROOM TYPE PARSER — checks both roomType and type fields ──────────────────
-function parseRoomType(query) {
-  const q = query.toLowerCase().trim();
- 
-  // Property type keywords
-  if (q.includes('hotel'))                                  return { field: 'type', value: 'hotel' };
-  if (q.includes('guesthouse') || q.includes('guest house')) return { field: 'type', value: 'guesthouse' };
-  if (q.includes('hostel'))                                 return { field: 'type', value: 'hostel' };
-  if (q.includes('self-contain') || q.includes('self contain') || q.includes('studio')) return { field: 'type', value: 'self-contain' };
- 
-  // Room type keywords
-if (q.includes('family suite') || (q.includes('family') && q.includes('suite'))) return { field: 'roomType', value: 'family suite' };
-if (q.includes('single'))                                 return { field: 'roomType', value: 'single' };
-if (q.includes('double'))                                 return { field: 'roomType', value: 'double' };
-if (q.includes('shared'))                                 return { field: 'roomType', value: 'shared' };
-if (q.includes('executive'))                              return { field: 'roomType', value: 'double' };
+// ─── UNIFIED SEARCH & FILTERING ───────────────────────────────────────────────
+window.filterSearch = function(query) {
+  applyFilters();
+};
 
-return null;
-}
- 
-// ─── LISTING MATCHER ─────────────────────────────────────────────────────────
-function listingMatchesRoomType(listing, roomTypeFilter) {
-  if (!roomTypeFilter) return true;
-  const { field, value } = roomTypeFilter;
- 
-  if (field === 'type') {
-    return listing.type.toLowerCase().includes(value);
+function applyFilters() {
+  const query = (document.getElementById('live-search-input')?.value || '').toLowerCase().trim();
+  const activeFilterBtn = document.querySelector('.filter-btn.active');
+  const typeFilter = activeFilterBtn ? activeFilterBtn.textContent.trim() : 'All';
+  
+  let matched = [...allListings];
+
+  // 1. Filter by Button (Type or Location)
+  if (typeFilter !== 'All') {
+    if (typeFilter === 'Asese' || typeFilter === 'RCCG Camp') {
+      matched = matched.filter(l => l.location === typeFilter);
+    } else {
+      matched = matched.filter(l => l.type === typeFilter);
+    }
   }
-  if (field === 'roomType') {
-    return listing.roomType.toLowerCase().includes(value);
+
+  // 2. Filter by Live Search Input
+  if (query) {
+    matched = matched.filter(l => 
+      l.name.toLowerCase().includes(query) || 
+      (l.location && l.location.toLowerCase().includes(query)) ||
+      (l.roomType && l.roomType.toLowerCase().includes(query))
+    );
   }
-  return true;
-}
- 
-// ─── AUTO-SCROLL ─────────────────────────────────────────────────────────────
-function scrollToListings() {
-  const main = document.getElementById('main');
-  if (main) setTimeout(() => main.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-}
- 
-// ─── HANDLE SEARCH ───────────────────────────────────────────────────────────
-window.handleSearch = function(query) {
-  const budget       = parseBudget(query);
-  const guests       = parseGuests(query);
-  const distancePref = parseDistance(query);
-  const roomType     = parseRoomType(query);
- 
-  // Debug — remove after testing
-  console.log('Search:', query);
-  console.log('Parsed roomType:', roomType);
-  console.log('All listings roomTypes:', allListings.map(l => ({ name: l.name, type: l.type, roomType: l.roomType })));
- 
-  let pool = [...allListings];
-  let matched = [...pool];
- 
-  if (budget)                   matched = matched.filter(l => l.pricePerNight <= budget);
-  if (guests)                   matched = matched.filter(l => l.capacity >= guests);
-  if (distancePref === 'close') matched = matched.filter(l => l.distanceM <= 1000);
-  if (roomType)                 matched = matched.filter(l => listingMatchesRoomType(l, roomType));
- 
-  const matchedIds = new Set(matched.map(l => l.id));
-  const others = pool.filter(l => !matchedIds.has(l.id));
- 
+
   const noMatchPanel = document.getElementById('no-match-panel');
   const listRoot     = document.getElementById('list-root');
- 
-  // If roomType search returns 0 matches — show "no match" not all listings
-  if (matched.length === 0 && roomType) {
+
+  if (matched.length === 0) {
     if (noMatchPanel) noMatchPanel.classList.add('visible');
     if (listRoot)     listRoot.style.display = 'none';
     const countEl = document.getElementById('results-count-num');
-    if (countEl) countEl.textContent = `0 matches for "${query}"`;
-  } else if (matched.length === 0 && others.length === 0) {
-    if (noMatchPanel) noMatchPanel.classList.add('visible');
-    if (listRoot)     listRoot.style.display = 'none';
+    if (countEl) countEl.textContent = `0 matches`;
   } else {
     if (noMatchPanel) noMatchPanel.classList.remove('visible');
     if (listRoot)     listRoot.style.display = '';
-    renderSearchResults(matched, others);
-    renderInsights(pool);
+    
+    // Render the list
+    if (listRoot) {
+      listRoot.innerHTML = '';
+      const allPrices = matched.map(l => l.pricePerNight);
+      matched.forEach(l => listRoot.appendChild(buildCard(l, allPrices)));
+    }
+    
+    const countEl = document.getElementById('results-count-num');
+    if (countEl) countEl.textContent = `${matched.length} room${matched.length !== 1 ? 's' : ''}`;
   }
- 
-  scrollToListings();
-};
+}
  
 function renderSearchResults(matched, others) {
   const root = document.getElementById('list-root');
@@ -605,19 +490,16 @@ window.confirmReservation = async function() {
   const guests  = document.getElementById('input-guests').value;
   const checkin = document.getElementById('input-checkin').value;
   const checkout = document.getElementById('input-checkout').value;
-  const program = document.getElementById('program-select') ? document.getElementById('program-select').value : 'unspecified';
-
+  const cleanPhone = phone.trim().replace(/\s+/g, '');
+  const isIntl = /^\+\d{10,15}$/.test(cleanPhone);
+  
   if (!name || !email || !phone || !checkin || !checkout) {
     alert('Please fill in all required fields.');
     return;
   }
   
-  const cleanPhone = phone.trim().replace(/\s+/g, '');
-  const isNigerian = /^0\d{10}$/.test(cleanPhone);
-  const isIntl = /^\+\d{10,15}$/.test(cleanPhone);
-  
-  if (!isNigerian && !isIntl) {
-    alert('Please enter a valid 11-digit Nigerian number (e.g. 08012345678) or an international number starting with + (e.g. +234...).');
+  if (!isIntl) {
+    alert('Please enter a valid international phone number starting with + (e.g. +2348012345678).');
     return;
   }
   
@@ -641,7 +523,7 @@ window.confirmReservation = async function() {
     guest_name:      name,
     guest_email:     email,
     guest_phone:     phone,
-    guests:          parseInt(guests),
+    guests_count:    parseInt(guests, 10),
     checkin:         checkin,
     checkout:        checkout,
     nights:          nights,
@@ -1253,48 +1135,20 @@ function init() {
   if (footerYear) footerYear.textContent = new Date().getFullYear();
  
   initOnboarding();
-  initProgramSelectorCue();
   
   if (typeof setupNotificationsUI === 'function') {
     setupNotificationsUI('guest');
   }
- 
-  document.querySelectorAll('.hint-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.getElementById('search-input').value = chip.textContent.trim();
-      document.getElementById('search-input').focus();
-    });
-  });
- 
+
+  // Filter buttons logic
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      const filterType = btn.textContent.trim();
-      let filtered = [...allListings];
-      if (filterType !== 'All') filtered = filtered.filter(l => l.type === filterType);
-      const noMatch  = document.getElementById('no-match-panel');
-      const listRoot = document.getElementById('list-root');
-      if (noMatch)  noMatch.classList.remove('visible');
-      if (listRoot) listRoot.style.display = '';
-      renderList(filtered);
-      renderInsights(filtered);
-      scrollToListings();
+      applyFilters();
     });
   });
- 
-  document.getElementById('btn-primary').addEventListener('click', () => {
-    const query = document.getElementById('search-input').value.trim();
-    if (query) window.handleSearch(query);
-  });
- 
-  document.getElementById('search-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      const query = document.getElementById('search-input').value.trim();
-      if (query) window.handleSearch(query);
-    }
-  });
- 
+
   document.getElementById('modal-overlay').addEventListener('click', function(e) {
     if (e.target === this) window.closeModal();
   });
@@ -1308,19 +1162,6 @@ function init() {
  
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { window.closeModal(); window.closePrePay(); }
-  });
- 
-  document.getElementById('program-select').addEventListener('change', () => {
-    const activeFilter = document.querySelector('.filter-btn.active');
-    const filterType   = activeFilter ? activeFilter.textContent.trim() : 'All';
-    let filtered = [...allListings];
-    if (filterType !== 'All') filtered = filtered.filter(l => l.type === filterType);
-    const noMatch  = document.getElementById('no-match-panel');
-    const listRoot = document.getElementById('list-root');
-    if (noMatch)  noMatch.classList.remove('visible');
-    if (listRoot) listRoot.style.display = '';
-    renderList(filtered);
-    renderInsights(filtered);
   });
 }
 
