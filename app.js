@@ -607,9 +607,12 @@ window.confirmReservation = async function() {
     return;
   }
   
-  const cleanPhone = phone.replace(/[^0-9+]/g, '');
-  if (cleanPhone.length < 10 || cleanPhone.length > 15) {
-    alert('Please enter a valid phone number (10-15 digits).');
+  const cleanPhone = phone.trim().replace(/\s+/g, '');
+  const isNigerian = /^0\d{10}$/.test(cleanPhone);
+  const isIntl = /^\+\d{10,15}$/.test(cleanPhone);
+  
+  if (!isNigerian && !isIntl) {
+    alert('Please enter a valid 11-digit Nigerian number (e.g. 08012345678) or an international number starting with + (e.g. +234...).');
     return;
   }
   
