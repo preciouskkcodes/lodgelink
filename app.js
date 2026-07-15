@@ -129,7 +129,6 @@ async function fetchListings() {
     }));
  
     renderList(allListings);
-    renderInsights(allListings);
   } catch (err) {
     console.error('LodgeLink: fetchListings failed', err);
     showErrorState();
@@ -664,26 +663,6 @@ window.closeModal = function() {
     overlay.classList.remove('open');
     overlay.setAttribute('aria-hidden', 'true');
   }
-};
- 
-window.filterByLocation = function(location) {
-  const main = document.getElementById('main');
-  if (main) main.scrollIntoView({ behavior: 'auto' });
- 
-  const matched = allListings.filter(l => l.location === location);
-  const others  = allListings.filter(l => l.location !== location);
- 
-  const noMatch  = document.getElementById('no-match-panel');
-  const listRoot = document.getElementById('list-root');
-  if (noMatch)  noMatch.classList.remove('visible');
-  if (listRoot) listRoot.style.display = '';
- 
-  renderSearchResults(matched, others);
-  renderInsights(allListings);
- 
-  const countEl = document.getElementById('results-count-num');
-  if (countEl) countEl.textContent =
-    `${matched.length} in ${location}${others.length ? `, ${others.length} other` : ''}`;
 };
  
 // ─── SCREEN NAVIGATION ────────────────────────────────────────────────────────
