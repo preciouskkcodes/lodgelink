@@ -180,8 +180,16 @@ function getPriceLabel(price, allPrices) {
   return                           { label: '↑ Above Avg',  cls: 'above' };
 }
  
-function formatPrice(n) {
-  return '₦' + n.toLocaleString('en-NG');
+function formatPrice(n, listingName = '') {
+  const naira = '₦' + Number(n).toLocaleString('en-NG');
+  if (listingName) {
+    const nameUpper = String(listingName).toUpperCase();
+    if (nameUpper.includes('OMNIA') || nameUpper.includes('SAPPHIRE')) {
+      const espees = (Number(n) / 2050).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      return `${naira} (${espees} Espees)`;
+    }
+  }
+  return naira;
 }
  
 // ─── IMAGE SLIDER ─────────────────────────────────────────────────────────────
@@ -266,7 +274,7 @@ function buildCard(listing, allPrices) {
         ${listing.distanceLabel} away • Up to ${listing.capacity} guests
       </div>
       <div class="card-price-row" style="display:flex; justify-content:space-between; align-items:center;">
-        <div>${formatPrice(listing.pricePerNight)} <span>/night</span></div>
+        <div>${formatPrice(listing.pricePerNight, listing.name)} <span>/night</span></div>
         <div style="font-size:13px; font-weight:700; color:var(--navy); text-decoration:underline;">View details</div>
       </div>
     </div>`;
@@ -577,8 +585,8 @@ window.updateTotal = function() {
   const total   = nights * activeReservation.pricePerNight;
   const totalEl = document.getElementById('modal-total');
   const brkEl   = document.getElementById('nights-breakdown');
-  if (totalEl) totalEl.textContent = formatPrice(total);
-  if (brkEl)   brkEl.textContent   = `${nights} night${nights > 1 ? 's' : ''} × ${formatPrice(activeReservation.pricePerNight)} per night`;
+  if (totalEl) totalEl.textContent = formatPrice(total, activeReservation.propertyName);
+  if (brkEl)   brkEl.textContent   = `${nights} night${nights > 1 ? 's' : ''} × ${formatPrice(activeReservation.pricePerNight, activeReservation.propertyName)} per night`;
 };
  
 window.confirmReservation = async function() {
@@ -912,7 +920,7 @@ window.showListingDetails = function(listingId) {
       <div style="font-size:14px;color:var(--text-mid);margin-bottom:16px;">${listing.roomType}</div>
       
       <div class="details-price">
-        ${formatPrice(listing.pricePerNight)} <span>/ night</span>
+        ${formatPrice(listing.pricePerNight, listing.name)} <span>/ night</span>
       </div>
 
       <div class="details-host-card">
@@ -957,7 +965,7 @@ window.showListingDetails = function(listingId) {
     <div class="details-sticky-footer" style="z-index:50;">
       <div>
         <div style="font-size:12px;color:var(--text-light);font-weight:600;text-transform:uppercase;margin-bottom:2px;">Total</div>
-        <div style="font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--text-dark);">${formatPrice(listing.pricePerNight)} <span style="font-family:var(--font-body);font-size:12px;font-weight:400;">/night</span></div>
+        <div style="font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--text-dark);">${formatPrice(listing.pricePerNight, listing.name)} <span style="font-family:var(--font-body);font-size:12px;font-weight:400;">/night</span></div>
       </div>
       ${isFullyBooked 
         ? `<button disabled style="background:#ccc;color:#666;border:none;padding:14px 24px;border-radius:var(--radius-md);font-family:var(--font-head);font-size:15px;font-weight:700;">Fully Booked</button>`
