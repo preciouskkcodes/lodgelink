@@ -276,6 +276,7 @@ function buildCard(listing, allPrices) {
       <div class="card-meta">
         ${listing.distanceLabel} away • Up to ${listing.capacity} guests
       </div>
+      ${!isFullyBooked ? `<div style="font-size:11px; color:#92600A; font-weight:600; margin-top:4px; padding:2px 6px; background:rgba(232,160,32,0.1); border-radius:4px; display:inline-block;">🔥 Only ${listing.roomsAvailable} room${listing.roomsAvailable !== 1 ? 's' : ''} left!</div>` : ''}
       <div class="card-price-row" style="display:flex; justify-content:space-between; align-items:center;">
         <div>${formatPrice(listing.pricePerNight, listing.name)} <span>/night</span></div>
         <div style="font-size:13px; font-weight:700; color:var(--navy); text-decoration:underline;">View details</div>
