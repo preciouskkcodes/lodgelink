@@ -529,7 +529,7 @@ window.confirmReservation = async function() {
     price_per_night: activeReservation.pricePerNight,
     total_cost:      nights * activeReservation.pricePerNight,
     reservation_fee: 2000,
-    program:         program || 'unspecified',
+    program:         'unspecified',
     status:          'pending',
   };
 
