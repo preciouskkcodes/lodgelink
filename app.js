@@ -522,7 +522,7 @@ window.confirmReservation = async function() {
     guest_name:      name,
     guest_email:     email,
     guest_phone:     phone,
-    guests_count:    parseInt(guests, 10),
+    guests:          parseInt(guests, 10),
     checkin:         checkin,
     checkout:        checkout,
     nights:          nights,
