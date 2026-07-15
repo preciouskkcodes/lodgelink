@@ -575,7 +575,19 @@
     .booking-action-btn.whatsapp:hover { background: #1ebe5d; border-color: #1ebe5d; }
 
     /* Active nav item indicator */
-    .nav-item.active .nav-icon { transform: scale(1.15); }
+    @keyframes nav-bounce {
+      0% { transform: scale(1); }
+      40% { transform: scale(0.8); }
+      70% { transform: scale(1.25); }
+      100% { transform: scale(1.15); }
+    }
+    .nav-item.active .nav-icon { 
+      animation: nav-bounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      color: var(--navy);
+    }
+    .nav-item.active .nav-icon svg {
+      stroke-width: 2.5; /* Makes the icon look bolder when active */
+    }
     .nav-item { transition: color 0.2s ease; }
     .nav-item .nav-icon { transition: transform 0.2s ease; }
     
