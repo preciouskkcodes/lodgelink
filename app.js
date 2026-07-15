@@ -536,6 +536,11 @@ window.handleReservation = function(propertyName, pricePerNight, listingId) {
     overlay.classList.add('open');
     overlay.setAttribute('aria-hidden', 'false');
   }
+  
+  // Pre-fill returning guest details
+  document.getElementById('input-name').value = localStorage.getItem('ll_guest_name') || '';
+  document.getElementById('input-email').value = localStorage.getItem('ll_guest_email') || '';
+  document.getElementById('input-phone').value = localStorage.getItem('ll_guest_phone') || '';
  
   const nightsEl = document.getElementById('input-nights');
   if (nightsEl) { nightsEl.value = '2'; updateTotal(); }
@@ -615,6 +620,11 @@ window.confirmReservation = async function() {
     alert('Please enter a valid 11-digit Nigerian number (e.g. 08012345678) or an international number starting with + (e.g. +234...).');
     return;
   }
+  
+  // Save for future bookings
+  localStorage.setItem('ll_guest_name', name);
+  localStorage.setItem('ll_guest_email', email);
+  localStorage.setItem('ll_guest_phone', cleanPhone);
   
   const d1 = new Date(checkin);
   const d2 = new Date(checkout);
