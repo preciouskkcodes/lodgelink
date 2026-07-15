@@ -124,6 +124,8 @@ async function fetchListings() {
       imageUrl:        l.image_url || '',
       images:          Array.isArray(l.images) ? l.images : (l.image_url ? [l.image_url] : []),
       roomsAvailable:  l.rooms_available ?? l.total_rooms ?? 1,
+      ratingAvg:       l.rating_avg || 0,
+      reviewCount:     l.review_count || 0,
     }));
  
     renderList(allListings);
@@ -266,8 +268,9 @@ function buildCard(listing, allPrices) {
       ${isFullyBooked ? `<div class="fully-booked-overlay">🚫 Fully Booked</div>` : ''}
     </div>
     <div class="card-body" onclick="showListingDetails('${listing.id}')">
-      <h2 class="card-title">
+      <h2 class="card-title" style="display:flex; justify-content:space-between; align-items:flex-start;">
         <span>${listing.name}</span>
+        ${listing.ratingAvg > 0 ? `<span style="font-size:13px; font-weight:700; color:var(--text-dark); display:flex; align-items:center; gap:3px;"><span style="color:#E8A020;">★</span> ${Number(listing.ratingAvg).toFixed(1)} <span style="font-weight:400; color:var(--text-light); font-size:11px;">(${listing.reviewCount})</span></span>` : ''}
       </h2>
       <div class="card-type">${locText} • ${listing.roomType}</div>
       <div class="card-meta">
@@ -600,6 +603,12 @@ window.confirmReservation = async function() {
 
   if (!name || !email || !phone || !checkin || !checkout) {
     alert('Please fill in all required fields.');
+    return;
+  }
+  
+  const cleanPhone = phone.replace(/[^0-9+]/g, '');
+  if (cleanPhone.length < 10 || cleanPhone.length > 15) {
+    alert('Please enter a valid phone number (10-15 digits).');
     return;
   }
   
@@ -960,6 +969,14 @@ window.showListingDetails = function(listingId) {
         Only ${listing.roomsAvailable} room${listing.roomsAvailable !== 1 ? 's' : ''} left!
       </div>` : ''}
 
+      <div class="details-section-title" style="margin-top:40px; display:flex; justify-content:space-between; align-items:center;">
+        <div>Guest Reviews <span style="font-size:12px; color:var(--text-light); font-weight:400;">(${listing.reviewCount})</span></div>
+        <button onclick="showReviewModal('${listing.id}')" style="background:var(--navy); color:var(--white); border:none; padding:6px 12px; border-radius:12px; font-size:11px; font-weight:600; cursor:pointer;">Write Review</button>
+      </div>
+      <div id="reviews-container" style="margin-bottom:32px;">
+        <div style="font-size:13px; color:var(--text-light); padding:20px; text-align:center; background:#FAFCFF; border-radius:var(--radius-sm); border:1px dashed var(--border);">Loading reviews...</div>
+      </div>
+
     </div>
     
     <div class="details-sticky-footer" style="z-index:50;">
@@ -974,7 +991,37 @@ window.showListingDetails = function(listingId) {
     </div>
   `;
   showScreen('listing-details');
+  loadReviews(listing.id);
 };
+
+async function loadReviews(listingId) {
+  const container = document.getElementById('reviews-container');
+  if (!container) return;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/reviews?listing_id=eq.${listingId}&order=created_at.desc&limit=5`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    if (!res.ok) throw new Error('Failed to load reviews');
+    const reviews = await res.json();
+    
+    if (reviews.length === 0) {
+      container.innerHTML = '<div style="font-size:13px; color:var(--text-light); padding:20px; text-align:center; background:#FAFCFF; border-radius:var(--radius-sm); border:1px dashed var(--border);">No reviews yet. Be the first!</div>';
+      return;
+    }
+    
+    container.innerHTML = reviews.map(r => `
+      <div style="padding:16px; border:1px solid var(--border); border-radius:var(--radius-md); margin-bottom:12px; background:var(--white);">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <div style="font-weight:700; font-size:14px; color:var(--text-dark);">${r.guest_name || 'Guest'}</div>
+          <div style="color:#E8A020; font-size:12px;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+        </div>
+        <div style="font-size:13px; color:var(--text-mid); line-height:1.5;">"${r.comment}"</div>
+      </div>
+    `).join('');
+  } catch (err) {
+    container.innerHTML = '<div style="font-size:13px; color:var(--text-light); padding:10px; text-align:center;">Could not load reviews.</div>';
+  }
+}
 
 // ─── BOOKINGS SCREEN RENDERER ──────────────────────────────────────────────────
 function renderGuestBookings() {
@@ -1087,7 +1134,92 @@ function renderGuestBookings() {
         </div>
       </div>`;
   }).join('')}</div>`;
+  }).join('')}</div>`;
 }
+
+// ─── REVIEWS LOGIC ─────────────────────────────────────────────────────────────
+let activeReviewListingId = null;
+let selectedRating = 5;
+
+window.showReviewModal = function(listingId) {
+  activeReviewListingId = listingId;
+  selectedRating = 5;
+  document.getElementById('review-name').value = localStorage.getItem('ll_guest_name') || '';
+  document.getElementById('review-comment').value = '';
+  updateStarUI(5);
+  const overlay = document.getElementById('review-overlay');
+  if (overlay) overlay.classList.add('open');
+};
+
+window.closeReviewModal = function() {
+  const overlay = document.getElementById('review-overlay');
+  if (overlay) overlay.classList.remove('open');
+};
+
+function updateStarUI(val) {
+  document.querySelectorAll('.star-input').forEach(s => {
+    if (parseInt(s.getAttribute('data-val')) <= val) {
+      s.style.color = '#E8A020';
+    } else {
+      s.style.color = '#ccc';
+    }
+  });
+}
+
+document.querySelectorAll('.star-input').forEach(star => {
+  star.addEventListener('click', function() {
+    selectedRating = parseInt(this.getAttribute('data-val'));
+    updateStarUI(selectedRating);
+  });
+});
+
+window.submitReview = async function() {
+  const name = document.getElementById('review-name').value.trim();
+  const comment = document.getElementById('review-comment').value.trim();
+
+  if (!name || !comment) {
+    alert('Please enter your name and a comment.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-submit-review');
+  const origText = btn.textContent;
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+
+  try {
+    // 1. Insert review into Supabase
+    const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/reviews`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        listing_id: activeReviewListingId,
+        guest_name: name,
+        rating: selectedRating,
+        comment: comment
+      })
+    });
+
+    if (!insertRes.ok) throw new Error('Failed to submit review');
+
+    // 2. We skip updating the listing rating_avg manually here to keep it simple, 
+    // it's best done via Supabase Trigger or just read dynamically.
+    
+    alert('Review submitted successfully! Thank you.');
+    closeReviewModal();
+  } catch (err) {
+    console.error('Error submitting review:', err);
+    alert('Could not submit review at this time.');
+  } finally {
+    btn.textContent = origText;
+    btn.disabled = false;
+  }
+};
 
 function formatBookingDate(dateStr) {
   try {
