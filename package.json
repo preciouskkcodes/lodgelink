@@ -5,6 +5,7 @@
       "start": "npx serve . -l $PORT"
     },
     "dependencies": {
+      "nodemailer": "^6.9.13",
       "serve": "^14.2.6"
     }
   }
