@@ -1135,9 +1135,7 @@ function renderGuestBookings() {
         </div>
       </div>`;
   }).join('')}</div>`;
-  }).join('')}</div>`;
 }
-
 // ─── REVIEWS LOGIC ─────────────────────────────────────────────────────────────
 let activeReviewListingId = null;
 let selectedRating = 5;
