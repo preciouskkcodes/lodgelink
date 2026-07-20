@@ -604,7 +604,7 @@
         <div class="onboard-dot active"></div>
       </div>
       <h2 class="onboard-title">Book with Ease</h2>
-      <p class="onboard-desc">Secure your room with a ₦2,000 reservation fee via Paystack. Get instant confirmation and host bank details — no surprises on arrival.</p>
+      <p class="onboard-desc">Secure your room with just <strong>₦2,000</strong> or <strong>1 Espees</strong> via our secure payment gateway. Get instant confirmation and host contact details — no surprises on arrival.</p>
       <button class="onboard-btn" onclick="goToApp()" style="background:var(--gold);color:var(--navy);">
         Get Started
         <svg viewBox="0 0 24 24" fill="none">
@@ -648,13 +648,16 @@
     };
  
     function init() {
-      // If already onboarded — skip straight to app
-      if (hasSeenOnboarding()) {
+      // Check if user was sent here deliberately from landing page
+      const forceSplash = new URLSearchParams(window.location.search).get('show') === 'all';
+
+      // If already onboarded AND not forced — skip straight to app
+      if (hasSeenOnboarding() && !forceSplash) {
         setTimeout(() => {
           window.location.href = 'app.html';
         }, 1500);
       }
- 
+
       // Show splash, then transition to onboarding
       setTimeout(() => {
         showScreen('onboard-1');
