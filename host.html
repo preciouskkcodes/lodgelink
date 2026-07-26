@@ -635,10 +635,22 @@
     }
  
     async function updateReservation(id, status) {
+      // ── Step 1: Update Supabase (this is the critical part) ──
       try {
         await db.update('reservations', id, { status });
-        
-        // Trigger notification to guest if reservation is confirmed
+      } catch (err) {
+        showToast('Could not update reservation', 'error');
+        return; // Stop here — don't show success if the update failed
+      }
+
+      // ── Step 2: Show success toast immediately ──
+      showToast(
+        status === 'confirmed' ? '✓ Reservation confirmed!' : 'Reservation declined',
+        status === 'confirmed' ? 'success' : ''
+      );
+
+      // ── Step 3: Fire notification (non-critical, ignore any errors) ──
+      try {
         if (status === 'confirmed') {
           const r = allReservations.find(x => x.id === id);
           const roomName = r ? r.name || 'your room' : 'your room';
@@ -646,10 +658,10 @@
             addNotification('guest', 'Reservation Confirmed! 🎉', `Your reservation for ${roomName} has been confirmed by the host.`);
           }
         }
+      } catch (e) { /* Notification failure is non-critical */ }
 
-        showToast(status === 'confirmed' ? '✓ Reservation confirmed!' : 'Reservation declined', status === 'confirmed' ? 'success' : '');
-        loadDashboard();
-      } catch (err) { showToast('Could not update reservation', 'error'); }
+      // ── Step 4: Reload dashboard (non-critical, ignore any errors) ──
+      try { loadDashboard(); } catch (e) { /* Silently ignore UI refresh errors */ }
     }
  
     // ── ADD LISTING FORM ──
