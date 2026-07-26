@@ -423,11 +423,12 @@
       async update(table, id, data) {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
           method: 'PATCH',
-          headers: { ...HEADERS, 'Prefer': 'return=representation' },
+          headers: { ...HEADERS, 'Prefer': 'return=minimal' },
           body: JSON.stringify(data),
         });
         if (!res.ok) throw new Error(`UPDATE failed: ${res.status}`);
-        return res.json();
+        return true;
+
       }
     };
  
