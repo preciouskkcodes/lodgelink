@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
 
     if (!paymentUrl) {
       console.error('KingsPay missing payment URL:', data);
-      return res.status(502).json({ message: 'No payment URL returned', raw: data });
+      return res.status(502).json({ message: 'No payment URL returned. Raw response: ' + JSON.stringify(data), raw: data });
     }
 
     return res.status(200).json({ paymentUrl });
