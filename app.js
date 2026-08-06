@@ -652,7 +652,6 @@ window.confirmReservationEspees = async function() {
     reservation_fee: 2000,
     program:         'unspecified',
     status:          'pending',
-    payment_method:  'espees',
   };
 
   const btn = document.getElementById('btn-espees-confirm');
