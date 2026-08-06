@@ -355,7 +355,9 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       const isKingsPaySuccess = await handleKingsPayCallback();
-      // If handleKingsPayCallback fails and redirects, the page will unload.
+      if (isKingsPaySuccess === false) {
+        return; // Redirecting, do not show success UI
+      }
       // Otherwise, we can safely unhide the card and load details.
       document.getElementById('main-card').style.display = 'block';
       loadReservationAndHostDetails();
