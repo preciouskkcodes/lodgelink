@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        amount: 1,
+        amount: 100,
         currency: 'ESP',
         payment_type: 'espees',
         description: 'LodgeLink Room Reservation - ' + (guestName || 'Guest'),
