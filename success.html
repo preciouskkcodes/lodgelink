@@ -152,7 +152,7 @@
   </style>
 </head>
 <body>
-  <div class="card">
+  <div class="card" id="main-card" style="display: none;">
  
     <!-- ── SUCCESS HEADER ── -->
     <div class="success-header">
@@ -354,7 +354,10 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      await handleKingsPayCallback();
+      const isKingsPaySuccess = await handleKingsPayCallback();
+      // If handleKingsPayCallback fails and redirects, the page will unload.
+      // Otherwise, we can safely unhide the card and load details.
+      document.getElementById('main-card').style.display = 'block';
       loadReservationAndHostDetails();
     });
   </script>
