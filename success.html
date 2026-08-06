@@ -304,7 +304,39 @@
       }
     }
  
-    document.addEventListener('DOMContentLoaded', loadReservationAndHostDetails);
+    // ── Handle KingsPay (Espees) redirect ──
+    async function handleKingsPayCallback() {
+      const params = new URLSearchParams(window.location.search);
+      const provider = params.get('provider');
+      const reservationId = params.get('reservation_id');
+
+      if (provider !== 'kingspay' || !reservationId) return false;
+
+      // Mark reservation as paid in Supabase
+      try {
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/reservations?id=eq.${reservationId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal',
+            },
+            body: JSON.stringify({ status: 'paid', payment_method: 'espees' }),
+          }
+        );
+      } catch (e) {
+        console.warn('Could not update reservation via KingsPay callback:', e);
+      }
+      return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await handleKingsPayCallback();
+      loadReservationAndHostDetails();
+    });
   </script>
 </body>
 </html>

@@ -604,6 +604,115 @@ window.confirmReservation = async function() {
     btn.disabled = false;
   }
 };
+
+// ─── ESPEES / KINGSPAY PAYMENT ────────────────────────────────────────────────
+window.confirmReservationEspees = async function() {
+  const name     = document.getElementById('input-name').value.trim();
+  const email    = document.getElementById('input-email').value.trim();
+  const phone    = document.getElementById('input-phone').value.trim();
+  const guests   = document.getElementById('input-guests').value;
+  const checkin  = document.getElementById('input-checkin').value;
+  const checkout = document.getElementById('input-checkout').value;
+  const cleanPhone = phone.replace(/\s+/g, '');
+  const isIntl = /^\+\d{10,15}$/.test(cleanPhone);
+
+  if (!name || !email || !phone || !checkin || !checkout) {
+    alert('Please fill in all required fields.');
+    return;
+  }
+  if (!isIntl) {
+    alert('Please enter a valid international phone number starting with + (e.g. +2348012345678).');
+    return;
+  }
+
+  const d1 = new Date(checkin);
+  const d2 = new Date(checkout);
+  const nights = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+  if (nights <= 0) {
+    alert('Check-out date must be after check-in date.');
+    return;
+  }
+
+  // Save guest details for repeat visits
+  localStorage.setItem('ll_guest_name', name);
+  localStorage.setItem('ll_guest_email', email);
+  localStorage.setItem('ll_guest_phone', cleanPhone);
+
+  const record = {
+    listing_id:      activeReservation.listingId,
+    guest_name:      name,
+    guest_email:     email,
+    guest_phone:     cleanPhone,
+    guests:          parseInt(guests, 10),
+    checkin,
+    checkout,
+    nights,
+    price_per_night: activeReservation.pricePerNight,
+    total_cost:      nights * activeReservation.pricePerNight,
+    reservation_fee: 2000,
+    program:         'unspecified',
+    status:          'pending',
+    payment_method:  'espees',
+  };
+
+  const btn = document.getElementById('btn-espees-confirm');
+  const originalText = btn.textContent;
+  btn.textContent = 'Processing...';
+  btn.disabled = true;
+
+  try {
+    // 1. Save reservation to Supabase first
+    const saved = await db.insert('reservations', record);
+    if (!saved || !saved[0] || !saved[0].id) {
+      throw new Error('Could not connect to server. Check your internet.');
+    }
+    const realId = saved[0].id;
+
+    // 2. Save local record for success page
+    const localRecord = {
+      ...record,
+      id:              realId,
+      propertyName:    activeReservation.propertyName,
+      pricePerNight:   activeReservation.pricePerNight,
+      totalCost:       record.total_cost,
+      total:           record.total_cost,
+      guestName:       name,
+      paymentMethod:   'espees',
+      image:           activeReservation.imageUrl || activeReservation.image || '',
+      hostPhone:       activeReservation.hostPhone || '',
+      hostBankName:    activeReservation.hostBankName || '',
+      hostBankAccount: activeReservation.hostBankAccount || '',
+      hostBankBank:    activeReservation.hostBankBank || '',
+      timestamp:       new Date().toISOString(),
+      status:          'paid',
+    };
+    const records = loadData();
+    records.push(localRecord);
+    saveData(records);
+
+    // 3. Call our secure backend to get KingsPay payment URL
+    const initRes = await fetch('/api/kingspay-init', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reservationId: realId, guestName: name }),
+    });
+
+    const initData = await initRes.json();
+
+    if (!initRes.ok || !initData.paymentUrl) {
+      throw new Error(initData.message || 'Could not initialise Espees payment. Please try again.');
+    }
+
+    // 4. Redirect guest to KingsPay Espees checkout
+    window.location.href = initData.paymentUrl;
+
+  } catch (err) {
+    alert('Espees payment error: ' + err.message);
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+};
+
  
 // ─── PRE-PAY FLOW ─────────────────────────────────────────────────────────────
 function openPrePay(record) {
