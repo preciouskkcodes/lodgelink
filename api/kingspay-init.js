@@ -1,4 +1,4 @@
-﻿// api/kingspay-init.js
+// api/kingspay-init.js
 // Secure serverless function - initializes a KingsPay Espees payment.
 // The secret key never touches the browser.
 
@@ -45,7 +45,8 @@ module.exports = async (req, res) => {
 
     if (!kpRes.ok) {
       console.error('KingsPay error:', data);
-      return res.status(502).json({ message: 'KingsPay error', detail: data });
+      const kpErrorMsg = data.message || data.error || JSON.stringify(data);
+      return res.status(502).json({ message: 'KingsPay API says: ' + kpErrorMsg, detail: data });
     }
 
     // KingsPay returns payment URL in various possible fields
