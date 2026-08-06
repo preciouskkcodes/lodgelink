@@ -312,8 +312,25 @@
 
       if (provider !== 'kingspay' || !reservationId) return false;
 
-      // Mark reservation as paid in Supabase
+      // Verify with backend
+      const paymentId = localStorage.getItem('kingspay_id_' + reservationId);
+      if (!paymentId) {
+        alert('Could not verify KingsPay payment (missing payment ID).');
+        window.location.href = 'index.html';
+        return false;
+      }
+
       try {
+        const verifyRes = await fetch(`/api/kingspay-verify?payment_id=${paymentId}`);
+        const verifyData = await verifyRes.json();
+        
+        if (!verifyData.success) {
+          alert('KingsPay Payment was not successful. Status: ' + (verifyData.status || 'Failed'));
+          window.location.href = 'index.html';
+          return false;
+        }
+
+        // Mark reservation as paid in Supabase only if KingsPay confirmed it
         await fetch(
           `${SUPABASE_URL}/rest/v1/reservations?id=eq.${reservationId}`,
           {
@@ -327,10 +344,13 @@
             body: JSON.stringify({ status: 'paid', payment_method: 'espees' }),
           }
         );
+        return true;
       } catch (e) {
         console.warn('Could not update reservation via KingsPay callback:', e);
+        alert('Error verifying payment.');
+        window.location.href = 'index.html';
+        return false;
       }
-      return true;
     }
 
     document.addEventListener('DOMContentLoaded', async () => {

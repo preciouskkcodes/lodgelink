@@ -64,7 +64,7 @@ module.exports = async (req, res) => {
       return res.status(502).json({ message: 'No payment URL returned. Raw response: ' + JSON.stringify(data), raw: data });
     }
 
-    return res.status(200).json({ paymentUrl });
+    return res.status(200).json({ paymentUrl, paymentId: data.payment_id });
 
   } catch (err) {
     console.error('KingsPay init error:', err.message);

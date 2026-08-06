@@ -703,6 +703,9 @@ window.confirmReservationEspees = async function() {
     }
 
     // 4. Redirect guest to KingsPay Espees checkout
+    if (initData.paymentId) {
+      localStorage.setItem('kingspay_id_' + realId, initData.paymentId);
+    }
     window.location.href = initData.paymentUrl;
 
   } catch (err) {
