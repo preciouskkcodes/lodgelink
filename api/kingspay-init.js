@@ -36,6 +36,7 @@ module.exports = async (req, res) => {
       body: JSON.stringify({
         amount: 1,
         currency: 'ESP',
+        payment_type: 'espees',
         description: 'LodgeLink Room Reservation - ' + (guestName || 'Guest'),
         merchant_callback_url: callbackUrl,
       }),
