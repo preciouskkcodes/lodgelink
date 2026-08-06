@@ -51,9 +51,13 @@ module.exports = async (req, res) => {
     }
 
     // KingsPay returns payment URL in various possible fields
-    const paymentUrl =
+    let paymentUrl =
       data.payment_url || data.checkout_url || data.url ||
       (data.data && (data.data.payment_url || data.data.checkout_url || data.data.url));
+
+    if (!paymentUrl && data.payment_id) {
+      paymentUrl = 'https://kingspay-gs.com/payment?id=' + data.payment_id;
+    }
 
     if (!paymentUrl) {
       console.error('KingsPay missing payment URL:', data);
