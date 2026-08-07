@@ -1136,7 +1136,10 @@
       const sendBtn = document.getElementById('chat-send-btn');
       const text = input.value.trim();
       
-      if (!text && !pendingChatImage) return;
+      if (!text && !pendingChatImage) {
+        alert("Please enter a message or attach an image first.");
+        return;
+      }
       if (!currentChatReservationId) return;
       
       const originalBtnText = sendBtn.textContent;
