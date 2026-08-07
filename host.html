@@ -133,7 +133,7 @@
       display: flex; flex-direction: column; gap: 12px;
       background: #fafafa;
     }
-    .msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+    .msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap; }
     .msg.host { background: var(--navy); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
     .msg.guest { background: #e0e0e0; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
     .chat-input-area {
@@ -1022,12 +1022,13 @@
         const r = window.hostReservations.find(res => res.id === currentChatReservationId);
         if (r && r._listing) {
           const l = r._listing;
+          const guestFirstName = r.guest_name ? r.guest_name.split(' ')[0] : 'Guest';
           const cost = r.total_cost ? `₦${Number(r.total_cost).toLocaleString('en-NG')}` : '';
           const bankDetails = (l.host_bank_name && l.host_bank_account) ? 
             `\n\nBank: ${l.host_bank_bank || '—'}\nAccount Number: ${l.host_bank_account}\nAccount Name: ${l.host_bank_name}` : '\n\n(No bank details added to listing)';
-          input.value = `Hello! Your reservation with ${l.name} is confirmed. To fully secure your room, please transfer ${cost} to:${bankDetails}\n\nKindly send your proof of payment (POP) here once done.`;
+          input.value = `Hello ${guestFirstName},\nYour reservation with ${l.name} is confirmed. To fully secure your room, please transfer ${cost} to:${bankDetails}\n\nKindly send your proof of payment (POP) here once done.`;
         } else {
-          input.value = "Hello! Your reservation is confirmed. Please transfer the payment and send the proof of payment (POP) here to fully secure your room.";
+          input.value = "Hello!\nYour reservation is confirmed. Please transfer the payment and send the proof of payment (POP) here to fully secure your room.";
         }
       } else {
         input.value = text;
