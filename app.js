@@ -1385,7 +1385,7 @@ document.addEventListener('DOMContentLoaded', () => {
   init();
   
   // Poll for unread messages on app dashboard
-  setInterval(async () => {
+  async function checkUnreadApp() {
     const records = loadData();
     if (!records || records.length === 0) return;
     
@@ -1393,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (activeIds.length === 0) return;
     
     try {
-      const list = activeIds.map(id => `"${id}"`).join(',');
+      const list = activeIds.join(',');
       const res = await fetch(`${SUPABASE_URL}/rest/v1/messages?reservation_id=in.(${list})&select=reservation_id,sender_type,created_at`, {
         headers: {
           'apikey': SUPABASE_KEY,
@@ -1414,6 +1414,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
       console.error('Error polling unread messages:', e);
     }
-  }, 5000);
+  }
+
+  checkUnreadApp();
+  setInterval(checkUnreadApp, 5000);
 });
  
