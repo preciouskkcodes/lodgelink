@@ -1065,7 +1065,6 @@
       document.getElementById('chat-header-title').textContent = `Chat with ${guestName}`;
       document.getElementById('chat-overlay').classList.add('open');
       document.getElementById('chat-modal').classList.add('open');
-      localStorage.setItem('chat_last_seen_' + reservationId, Date.now());
       const badge = document.getElementById('badge-' + reservationId);
       if (badge) badge.style.display = 'none';
       fetchMessages();
@@ -1094,13 +1093,19 @@
 
     async function fetchMessages() {
       if (!currentChatReservationId) return;
-      localStorage.setItem('chat_last_seen_' + currentChatReservationId, Date.now());
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/messages?reservation_id=eq.${currentChatReservationId}&order=created_at.asc`, {
           headers: HEADERS
         });
         if (!res.ok) return;
         const msgs = await res.json();
+        
+        if (msgs.length > 0) {
+          localStorage.setItem('chat_last_seen_' + currentChatReservationId, new Date(msgs[msgs.length - 1].created_at).getTime());
+        } else {
+          localStorage.setItem('chat_last_seen_' + currentChatReservationId, Date.now());
+        }
+        
         const container = document.getElementById('chat-messages');
         
         const currentMsgCount = container.children.length;
