@@ -1045,7 +1045,11 @@
         const r = window.hostReservations.find(res => res.id === currentChatReservationId);
         if (r && r._listing) {
           const guestFirstName = r.guest_name ? r.guest_name.split(' ')[0] : 'Guest';
-          input.value = `Hello ${guestFirstName},\nI have received your payment. Your reservation is now fully confirmed! We look forward to hosting you.`;
+          const lodgeName = r._listing.name || 'our lodge';
+          const cost = r.total_cost ? `₦${Number(r.total_cost).toLocaleString('en-NG')}` : 'your payment';
+          const nightsText = r.nights ? (r.nights == 1 ? '1-night' : `${r.nights}-night`) : '';
+          
+          input.value = `Hello ${guestFirstName},\nI have received your payment of ${cost} for a ${nightsText} stay at ${lodgeName}. Your reservation is now fully confirmed! We look forward to hosting you.`;
         } else {
           input.value = "Hello,\nI have received your payment. Your reservation is now fully confirmed! We look forward to hosting you.";
         }
