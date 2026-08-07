@@ -631,9 +631,13 @@
         const allReservations = [];
         for (const listing of listings) {
           const res = await db.get('reservations', { listing_id: listing.id });
-          res.forEach(r => { r._listing_name = listing.name; });
+          res.forEach(r => { 
+            r._listing_name = listing.name; 
+            r._listing = listing; 
+          });
           allReservations.push(...res);
         }
+        window.hostReservations = allReservations;
         renderReservations(allReservations);
         document.getElementById('stat-listings').textContent  = listings.length;
         document.getElementById('stat-pending').textContent   = allReservations.filter(r => r.status === 'pending').length;
@@ -997,7 +1001,7 @@
       <!-- Messages appear here -->
     </div>
     <div class="quick-replies">
-      <button class="quick-reply-btn" onclick="useQuickReply('Hello! Your booking is confirmed. When will you arrive?')">Booking confirmed</button>
+      <button class="quick-reply-btn" onclick="useQuickReply('payment')">Request Payment</button>
       <button class="quick-reply-btn" onclick="useQuickReply('Here are the directions to the lodge: ')">Directions</button>
       <button class="quick-reply-btn" onclick="useQuickReply('Let me know when you are close so I can receive you.')">Arriving soon</button>
     </div>
@@ -1010,10 +1014,24 @@
   <script>
     let currentChatReservationId = null;
     let chatPollingInterval = null;
+    window.hostReservations = [];
 
     function useQuickReply(text) {
       const input = document.getElementById('chat-input');
-      input.value = text;
+      if (text === 'payment') {
+        const r = window.hostReservations.find(res => res.id === currentChatReservationId);
+        if (r && r._listing) {
+          const l = r._listing;
+          const cost = r.total_cost ? `₦${Number(r.total_cost).toLocaleString('en-NG')}` : '';
+          const bankDetails = (l.host_bank_name && l.host_bank_account) ? 
+            `\n\nBank: ${l.host_bank_bank || '—'}\nAccount Number: ${l.host_bank_account}\nAccount Name: ${l.host_bank_name}` : '\n\n(No bank details added to listing)';
+          input.value = `Hello! Your reservation with ${l.name} is confirmed. To fully secure your room, please transfer ${cost} to:${bankDetails}\n\nKindly send your proof of payment (POP) here once done.`;
+        } else {
+          input.value = "Hello! Your reservation is confirmed. Please transfer the payment and send the proof of payment (POP) here to fully secure your room.";
+        }
+      } else {
+        input.value = text;
+      }
       input.focus();
     }
 
