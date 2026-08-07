@@ -140,9 +140,10 @@
       padding: 16px; border-top: 1px solid #eee;
       display: flex; gap: 10px; background: white;
     }
-    .chat-input-area input {
+    .chat-input-area textarea {
       flex: 1; padding: 12px; border: 1px solid var(--border);
       border-radius: 20px; outline: none; font-size: 14px; font-family: var(--font-body);
+      resize: none; height: 44px; overflow: hidden; line-height: 1.4;
     }
     .chat-input-area button {
       background: var(--navy); color: white; border: none;
@@ -1006,7 +1007,7 @@
       <button class="quick-reply-btn" onclick="useQuickReply('Let me know when you are close so I can receive you.')">Arriving soon</button>
     </div>
     <div class="chat-input-area">
-      <input type="text" id="chat-input" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') sendMessage('host')" />
+      <textarea id="chat-input" placeholder="Type a message..." onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage('host'); }"></textarea>
       <button onclick="sendMessage('host')">Send</button>
     </div>
   </div>
