@@ -691,8 +691,9 @@
             <a href="https://wa.me/${r.guest_phone.replace(/^0/, '234').replace('+', '')}?text=Hi%20${encodeURIComponent(r.guest_name)},%20about%20your%20reservation%20for%20${encodeURIComponent(r._listing_name || 'LodgeLink')}%20..." target="_blank" style="flex:1; display:flex; justify-content:center; align-items:center; gap:6px; padding:8px; background:#25D366; color:white; text-decoration:none; border-radius:6px; font-size:13px; font-weight:600;">
               📱 WhatsApp
             </a>
-            <button onclick="openChat('${r.id}', '${(r.guest_name || 'Guest').replace(/'/g, "\\'")}')" style="flex:1; display:flex; justify-content:center; align-items:center; gap:6px; padding:8px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">
+            <button id="chat-btn-${r.id}" onclick="openChat('${r.id}', '${(r.guest_name || 'Guest').replace(/'/g, "\\'")}')" style="flex:1; display:flex; justify-content:center; align-items:center; gap:6px; padding:8px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; position:relative;">
               💬 Chat
+              <span id="badge-${r.id}" style="display:none; position:absolute; top:-6px; right:-6px; background:#E02424; color:white; border-radius:10px; padding:2px 6px; font-size:10px; line-height:1.2;">New</span>
             </button>
           </div>
 
@@ -1064,6 +1065,9 @@
       document.getElementById('chat-header-title').textContent = `Chat with ${guestName}`;
       document.getElementById('chat-overlay').classList.add('open');
       document.getElementById('chat-modal').classList.add('open');
+      localStorage.setItem('chat_last_seen_' + reservationId, Date.now());
+      const badge = document.getElementById('badge-' + reservationId);
+      if (badge) badge.style.display = 'none';
       fetchMessages();
       chatPollingInterval = setInterval(fetchMessages, 3000);
     }
@@ -1090,6 +1094,7 @@
 
     async function fetchMessages() {
       if (!currentChatReservationId) return;
+      localStorage.setItem('chat_last_seen_' + currentChatReservationId, Date.now());
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/messages?reservation_id=eq.${currentChatReservationId}&order=created_at.asc`, {
           headers: HEADERS
@@ -1186,6 +1191,38 @@
         input.value = '';
       }
     }
+    // Unread Messages Polling
+    async function checkUnreadMessagesHost() {
+      if (!window.hostReservations || window.hostReservations.length === 0) return;
+      const resIds = window.hostReservations.map(r => r.id).join(',');
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/messages?reservation_id=in.(${resIds})&select=reservation_id,sender_type,created_at`, {
+          headers: HEADERS
+        });
+        if (!res.ok) return;
+        const msgs = await res.json();
+        
+        window.hostReservations.forEach(r => {
+          const lastSeen = parseInt(localStorage.getItem('chat_last_seen_' + r.id) || '0');
+          const hasUnread = msgs.some(m => m.reservation_id === r.id && m.sender_type === 'guest' && new Date(m.created_at).getTime() > lastSeen);
+          const badge = document.getElementById('badge-' + r.id);
+          // Only show badge if chat is not currently open for this reservation
+          if (badge) {
+            if (hasUnread && currentChatReservationId !== r.id) {
+              badge.style.display = 'flex';
+            } else {
+              badge.style.display = 'none';
+            }
+          }
+        });
+      } catch (e) {
+        console.error('Error checking unread messages:', e);
+      }
+    }
+    
+    // Check unread messages every 5 seconds
+    setInterval(checkUnreadMessagesHost, 5000);
+
   </script>
 </body>
 </html>
