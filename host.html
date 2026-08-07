@@ -1003,6 +1003,7 @@
     </div>
     <div class="quick-replies">
       <button class="quick-reply-btn" onclick="useQuickReply('payment')">Request Payment</button>
+      <button class="quick-reply-btn" onclick="useQuickReply('payment_received')">Payment Confirmed</button>
       <button class="quick-reply-btn" onclick="useQuickReply('Here are the directions to the lodge: ')">Directions</button>
       <button class="quick-reply-btn" onclick="useQuickReply('Let me know when you are close so I can receive you.')">Arriving soon</button>
     </div>
@@ -1039,6 +1040,14 @@
           input.value = `Hello ${guestFirstName},\nYour reservation with ${l.name} is confirmed. To fully secure your room, please transfer ${cost} to:${bankDetails}\n\nKindly send your proof of payment (POP) here once done.`;
         } else {
           input.value = "Hello!\nYour reservation is confirmed. Please transfer the payment and send the proof of payment (POP) here to fully secure your room.";
+        }
+      } else if (text === 'payment_received') {
+        const r = window.hostReservations.find(res => res.id === currentChatReservationId);
+        if (r && r._listing) {
+          const guestFirstName = r.guest_name ? r.guest_name.split(' ')[0] : 'Guest';
+          input.value = `Hello ${guestFirstName},\nI have received your payment. Your reservation is now fully confirmed! We look forward to hosting you.`;
+        } else {
+          input.value = "Hello,\nI have received your payment. Your reservation is now fully confirmed! We look forward to hosting you.";
         }
       } else {
         input.value = text;
