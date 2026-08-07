@@ -103,6 +103,57 @@
     .form-step.done .form-step-label{color:var(--success);}
     .back-link{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-mid);cursor:pointer;margin-bottom:20px;width:fit-content;}
     .back-link:hover{color:var(--navy);}
+
+    /* CHAT UI */
+    .chat-modal {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: white;
+      border-top-left-radius: 20px; border-top-right-radius: 20px;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+      display: flex; flex-direction: column;
+      height: 75vh;
+      transform: translateY(100%); transition: transform 0.3s ease;
+      z-index: 2000;
+      max-width: 480px; margin: 0 auto; /* Match container */
+    }
+    .chat-modal.open { transform: translateY(0); }
+    .chat-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #eee;
+      display: flex; justify-content: space-between; align-items: center;
+      background: #f8f9fa;
+      border-top-left-radius: 20px; border-top-right-radius: 20px;
+    }
+    .chat-header h3 { margin: 0; font-size: 16px; color: var(--navy); font-family: var(--font-head); }
+    .chat-header button {
+      background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-light);
+    }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 20px;
+      display: flex; flex-direction: column; gap: 12px;
+      background: #fafafa;
+    }
+    .msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+    .msg.host { background: var(--navy); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .msg.guest { background: #e0e0e0; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
+    .chat-input-area {
+      padding: 16px; border-top: 1px solid #eee;
+      display: flex; gap: 10px; background: white;
+    }
+    .chat-input-area input {
+      flex: 1; padding: 12px; border: 1px solid var(--border);
+      border-radius: 20px; outline: none; font-size: 14px; font-family: var(--font-body);
+    }
+    .chat-input-area button {
+      background: var(--navy); color: white; border: none;
+      padding: 0 20px; border-radius: 20px; font-weight: bold; cursor: pointer; font-family: var(--font-body);
+    }
+    .chat-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none;
+      transition: opacity 0.3s; z-index: 1999;
+    }
+    .chat-overlay.open { opacity: 1; pointer-events: all; }
   </style>
 </head>
 <body>
@@ -620,10 +671,13 @@
           <div class="reservation-detail">🗓️ ${r.checkin ? `${new Date(r.checkin).toLocaleDateString('en-GB', {day:'numeric', month:'short'})} - ${r.checkout ? new Date(r.checkout).toLocaleDateString('en-GB', {day:'numeric', month:'short'}) : '?'} (${r.nights} nights)` : `${r.nights} nights`} · ${r.guests} guest${r.guests !== 1 ? 's' : ''}</div>
           <div class="reservation-detail">💰 ₦${Number(r.total_cost).toLocaleString('en-NG')} on arrival</div>
           
-          <div style="margin-top:10px;">
-            <a href="https://wa.me/${r.guest_phone.replace(/^0/, '234').replace('+', '')}?text=Hi%20${encodeURIComponent(r.guest_name)},%20about%20your%20reservation%20for%20${encodeURIComponent(r._listing_name || 'LodgeLink')}%20..." target="_blank" style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:#25D366; color:white; text-decoration:none; border-radius:6px; font-size:13px; font-weight:600;">
-              📱 Message Guest
+          <div style="margin-top:10px; display:flex; gap:8px;">
+            <a href="https://wa.me/${r.guest_phone.replace(/^0/, '234').replace('+', '')}?text=Hi%20${encodeURIComponent(r.guest_name)},%20about%20your%20reservation%20for%20${encodeURIComponent(r._listing_name || 'LodgeLink')}%20..." target="_blank" style="flex:1; display:flex; justify-content:center; align-items:center; gap:6px; padding:8px; background:#25D366; color:white; text-decoration:none; border-radius:6px; font-size:13px; font-weight:600;">
+              📱 WhatsApp
             </a>
+            <button onclick="openChat('${r.id}', '${(r.guest_name || 'Guest').replace(/'/g, "\\'")}')" style="flex:1; display:flex; justify-content:center; align-items:center; gap:6px; padding:8px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">
+              💬 Chat
+            </button>
           </div>
 
           ${r.status === 'pending' ? `
@@ -915,11 +969,88 @@
       window.addEventListener('storage', () => {
         window.renderNotifications(recipient);
       });
-      
       window.renderNotifications(recipient);
     }
 
     document.addEventListener('DOMContentLoaded', init);
+  </script>
+
+  <!-- CHAT MODAL -->
+  <div class="chat-overlay" id="chat-overlay" onclick="closeChat()"></div>
+  <div id="chat-modal" class="chat-modal">
+    <div class="chat-header">
+      <h3 id="chat-header-title">Chat with Guest</h3>
+      <button onclick="closeChat()">✕</button>
+    </div>
+    <div id="chat-messages" class="chat-messages">
+      <!-- Messages appear here -->
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="chat-input" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') sendMessage('host')" />
+      <button onclick="sendMessage('host')">Send</button>
+    </div>
+  </div>
+
+  <script>
+    let currentChatReservationId = null;
+    let chatPollingInterval = null;
+
+    function openChat(reservationId, guestName) {
+      currentChatReservationId = reservationId;
+      document.getElementById('chat-header-title').textContent = `Chat with ${guestName}`;
+      document.getElementById('chat-overlay').classList.add('open');
+      document.getElementById('chat-modal').classList.add('open');
+      fetchMessages();
+      chatPollingInterval = setInterval(fetchMessages, 3000);
+    }
+
+    function closeChat() {
+      document.getElementById('chat-overlay').classList.remove('open');
+      document.getElementById('chat-modal').classList.remove('open');
+      if (chatPollingInterval) {
+        clearInterval(chatPollingInterval);
+        chatPollingInterval = null;
+      }
+    }
+
+    async function fetchMessages() {
+      if (!currentChatReservationId) return;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/messages?reservation_id=eq.${currentChatReservationId}&order=created_at.asc`, {
+          headers: HEADERS
+        });
+        if (!res.ok) return;
+        const msgs = await res.json();
+        const container = document.getElementById('chat-messages');
+        
+        const currentMsgCount = container.children.length;
+        if (msgs.length > currentMsgCount || currentMsgCount === 0) {
+          container.innerHTML = msgs.map(m => `<div class="msg ${m.sender_type}">${m.content}</div>`).join('');
+          container.scrollTop = container.scrollHeight;
+        }
+      } catch(e) { console.error('Error fetching messages:', e); }
+    }
+
+    async function sendMessage(senderType) {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text || !currentChatReservationId) return;
+      
+      input.value = '';
+      
+      const container = document.getElementById('chat-messages');
+      container.innerHTML += `<div class="msg ${senderType}">${text}</div>`;
+      container.scrollTop = container.scrollHeight;
+      
+      try {
+        await db.insert('messages', {
+          reservation_id: currentChatReservationId,
+          sender_type: senderType,
+          content: text
+        });
+        fetchMessages();
+      } catch(e) { console.error('Error sending message:', e); }
+    }
   </script>
 </body>
 </html>

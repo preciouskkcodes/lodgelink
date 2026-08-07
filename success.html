@@ -149,6 +149,63 @@
  
     /* Hide host section until data loads */
     #host-section { display: none; }
+
+    /* CHAT UI */
+    .chat-modal {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: white;
+      border-top-left-radius: 20px; border-top-right-radius: 20px;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+      display: flex; flex-direction: column;
+      height: 75vh;
+      transform: translateY(100%); transition: transform 0.3s ease;
+      z-index: 1000;
+      max-width: 420px; margin: 0 auto; /* Match container */
+    }
+    .chat-modal.open { transform: translateY(0); }
+    .chat-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #eee;
+      display: flex; justify-content: space-between; align-items: center;
+      background: #f8f9fa;
+      border-top-left-radius: 20px; border-top-right-radius: 20px;
+    }
+    .chat-header h3 { margin: 0; font-size: 16px; color: #0B1F3A; }
+    .chat-header button {
+      background: none; border: none; font-size: 20px; cursor: pointer; color: #555;
+    }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 20px;
+      display: flex; flex-direction: column; gap: 12px;
+      background: #fafafa;
+    }
+    .msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+    .msg.guest { background: #E05C2A; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .msg.host { background: #e0e0e0; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
+    .chat-input-area {
+      padding: 16px; border-top: 1px solid #eee;
+      display: flex; gap: 10px; background: white;
+    }
+    .chat-input-area input {
+      flex: 1; padding: 12px; border: 1px solid #ddd;
+      border-radius: 20px; outline: none; font-size: 14px;
+    }
+    .chat-input-area button {
+      background: #E05C2A; color: white; border: none;
+      padding: 0 20px; border-radius: 20px; font-weight: bold; cursor: pointer;
+    }
+    .chat-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none;
+      transition: opacity 0.3s; z-index: 999;
+    }
+    .chat-overlay.open { opacity: 1; pointer-events: all; }
+    .btn-chat {
+      display: block; width: 100%; padding: 16px;
+      background: #3D5A80; color: white; border: none; border-radius: 14px;
+      font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+      text-decoration: none; cursor: pointer; margin-bottom: 16px; text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -209,9 +266,10 @@
       </div>
  
       <!-- WhatsApp button -->
-      <a id="btn-whatsapp" href="#" class="btn-whatsapp" target="_blank">
+      <a id="btn-whatsapp" href="#" class="btn-whatsapp" target="_blank" style="margin-bottom:10px;">
         📲 Send Payment Screenshot on WhatsApp
       </a>
+      <button class="btn-chat" onclick="openChat()">💬 Chat with Host in LodgeLink</button>
  
       <!-- Notice -->
       <div class="box box-gold" style="margin-bottom:16px;">
@@ -231,10 +289,29 @@
  
   </div>
  
+  <!-- CHAT MODAL -->
+  <div class="chat-overlay" id="chat-overlay" onclick="closeChat()"></div>
+  <div id="chat-modal" class="chat-modal">
+    <div class="chat-header">
+      <h3>Chat with Host</h3>
+      <button onclick="closeChat()">✕</button>
+    </div>
+    <div id="chat-messages" class="chat-messages">
+      <!-- Messages appear here -->
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="chat-input" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') sendMessage('guest')" />
+      <button onclick="sendMessage('guest')">Send</button>
+    </div>
+  </div>
+ 
   <script>
     const SUPABASE_URL = 'https://zomcrvfekwihqrrqvifi.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_lC9xUJnLXMF5saz5Y6JYag_JGzmP6fD';
  
+    let currentChatReservationId = null;
+    let chatPollingInterval = null;
+
     function formatPrice(n) {
       return '₦' + Number(n).toLocaleString('en-NG');
     }
@@ -246,7 +323,10 @@
         const raw = localStorage.getItem('lodgelink_reservations_v1');
         if (raw) {
           const all = JSON.parse(raw);
-          if (all.length > 0) record = all[all.length - 1]; // most recent
+          if (all.length > 0) {
+            record = all[all.length - 1]; // most recent
+            currentChatReservationId = record.id;
+          }
         }
       } catch (e) {
         console.error('Could not read localStorage:', e);
