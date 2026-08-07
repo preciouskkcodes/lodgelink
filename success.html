@@ -477,7 +477,6 @@
           document.getElementById('host-bank').textContent        = listing.host_bank_bank     || '—';
           document.getElementById('host-acct-number').textContent = listing.host_bank_account  || '—';
           document.getElementById('host-amount').textContent      = formatPrice(record.total_cost);
-          document.getElementById('host-phone').textContent       = listing.host_phone         || '—';
  
           // WhatsApp deep link
           const phone = (listing.host_phone || '').replace(/\D/g, '');
