@@ -390,7 +390,7 @@
       const provider = params.get('provider');
       const reservationId = params.get('reservation_id');
 
-      if (provider !== 'kingspay' || !reservationId) return false;
+      if (provider !== 'kingspay' || !reservationId) return null;
 
       // Verify with backend
       const paymentId = localStorage.getItem('kingspay_id_' + reservationId);

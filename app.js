@@ -587,8 +587,7 @@ window.confirmReservation = async function() {
 
         closeModal();
         alert('Payment complete! Reference: ' + response.reference);
-        showScreen('bookings');
-        renderGuestBookings();
+        window.location.href = 'success.html';
       },
       onClose: function() {
         alert('Payment cancelled. Your reservation is still pending.');
