@@ -531,7 +531,7 @@
           <div class="table-title">All Reservations</div>
           <div style="display:flex; gap:8px; align-items:center;">
             <span class="table-count" id="reservations-count">Loading...</span>
-            <button class="btn-refresh" onclick="clearAllReservations()" style="color:var(--error); border-color:var(--error);">🗑️ Clear All</button>
+            <button class="btn-refresh" onclick="deleteSelectedReservations()" style="color:var(--error); border-color:var(--error);">🗑️ Delete Selected</button>
             <button class="btn-refresh" onclick="loadDashboard()">↻ Refresh</button>
           </div>
         </div>
@@ -539,6 +539,7 @@
           <table>
             <thead>
               <tr>
+                <th style="width:40px;"><input type="checkbox" id="selectAllRes" onclick="toggleAllRes(this)" style="cursor:pointer;" /></th>
                 <th>Guest</th>
                 <th>Phone</th>
                 <th>Property</th>
@@ -551,7 +552,7 @@
               </tr>
             </thead>
             <tbody id="reservations-table-body">
-              <tr><td colspan="9"><div class="empty-state"><div class="empty-state-icon">⏳</div><p>Loading reservations...</p></div></td></tr>
+              <tr><td colspan="10"><div class="empty-state"><div class="empty-state-icon">⏳</div><p>Loading reservations...</p></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -779,7 +780,7 @@
       document.getElementById('reservations-count').textContent = `${reservations.length} total`;
  
       if (!reservations.length) {
-        tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-state-icon">📭</div><p>No reservations yet.</p></div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-state-icon">📭</div><p>No reservations yet.</p></div></td></tr>`;
         return;
       }
  
@@ -792,6 +793,7 @@
         const date    = r.created_at ? new Date(r.created_at).toLocaleDateString('en-NG') : '—';
         return `
           <tr>
+            <td><input type="checkbox" class="res-checkbox" value="${r.id}" style="cursor:pointer;" /></td>
             <td><strong>${r.guest_name}</strong></td>
             <td>${r.guest_phone}</td>
             <td>${listing ? listing.name : r.listing_id?.substring(0,8) + '...'}</td>
