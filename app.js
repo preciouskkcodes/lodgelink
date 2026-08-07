@@ -1093,8 +1093,9 @@ function renderGuestBookings() {
       </a>` : '';
       
     const messageHostBtn = `
-      <a href="success.html?id=${r.id}" class="booking-action-btn primary" style="background:#0B1F3A;">
+      <a href="success.html?id=${r.id}" class="booking-action-btn primary" style="background:#0B1F3A; position:relative;">
         💬 Message Host
+        <span id="guest-badge-${r.id}" style="display:none; position:absolute; top:-6px; right:-6px; background:#E02424; color:white; border-radius:10px; padding:2px 6px; font-size:10px; line-height:1.2;">New</span>
       </a>`;
 
     return `

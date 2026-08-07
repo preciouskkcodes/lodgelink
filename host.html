@@ -1211,9 +1211,11 @@
           const lastSeen = parseInt(localStorage.getItem('chat_last_seen_' + r.id) || '0');
           const hasUnread = msgs.some(m => m.reservation_id === r.id && m.sender_type === 'guest' && new Date(m.created_at).getTime() > lastSeen);
           const badge = document.getElementById('badge-' + r.id);
+          const chatModal = document.getElementById('chat-modal');
           // Only show badge if chat is not currently open for this reservation
-          if (badge) {
-            if (hasUnread && currentChatReservationId !== r.id) {
+          if (badge && chatModal) {
+            const isChatOpen = chatModal.classList.contains('open') && currentChatReservationId === r.id;
+            if (hasUnread && !isChatOpen) {
               badge.style.display = 'flex';
             } else {
               badge.style.display = 'none';
