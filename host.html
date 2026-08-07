@@ -154,6 +154,17 @@
       transition: opacity 0.3s; z-index: 1999;
     }
     .chat-overlay.open { opacity: 1; pointer-events: all; }
+    .quick-replies {
+      display: flex; gap: 8px; padding: 10px 16px 0; background: white;
+      overflow-x: auto; white-space: nowrap; scrollbar-width: none;
+    }
+    .quick-replies::-webkit-scrollbar { display: none; }
+    .quick-reply-btn {
+      background: #F0F4F8; color: var(--navy); border: 1px solid var(--border);
+      padding: 6px 12px; border-radius: 16px; font-size: 12px; cursor: pointer;
+      font-family: var(--font-body); transition: all 0.2s;
+    }
+    .quick-reply-btn:hover { background: var(--navy); color: white; }
   </style>
 </head>
 <body>
@@ -985,6 +996,11 @@
     <div id="chat-messages" class="chat-messages">
       <!-- Messages appear here -->
     </div>
+    <div class="quick-replies">
+      <button class="quick-reply-btn" onclick="useQuickReply('Hello! Your booking is confirmed. When will you arrive?')">Booking confirmed</button>
+      <button class="quick-reply-btn" onclick="useQuickReply('Here are the directions to the lodge: ')">Directions</button>
+      <button class="quick-reply-btn" onclick="useQuickReply('Let me know when you are close so I can receive you.')">Arriving soon</button>
+    </div>
     <div class="chat-input-area">
       <input type="text" id="chat-input" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') sendMessage('host')" />
       <button onclick="sendMessage('host')">Send</button>
@@ -994,6 +1010,12 @@
   <script>
     let currentChatReservationId = null;
     let chatPollingInterval = null;
+
+    function useQuickReply(text) {
+      const input = document.getElementById('chat-input');
+      input.value = text;
+      input.focus();
+    }
 
     function openChat(reservationId, guestName) {
       currentChatReservationId = reservationId;
