@@ -476,14 +476,21 @@
     }
  
     async function loadReservationAndHostDetails() {
+      const params = new URLSearchParams(window.location.search);
+      const urlId = params.get('id');
+      
       // Read the most recent reservation from localStorage
       let record = null;
       try {
         const raw = localStorage.getItem('lodgelink_reservations_v1');
         if (raw) {
           const all = JSON.parse(raw);
-          if (all.length > 0) {
+          if (urlId) {
+            record = all.find(r => r.id === urlId);
+          } else if (all.length > 0) {
             record = all[all.length - 1]; // most recent
+          }
+          if (record) {
             currentChatReservationId = record.id;
           }
         }

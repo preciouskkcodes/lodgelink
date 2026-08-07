@@ -1091,6 +1091,11 @@ function renderGuestBookings() {
       <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="booking-action-btn whatsapp">
         💬 WhatsApp Host
       </a>` : '';
+      
+    const messageHostBtn = `
+      <a href="success.html?id=${r.id}" class="booking-action-btn primary" style="background:#0B1F3A;">
+        💬 Message Host
+      </a>`;
 
     return `
       <div class="booking-card">
@@ -1114,6 +1119,7 @@ function renderGuestBookings() {
           ${bankPanel}
           <div class="booking-actions">
             ${bankBtnHtml}
+            ${messageHostBtn}
             ${waBtnHtml}
           </div>
         </div>
