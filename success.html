@@ -376,9 +376,9 @@
         const msgs = await res.json();
         
         if (msgs.length > 0) {
-          localStorage.setItem('chat_last_seen_' + currentChatReservationId, new Date(msgs[msgs.length - 1].created_at).getTime());
+          localStorage.setItem('chat_seen_v2_' + currentChatReservationId, new Date(msgs[msgs.length - 1].created_at).getTime());
         } else {
-          localStorage.setItem('chat_last_seen_' + currentChatReservationId, Date.now());
+          localStorage.setItem('chat_seen_v2_' + currentChatReservationId, Date.now());
         }
         
         const container = document.getElementById('chat-messages');
@@ -620,7 +620,7 @@
         if (!res.ok) return;
         const msgs = await res.json();
         
-        const lastSeen = parseInt(localStorage.getItem('chat_last_seen_' + currentChatReservationId) || '0');
+        const lastSeen = parseInt(localStorage.getItem('chat_seen_v2_' + currentChatReservationId) || '0');
         const hasUnread = msgs.some(m => m.sender_type === 'host' && new Date(m.created_at).getTime() > lastSeen);
         const badge = document.getElementById('guest-badge');
         const chatModal = document.getElementById('chat-modal');

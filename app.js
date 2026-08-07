@@ -1381,5 +1381,39 @@ function setupNotificationsUI(recipient) {
   window.renderNotifications(recipient);
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  
+  // Poll for unread messages on app dashboard
+  setInterval(async () => {
+    const records = loadData();
+    if (!records || records.length === 0) return;
+    
+    const activeIds = records.filter(r => r.status === 'pending' || r.status === 'confirmed').map(r => r.id);
+    if (activeIds.length === 0) return;
+    
+    try {
+      const list = activeIds.map(id => `"${id}"`).join(',');
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/messages?reservation_id=in.(${list})&select=reservation_id,sender_type,created_at`, {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`
+        }
+      });
+      if (!res.ok) return;
+      const msgs = await res.json();
+      
+      activeIds.forEach(id => {
+        const badge = document.getElementById('guest-badge-' + id);
+        if (badge) {
+          const lastSeen = parseInt(localStorage.getItem('chat_seen_v2_' + id) || '0');
+          const hasUnread = msgs.some(m => m.reservation_id === id && m.sender_type === 'host' && new Date(m.created_at).getTime() > lastSeen);
+          badge.style.display = hasUnread ? 'inline-block' : 'none';
+        }
+      });
+    } catch (e) {
+      console.error('Error polling unread messages:', e);
+    }
+  }, 5000);
+});
  
