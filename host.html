@@ -1007,6 +1007,8 @@
       <button class="quick-reply-btn" onclick="useQuickReply('Let me know when you are close so I can receive you.')">Arriving soon</button>
     </div>
     <div class="chat-input-area">
+      <input type="file" id="chat-file-input" accept="image/*" style="display:none;" onchange="uploadChatImage('host')" />
+      <button onclick="document.getElementById('chat-file-input').click()" class="btn-attach" title="Attach Image" style="background:none; color:var(--navy); padding:0 10px; font-size:20px;">📎</button>
       <textarea id="chat-input" placeholder="Type a message..." onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage('host'); }"></textarea>
       <button onclick="sendMessage('host')">Send</button>
     </div>
@@ -1055,6 +1057,17 @@
       }
     }
 
+    function formatChatMessage(text) {
+      if (!text) return '';
+      const imgRegex = /\[IMAGE\](.*?)\[\/IMAGE\]/g;
+      if (imgRegex.test(text)) {
+        return text.replace(imgRegex, (match, url) => {
+          return `<a href="${url}" target="_blank"><img src="${url}" alt="Attachment" style="max-width: 100%; border-radius: 8px; margin-top: 4px; display: block;" /></a>`;
+        });
+      }
+      return text;
+    }
+
     async function fetchMessages() {
       if (!currentChatReservationId) return;
       try {
@@ -1067,7 +1080,7 @@
         
         const currentMsgCount = container.children.length;
         if (msgs.length > currentMsgCount || currentMsgCount === 0) {
-          container.innerHTML = msgs.map(m => `<div class="msg ${m.sender_type}">${m.content}</div>`).join('');
+          container.innerHTML = msgs.map(m => `<div class="msg ${m.sender_type}">${formatChatMessage(m.content)}</div>`).join('');
           container.scrollTop = container.scrollHeight;
         }
       } catch(e) { console.error('Error fetching messages:', e); }
@@ -1081,7 +1094,7 @@
       input.value = '';
       
       const container = document.getElementById('chat-messages');
-      container.innerHTML += `<div class="msg ${senderType}">${text}</div>`;
+      container.innerHTML += `<div class="msg ${senderType}">${formatChatMessage(text)}</div>`;
       container.scrollTop = container.scrollHeight;
       
       try {
@@ -1092,6 +1105,36 @@
         });
         fetchMessages();
       } catch(e) { console.error('Error sending message:', e); }
+    }
+
+    async function uploadChatImage(senderType) {
+      const input = document.getElementById('chat-file-input');
+      const file = input.files[0];
+      if (!file) return;
+      
+      const textInput = document.getElementById('chat-input');
+      const prevPlaceholder = textInput.placeholder;
+      textInput.placeholder = "Uploading image...";
+      textInput.disabled = true;
+
+      try {
+        const url = await uploadToCloudinary(file);
+        const msgText = `[IMAGE]${url}[/IMAGE]`;
+        
+        await db.insert('messages', {
+          reservation_id: currentChatReservationId,
+          sender_type: senderType,
+          content: msgText
+        });
+        fetchMessages();
+      } catch (err) {
+        console.error("Upload error", err);
+        showToast("Failed to upload image.", "error");
+      } finally {
+        textInput.placeholder = prevPlaceholder;
+        textInput.disabled = false;
+        input.value = '';
+      }
     }
   </script>
 </body>
