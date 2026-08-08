@@ -1027,6 +1027,13 @@ function renderGuestBookings() {
         <button class="bookings-empty-btn" onclick="showScreen('explore')">
           🔍 Explore Rooms
         </button>
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; width: 100%; max-width: 350px; margin-left:auto; margin-right:auto;">
+          <p style="font-size:13px; color:var(--text-mid); margin-bottom:12px;">Booked on another device? Enter your phone number to restore your bookings.</p>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="find-booking-phone" placeholder="Phone (e.g. 080...)" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:14px; outline:none;">
+            <button onclick="findGuestBookings(event)" style="background:var(--primary); color:white; border:none; padding:10px 15px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">Find</button>
+          </div>
+        </div>
       </div>`;
     return;
   }
@@ -1042,11 +1049,19 @@ function renderGuestBookings() {
       statusLabel = '✅ Confirmed';
       statusClass = 'status-confirmed';
     } else {
-      // Pay on arrival — pending host confirmation
       statusLabel = '⏳ Pending Host';
-      statusClass = 'status-pending-host';
+      statusClass = 'status-pending';
     }
-
+    
+    // Override if backend status is 'confirmed'
+    if (r.status === 'confirmed') {
+      statusLabel = '✅ Confirmed';
+      statusClass = 'status-confirmed';
+    } else if (r.status === 'declined' || r.status === 'cancelled') {
+      statusLabel = '❌ Declined';
+      statusClass = 'status-declined';
+    }
+    
     // Format dates
     const checkinDisplay  = r.checkin  ? formatBookingDate(r.checkin)  : 'Not set';
     const checkoutDisplay = r.checkout ? formatBookingDate(r.checkout) : 'Not set';
@@ -1061,8 +1076,11 @@ function renderGuestBookings() {
     }
 
     // Image
+    const isVideo = r.image && r.image.match(/\.(mp4|webm|mov)$/i);
     const imageHtml = r.image
-      ? `<img class="booking-card-image" src="${r.image}" alt="${r.propertyName || 'Room photo'}" onerror="this.parentNode.innerHTML='<div class=booking-card-image-placeholder>🏠</div>'">`
+      ? (isVideo 
+         ? `<video class="booking-card-image" src="${r.image}" controls preload="metadata" style="object-fit:cover;"></video>`
+         : `<img class="booking-card-image" src="${r.image}" alt="${r.propertyName || 'Room photo'}" onerror="this.parentNode.innerHTML='<div class=booking-card-image-placeholder>🏠</div>'">`)
       : `<div class="booking-card-image-placeholder">🏠</div>`;
 
     // Bank details panel (only show for pay-on-arrival bookings)
@@ -1126,7 +1144,68 @@ function renderGuestBookings() {
         </div>
       </div>`;
   }).join('')}</div>`;
+
+  if (typeof window.checkUnreadApp === 'function') {
+    window.checkUnreadApp();
+  }
 }
+
+window.findGuestBookings = async function(event) {
+  const phone = document.getElementById('find-booking-phone').value.trim();
+  if (!phone) return showToast('Please enter your phone number', 'error');
+  
+  const btn = event.target;
+  const originalText = btn.textContent;
+  btn.textContent = '...';
+  btn.disabled = true;
+  
+  try {
+    // Format the phone number slightly to match how it was saved (if needed)
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/reservations?guest_phone=eq.${encodeURIComponent(phone)}&select=*`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if (!res.ok) throw new Error('Failed to fetch bookings');
+    const bookings = await res.json();
+    
+    if (bookings.length === 0) {
+      showToast('No bookings found for that phone number.', 'error');
+      return;
+    }
+    
+    // Convert backend schema format back to frontend format if necessary
+    // Our frontend expects r.propertyName, r.image, r.dates, etc.
+    const formatted = bookings.map(b => ({
+      id: b.id,
+      listing_id: b.listing_id,
+      guest_name: b.guest_name,
+      guest_phone: b.guest_phone,
+      propertyName: b.listing_name || 'Lodge', // fallback
+      image: b.listing_image || null,
+      dates: typeof b.dates === 'string' ? JSON.parse(b.dates) : b.dates,
+      guests: b.guests,
+      total: b.total_price,
+      status: b.status,
+      paymentMethod: b.payment_method || 'pay-on-arrival',
+      checkin: b.dates ? (typeof b.dates === 'string' ? JSON.parse(b.dates).start : b.dates.start) : null,
+      checkout: b.dates ? (typeof b.dates === 'string' ? JSON.parse(b.dates).end : b.dates.end) : null
+    }));
+    
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(formatted));
+    renderGuestBookings();
+    showToast(`Found ${bookings.length} booking(s)!`, 'success');
+  } catch(e) {
+    console.error(e);
+    showToast('Error finding bookings. Please try again later.', 'error');
+  } finally {
+    if (btn) {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  }
+};
 // ─── REVIEWS LOGIC ─────────────────────────────────────────────────────────────
 let activeReviewListingId = null;
 let selectedRating = 5;
@@ -1385,8 +1464,8 @@ document.addEventListener('DOMContentLoaded', () => {
   init();
   
   // Poll for unread messages on app dashboard
-  async function checkUnreadApp() {
-    const records = loadData();
+  window.checkUnreadApp = async function() {
+    const records = typeof loadData === 'function' ? loadData() : [];
     if (!records || records.length === 0) return;
     
     const activeIds = records.filter(r => r.status === 'pending' || r.status === 'confirmed').map(r => r.id);
@@ -1414,9 +1493,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
       console.error('Error polling unread messages:', e);
     }
-  }
+  };
 
-  checkUnreadApp();
-  setInterval(checkUnreadApp, 5000);
+  window.checkUnreadApp();
+  setInterval(window.checkUnreadApp, 5000);
 });
  

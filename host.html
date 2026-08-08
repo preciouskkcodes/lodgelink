@@ -329,10 +329,10 @@
           <div class="field-group">
             <label>Property photos (up to 5)</label>
             <div class="image-upload-area" id="upload-area">
-              <input type="file" id="image-input" accept="image/*" multiple />
+              <input type="file" id="image-input" accept="image/*,video/*" multiple />
               <div class="upload-icon">📷</div>
-              <div class="upload-label">Tap to add photos</div>
-              <div class="upload-sub">Up to 5 images · JPG, PNG · Max 5MB each</div>
+              <div class="upload-label">Tap to add photos or videos</div>
+              <div class="upload-sub">Up to 5 files · JPG, PNG, MP4 · Max 10MB each</div>
             </div>
             <div id="image-previews"></div>
             <div class="upload-progress" id="upload-progress">Uploading images...</div>
@@ -377,11 +377,6 @@
             <p class="field-helper">The exact price guests will pay on arrival. No hidden charges.</p>
           </div>
           <div class="field-group">
-            <label for="listing-distance">Distance from venue (metres) <span style="font-weight:400;color:var(--text-light);">— optional</span></label>
-            <input type="number" id="listing-distance" placeholder="e.g. 800" min="0" />
-            <p class="field-helper">Approximate walking distance to the main hall in metres</p>
-          </div>
-          <div class="field-group">
             <label for="listing-location">Area</label>
             <select id="listing-location">
               <option value="">— Select area —</option>
@@ -392,6 +387,14 @@
           <div class="field-group">
             <label for="listing-address">Property address</label>
             <textarea id="listing-address" placeholder="e.g. 5 Redemption Way, Asese, Ogun State"></textarea>
+          </div>
+          <div class="field-group">
+            <label for="listing-distance">Distance from venue (metres) <span style="font-weight:400;color:var(--text-light);">— optional</span></label>
+            <div style="display:flex; gap:8px;">
+              <input type="number" id="listing-distance" placeholder="e.g. 800" min="0" style="flex:1;" />
+              <button type="button" id="calc-dist-btn" onclick="calculateDistance()" style="background:var(--primary); color:white; border:none; padding:10px 15px; border-radius:8px; cursor:pointer;">Auto-calculate</button>
+            </div>
+            <p class="field-helper">Approximate walking distance to the main hall in metres</p>
           </div>
           <div style="display:flex;gap:10px;">
             <button class="btn-secondary" onclick="goToSection(1)" style="width:auto;flex:1;margin-top:0;">← Back</button>
@@ -558,7 +561,8 @@
       formData.append('file', file);
       formData.append('upload_preset', CLOUDINARY_PRESET);
       formData.append('folder', 'lodgelink');
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: formData });
+      // Use /auto/upload to support both images and videos
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`, { method: 'POST', body: formData });
       if (!res.ok) throw new Error('Cloudinary upload failed');
       const data = await res.json();
       return data.secure_url;
@@ -709,6 +713,22 @@
       // ── Step 1: Update Supabase (this is the critical part) ──
       try {
         await db.update('reservations', id, { status });
+        
+        // ── Step 1.5: Manage Inventory ──
+        if (status === 'confirmed') {
+          const r = allReservations.find(x => x.id === id);
+          if (r && r.listing_id) {
+            const listingRes = await db.get('listings', { id: r.listing_id });
+            if (listingRes.length > 0) {
+              const listing = listingRes[0];
+              const currentRooms = listing.rooms_available ?? listing.total_rooms ?? 1;
+              const newRooms = Math.max(0, currentRooms - 1);
+              if (newRooms !== currentRooms) {
+                await db.update('listings', r.listing_id, { rooms_available: newRooms });
+              }
+            }
+          }
+        }
       } catch (err) {
         showToast('Could not update reservation', 'error');
         return; // Stop here — don't show success if the update failed
@@ -1079,6 +1099,67 @@
         chatPollingInterval = null;
       }
     }
+
+    function formatBookingDate(dateStr) {
+      if (!dateStr) return '';
+      return new Date(dateStr).toLocaleDateString();
+    }
+
+    // ── DISTANCE CALCULATION ──
+    window.calculateDistance = async function() {
+      let address = document.getElementById('listing-address').value.trim();
+      if (!address) {
+        showToast('Please enter an address first', 'error');
+        return;
+      }
+      
+      const btn = document.getElementById('calc-dist-btn');
+      const originalText = btn.textContent;
+      btn.textContent = 'Calculating...';
+      btn.disabled = true;
+      
+      try {
+        // Loveworld Camp Ground approximate coordinates (Asese region)
+        const venueLat = 6.7645;
+        const venueLon = 3.4216;
+        
+        // Append context if not provided
+        if (!address.toLowerCase().includes('ogun')) {
+          address += ', Ogun State, Nigeria';
+        }
+        
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
+        const data = await res.json();
+        
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          
+          // Haversine distance
+          const R = 6371e3; // metres
+          const p1 = venueLat * Math.PI/180;
+          const p2 = lat * Math.PI/180;
+          const dp = (lat-venueLat) * Math.PI/180;
+          const dl = (lon-venueLon) * Math.PI/180;
+          
+          const a = Math.sin(dp/2) * Math.sin(dp/2) +
+                    Math.cos(p1) * Math.cos(p2) *
+                    Math.sin(dl/2) * Math.sin(dl/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          const d = R * c; // in metres
+          
+          document.getElementById('listing-distance').value = Math.round(d);
+          showToast('Distance calculated successfully!', 'success');
+        } else {
+          showToast('Could not find that exact address. Please enter distance manually.', 'error');
+        }
+      } catch (e) {
+        showToast('Error calculating distance.', 'error');
+      } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    };
 
     function formatChatMessage(text) {
       if (!text) return '';
