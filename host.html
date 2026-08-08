@@ -483,7 +483,10 @@
           headers: { ...HEADERS, 'Prefer': 'return=representation' },
           body: JSON.stringify(data),
         });
-        if (!res.ok) throw new Error(`INSERT failed: ${res.status}`);
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`INSERT failed: ${res.status} - ${errText}`);
+        }
         return res.json();
       },
       async update(table, id, data) {
@@ -549,7 +552,8 @@
           updatePreview(tempId, url, uploadedImageUrls.length);
         } catch (err) {
           removePreview(tempId);
-          showToast(`Image ${i + 1} failed to upload`, 'error');
+          showToast(`File ${i + 1} failed to upload: ${err.message}`, 'error');
+          alert(`File upload error: ${err.message}. If you are uploading a video, ensure your Cloudinary upload preset allows videos (Resource Type: Auto).`);
         }
       }
       progressEl.style.display = 'none';
@@ -850,6 +854,7 @@
       } catch (err) {
         console.error('Submit listing error:', err);
         showToast('Could not submit listing. Try again.', 'error');
+        alert(`Submission failed: ${err.message}`);
         btn.textContent = 'Submit Listing ✓'; btn.disabled = false;
       }
     }
