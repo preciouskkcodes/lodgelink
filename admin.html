@@ -770,6 +770,7 @@
             ` : `
               <button class="btn-decline" onclick="declineListing('${l.id}')">Take down</button>
             `}
+            <button class="btn-decline" onclick="deleteListing('${l.id}')" style="background:#FEE2E2; color:#991B1B; border:1px solid #EF4444; margin-top:5px;">🗑️ Delete</button>
           </td>
         </tr>`).join('');
     }
@@ -846,10 +847,29 @@
       if (!confirm('Are you sure you want to decline or take down this listing?')) return;
       try {
         await db.update('listings', id, { approved: false, available: false });
-        showToast('Listing removed from live site', '');
+        showToast('Listing removed from live site (still in DB)', 'success');
         loadDashboard();
       } catch (err) {
         showToast('Could not update listing', 'error');
+      }
+    }
+
+    async function deleteListing(id) {
+      if (!confirm('Are you absolutely sure you want to PERMANENTLY delete this listing? This cannot be undone.')) return;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        if (!res.ok) throw new Error("Delete failed");
+        showToast('Listing permanently deleted!', 'success');
+        loadDashboard();
+      } catch (err) {
+        showToast('Delete failed. Make sure you ran the SQL command to enable Deletes.', 'error');
+        console.error(err);
       }
     }
 
