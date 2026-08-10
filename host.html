@@ -329,10 +329,10 @@
           <div class="field-group">
             <label>Property photos (up to 5)</label>
             <div class="image-upload-area" id="upload-area">
-              <input type="file" id="image-input" accept="image/*,video/*" multiple />
+              <input type="file" id="image-input" accept="image/*" multiple />
               <div class="upload-icon">📷</div>
-              <div class="upload-label">Tap to add photos or videos</div>
-              <div class="upload-sub">Up to 5 files · JPG, PNG, MP4 · Max 10MB each</div>
+              <div class="upload-label">Tap to add photos</div>
+              <div class="upload-sub">Up to 5 files · JPG, PNG · Max 10MB each</div>
             </div>
             <div id="image-previews"></div>
             <div class="upload-progress" id="upload-progress">Uploading images...</div>
@@ -553,7 +553,7 @@
         } catch (err) {
           removePreview(tempId);
           showToast(`File ${i + 1} failed to upload: ${err.message}`, 'error');
-          alert(`File upload error: ${err.message}. If you are uploading a video, ensure your Cloudinary upload preset allows videos (Resource Type: Auto).`);
+          alert(`File upload error: ${err.message}`);
         }
       }
       progressEl.style.display = 'none';
@@ -565,8 +565,7 @@
       formData.append('file', file);
       formData.append('upload_preset', CLOUDINARY_PRESET);
       formData.append('folder', 'lodgelink');
-      // Use /auto/upload to support both images and videos
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`, { method: 'POST', body: formData });
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: formData });
       if (!res.ok) throw new Error('Cloudinary upload failed');
       const data = await res.json();
       return data.secure_url;

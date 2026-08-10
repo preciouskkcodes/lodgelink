@@ -1076,11 +1076,8 @@ function renderGuestBookings() {
     }
 
     // Image
-    const isVideo = r.image && r.image.match(/\.(mp4|webm|mov)$/i);
     const imageHtml = r.image
-      ? (isVideo 
-         ? `<video class="booking-card-image" src="${r.image}" controls preload="metadata" style="object-fit:cover;"></video>`
-         : `<img class="booking-card-image" src="${r.image}" alt="${r.propertyName || 'Room photo'}" onerror="this.parentNode.innerHTML='<div class=booking-card-image-placeholder>🏠</div>'">`)
+      ? `<img class="booking-card-image" src="${r.image}" alt="${r.propertyName || 'Room photo'}" onerror="this.parentNode.innerHTML='<div class=booking-card-image-placeholder>🏠</div>'">`
       : `<div class="booking-card-image-placeholder">🏠</div>`;
 
     // Bank details panel (only show for pay-on-arrival bookings)
