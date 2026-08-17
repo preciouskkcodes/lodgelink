@@ -193,13 +193,13 @@
     .onboarding-skip button { background: none; border: none; color: var(--text-mid); font-size: 13px; cursor: pointer; text-decoration: underline; font-family: var(--font-body); }
  
     /* ── HERO ── */
-    #hero { background: var(--navy); padding: 48px 0 36px; position: relative; overflow: hidden; }
+    #hero { background: var(--navy); padding: 32px 0 28px; position: relative; overflow: hidden; }
     #hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 280px; height: 280px; border-radius: 50%; background: radial-gradient(circle, rgba(232,160,32,0.12) 0%, transparent 70%); pointer-events: none; }
     .hero-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; animation: fadeUp 0.5s ease both; }
     .logo-mark { width: 40px; height: 40px; background: var(--gold); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
     .logo-text { font-family: var(--font-head); font-size: 22px; font-weight: 800; color: var(--white); letter-spacing: -0.3px; }
     .logo-text span { color: var(--gold); }
-    .hero-headline { font-family: var(--font-head); font-size: clamp(30px, 8vw, 42px); text-align: center; font-weight: 800; color: var(--white); line-height: 1.15; margin-bottom: 10px; animation: fadeUp 0.5s 0.1s ease both; }
+    .hero-headline { font-family: var(--font-head); font-size: clamp(26px, 7vw, 38px); text-align: center; font-weight: 800; color: var(--white); line-height: 1.15; margin-bottom: 10px; animation: fadeUp 0.5s 0.1s ease both; }
     .hero-headline em { font-style: normal; color: var(--gold); }
     .hero-sub { font-size: 14px; color: rgba(255,255,255,0.65); font-weight: 300; margin-bottom: 28px; text-align: center; animation: fadeUp 0.5s 0.2s ease both; }
  
@@ -259,7 +259,7 @@
     #list-root { display: flex; flex-direction: column; gap: 32px; animation: fadeUp 0.5s 0.25s ease both; }
     .listing-card { background: transparent; border-radius: 0; overflow: visible; box-shadow: none; border: none; transition: transform var(--transition); cursor: pointer; display: flex; flex-direction: column; }
     .listing-card:hover { transform: translateY(-2px); }
-    .card-image { position: relative; height: 280px; background: #e2e8f0; overflow: hidden; border-radius: 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .card-image { position: relative; height: 260px; background: #e2e8f0; overflow: hidden; border-radius: 20px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
     .card-image-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 48px; opacity: 0.3; }
     .price-badge { display: none; /* Removed from image, now in body */ }
     .fair-label { position: absolute; top: 16px; left: 16px; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; z-index: 1; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -274,13 +274,13 @@
  
     /* ── IMAGE SLIDER ── */
     .img-slider { position: absolute; inset: 0; }
-    .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(11,31,58,0.55); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 18px; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
-    .slider-btn:hover { background: rgba(11,31,58,0.85); }
+    .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.92); color: var(--text-dark); border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 16px; font-weight: 700; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
+    .slider-btn:hover { background: white; transform: translateY(-50%) scale(1.08); }
     .slider-prev { left: 8px; }
     .slider-next { right: 8px; }
-    .slider-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 2; }
-    .slider-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); transition: background 0.2s, width 0.2s; }
-    .slider-dot.active { background: white; width: 16px; border-radius: 3px; }
+    .slider-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 2; }
+    .slider-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.6); transition: all 0.25s ease; backdrop-filter: blur(2px); }
+    .slider-dot.active { background: white; width: 16px; border-radius: 3px; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
  
     /* ── FULLY BOOKED OVERLAY ── */
     .fully-booked-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 16px; font-weight: 800; color: var(--navy); letter-spacing: 0.5px; z-index: 3; }
@@ -294,6 +294,25 @@
     
     .amenities, .card-footer { display: none; /* Removed for cleaner look */ }
  
+    
+    /* ── PHOTO COUNT BADGE (Airbnb style) ── */
+    .photo-count {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      background: rgba(0,0,0,0.65);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      pointer-events: none;
+    }
+    
     /* ── NO MATCH PANEL ── */
     .no-match-panel { background: var(--white); border-radius: var(--radius-lg); padding: 28px 20px; text-align: center; border: 1.5px dashed var(--border); display: none; }
     .no-match-panel.visible { display: block; }
@@ -1397,6 +1416,44 @@
       border-color: rgba(192,57,43,0.2);
     }
 
+
+    /* ── SEARCH PILL ── */
+    .search-pill-wrap {
+      display: flex; justify-content: center;
+      margin-bottom: 24px; animation: fadeUp 0.5s 0.2s ease both;
+      padding: 0 10px;
+    }
+    .search-pill {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--white);
+      border-radius: 40px;
+      padding: 10px 16px 10px 20px;
+      box-shadow: 0 4px 16px rgba(11,31,58,0.15);
+      border: 1px solid rgba(11,31,58,0.05);
+      width: 100%; max-width: 360px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .search-pill:active { transform: scale(0.98); }
+    .search-pill-icon { color: var(--text-dark); font-size: 18px; display: flex; align-items: center; }
+    .search-pill-text {
+      flex: 1; display: flex; flex-direction: column; justify-content: center;
+    }
+    .search-pill-title { font-family: var(--font-head); font-size: 14px; font-weight: 800; color: var(--text-dark); line-height: 1.2; }
+    .search-pill-sub { font-size: 11px; color: var(--text-light); line-height: 1.2; }
+    .search-pill-action {
+      background: var(--navy); color: white; border-radius: 50%;
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── ENHANCED MODAL SHEET ── */
+    .modal-sheet {
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    }
+    .modal-overlay {
+      backdrop-filter: blur(8px);
+    }
+    
 </style>
 </head>
 <body>
@@ -1567,11 +1624,24 @@
   </div>
 
       
-      <div style="position: relative; margin-bottom: 12px; animation: fadeUp 0.5s 0.2s ease both;">
-        <svg style="position:absolute; left:16px; top:50%; transform:translateY(-50%); width:18px; height:18px; stroke:rgba(255,255,255,0.6);" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input type="text" id="live-search-input" placeholder="Search Asese, RCCG Camp, or property..." oninput="filterSearch(this.value)" style="width:100%; padding: 16px 16px 16px 44px; border-radius: 30px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--white); font-family: var(--font-body); font-size: 15px; outline: none; transition: all 0.2s ease;" onfocus="this.style.borderColor='var(--gold)'; this.style.background='rgba(255,255,255,0.15)';" onblur="this.style.borderColor='rgba(255,255,255,0.2)'; this.style.background='rgba(255,255,255,0.1)';">
+      <!-- SEARCH PILL -->
+      <div class="search-pill-wrap" onclick="openSearchModal()">
+        <div class="search-pill">
+          <div class="search-pill-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <div class="search-pill-text">
+            <div class="search-pill-title" id="pill-title">Anywhere</div>
+            <div class="search-pill-sub" id="pill-sub">Any week • Add guests</div>
+          </div>
+          <div class="search-pill-action">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -1837,5 +1907,42 @@
       });
     }
   </script>
+
+  <!-- SEARCH MODAL -->
+  <div class="modal-overlay" id="search-modal">
+    <div class="modal-sheet" style="padding-top: 20px;">
+      <div class="modal-handle"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+        <h3 class="modal-title" style="margin:0;">Where to?</h3>
+        <button class="modal-close" style="position:static;" onclick="closeSearchModal()">✕</button>
+      </div>
+      
+      <div class="field-group">
+        <label>Destination</label>
+        <div style="position: relative;">
+          <svg style="position:absolute; left:16px; top:50%; transform:translateY(-50%); width:18px; height:18px; stroke:var(--text-light);" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="modal-search-input" placeholder="Search Asese, RCCG Camp, etc..." style="padding-left: 44px; border-radius: 20px;">
+        </div>
+      </div>
+      
+      <div class="field-group" style="display:flex; gap:12px;">
+        <div style="flex:1;">
+          <label>Check in</label>
+          <input type="date" style="border-radius: 20px; font-size: 13px;">
+        </div>
+        <div style="flex:1;">
+          <label>Check out</label>
+          <input type="date" style="border-radius: 20px; font-size: 13px;">
+        </div>
+      </div>
+
+      <button id="btn-search-confirm" onclick="applySearch()" style="width: 100%; padding: 18px; background: var(--navy); color: var(--white); border: none; border-radius: 20px; font-family: var(--font-head); font-size: 16px; font-weight: 700; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 14px rgba(11,31,58,0.2); margin-top: 10px;">
+        Search
+      </button>
+    </div>
+  </div>
+
 </body>
 </html>

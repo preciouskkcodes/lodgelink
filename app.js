@@ -237,8 +237,49 @@ function buildCard(listing, allPrices) {
              : [];
  
   let galleryHtml;
+  const hash = (listing.name || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const PLACEHOLDERS = [
+    "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80",
+    "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",
+    "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600&q=80",
+    "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?w=600&q=80",
+    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80",
+    "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80",
+    "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600&q=80",
+    "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600&q=80",
+  ];
+  const fallbackImg = PLACEHOLDERS[hash % PLACEHOLDERS.length];
+
+  // Use 3 varied images for carousel when no real images exist
+  const carouselFallbacks = [
+    fallbackImg,
+    PLACEHOLDERS[(hash + 2) % PLACEHOLDERS.length],
+    PLACEHOLDERS[(hash + 4) % PLACEHOLDERS.length],
+  ];
+
   if (imgs.length === 0) {
-    galleryHtml = `<div class="card-image-placeholder" aria-hidden="true">🏨</div>`;
+    // Build a swipeable carousel with beautiful placeholder images
+    const allImgs = carouselFallbacks;
+    galleryHtml = `
+      <div class="img-slider" id="${cardId}-slider" data-index="0">
+        ${allImgs.map((src, i) => `
+          <img src="${src}" alt="${listing.name} photo ${i + 1}"
+               class="slider-img"
+               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+                      opacity:${i === 0 ? 1 : 0};transition:opacity 0.4s ease;" />
+        `).join('')}
+        <button class="slider-btn slider-prev"
+                onclick="slideImg(event,'${cardId}-slider',-1)"
+                aria-label="Previous photo">&#8249;</button>
+        <button class="slider-btn slider-next"
+                onclick="slideImg(event,'${cardId}-slider', 1)"
+                aria-label="Next photo">&#8250;</button>
+        <div class="slider-dots">
+          ${allImgs.map((_, i) => `
+            <span class="slider-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></span>
+          `).join('')}
+        </div>
+      </div>`;
   } else if (imgs.length === 1) {
     galleryHtml = `<img src="${imgs[0]}" alt="${listing.name}"
       style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" />`;
@@ -336,7 +377,7 @@ window.filterSearch = function(query) {
 };
 
 function applyFilters() {
-  const query = (document.getElementById('live-search-input')?.value || '').toLowerCase().trim();
+  const query = (document.getElementById('modal-search-input')?.value || document.getElementById('live-search-input')?.value || '').toLowerCase().trim();
   const activeFilterBtn = document.querySelector('.filter-btn.active');
   const typeFilter = activeFilterBtn ? activeFilterBtn.textContent.trim() : 'All';
   
@@ -1724,3 +1765,28 @@ window.openChatScreen = function(reservationId) {
 };
 
 // ─── END CHAT LOGIC ──────────────────────────────────────────────────────────
+
+
+// ── SEARCH MODAL ──
+function openSearchModal() {
+  const modal = document.getElementById('search-modal');
+  if(modal) modal.classList.add('open');
+}
+
+function closeSearchModal() {
+  const modal = document.getElementById('search-modal');
+  if(modal) modal.classList.remove('open');
+}
+
+function applySearch() {
+  const input = document.getElementById('modal-search-input').value;
+  const pillTitle = document.getElementById('pill-title');
+  if (input.trim()) {
+    pillTitle.textContent = input;
+    filterSearch(input);
+  } else {
+    pillTitle.textContent = 'Anywhere';
+    filterSearch('');
+  }
+  closeSearchModal();
+}
