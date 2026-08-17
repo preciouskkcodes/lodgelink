@@ -2,7 +2,7 @@
   "name": "LodgeLink",
   "short_name": "LodgeLink",
   "description": "Find accommodation for programs & events in Asese & RCCG Camp",
-  "start_url": "/splash.html",
+  "start_url": "/app.html",
   "display": "standalone",
   "background_color": "#0B1F3A",
   "theme_color": "#E8A020",

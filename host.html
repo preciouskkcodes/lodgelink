@@ -77,7 +77,24 @@
     #toast.show{transform:translateX(-50%) translateY(0);}
     #toast.success{background:var(--success);}
     #toast.error{background:var(--error);}
-    .reservation-card{background:#F8FBFF;border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:10px;}
+    .reservation-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+    .reservation-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f0f4f8;
+    }
+    .reservation-guest { font-size: 16px; font-family: var(--font-head); font-weight: 800; color: var(--navy); }
+    .reservation-detail { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-mid); margin-bottom: 6px; }
     .reservation-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
     .reservation-guest{font-size:14px;font-weight:700;color:var(--text-dark);}
     .reservation-detail{font-size:12px;color:var(--text-light);margin-bottom:3px;}
@@ -131,10 +148,12 @@
     .chat-messages {
       flex: 1; overflow-y: auto; padding: 20px;
       display: flex; flex-direction: column; gap: 12px;
-      background: #fafafa;
+      background: #FAFCFF;
     }
-    .msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap; }
-    .msg.host { background: var(--navy); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .msg { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap; position: relative; }
+    .msg.host { background: var(--navy); color: white; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 2px 5px rgba(11,31,58,0.15); }
+    .msg.guest { background: white; color: var(--text-dark); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(11,31,58,0.05); }
+    .msg-time { font-size: 10px; opacity: 0.7; margin-top: 4px; display: block; text-align: right; }
     .msg.guest { background: #e0e0e0; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
     .chat-input-area {
       padding: 16px; border-top: 1px solid #eee;
@@ -166,6 +185,65 @@
       font-family: var(--font-body); transition: all 0.2s;
     }
     .quick-reply-btn:hover { background: var(--navy); color: white; }
+  
+    /* ── STICKY HEADER ── */
+    #header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--navy);
+      padding: 16px 0;
+      box-shadow: 0 4px 12px rgba(11,31,58,0.15);
+    }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 12px 0 24px 0;
+      box-shadow: 0 -2px 10px rgba(11,31,58,0.05);
+      z-index: 90;
+      border-top: 1px solid var(--border);
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 600;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .nav-item.active {
+      color: var(--navy);
+    }
+    .nav-icon {
+      font-size: 20px;
+    }
+    @keyframes nav-bounce {
+      0% { transform: scale(1); }
+      40% { transform: scale(0.8); }
+      70% { transform: scale(1.25); }
+      100% { transform: scale(1.15); }
+    }
+    .nav-item.active .nav-icon { 
+      animation: nav-bounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      color: var(--navy);
+    }
+    .app-screen {
+      padding-bottom: 90px; /* space for bottom nav */
+    }
+    
   </style>
 </head>
 <body>
@@ -225,15 +303,16 @@
     </div>
   </div>
  
+  
   <!-- SCREEN 2 — DASHBOARD -->
-  <div class="screen" id="screen-dashboard">
+  <div class="screen app-screen" id="screen-dashboard">
     <div class="container">
       <div style="padding:20px 0 4px;display:flex;justify-content:space-between;align-items:center;">
         <div>
           <div style="font-family:var(--font-head);font-size:20px;font-weight:800;">Welcome back 👋</div>
           <div style="font-size:13px;color:var(--text-light);" id="dashboard-host-name">Loading...</div>
         </div>
-        <button onclick="showScreen('add-listing')" class="btn-gold" style="width:auto;padding:10px 18px;font-size:13px;">+ Add Listing</button>
+        <button class="btn-secondary" onclick="handleLogout()" style="width:auto; margin-top:0; padding:6px 12px; font-size:12px;">Sign out</button>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:20px 0;">
         <div class="card" style="padding:14px;text-align:center;margin-bottom:0;">
@@ -253,14 +332,22 @@
       <div id="reservations-list">
         <div class="empty-state"><div class="empty-state-icon">📭</div><p>No reservation requests yet.<br/>They will appear here when guests book your rooms.</p></div>
       </div>
-      <div class="section-title">🏠 My Listings</div>
-      <div id="listings-list">
-        <div class="empty-state"><div class="empty-state-icon">🏠</div><p>No listings yet.<br/>Tap "+ Add Listing" to list your first room.</p></div>
-      </div>
-      <button class="btn-secondary" onclick="handleLogout()">Sign out</button>
     </div>
   </div>
- 
+
+  <!-- SCREEN — LISTINGS -->
+  <div class="screen app-screen" id="screen-listings">
+    <div class="container">
+      <div style="padding:20px 0 4px;display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-family:var(--font-head);font-size:20px;font-weight:800;">My Listings</div>
+        <button onclick="showScreen('add-listing')" class="btn-gold" style="width:auto;padding:10px 18px;font-size:13px;">+ Add Listing</button>
+      </div>
+      <div id="listings-list" style="margin-top:16px;">
+        <div class="empty-state"><div class="empty-state-icon">🏠</div><p>No listings yet.<br/>Tap "+ Add Listing" to list your first room.</p></div>
+      </div>
+    </div>
+  </div>
+
   <!-- SCREEN 3 — ADD LISTING -->
   <div class="screen" id="screen-add-listing">
     <div class="container">
@@ -504,11 +591,26 @@
     let currentHost = null;
     let uploadedImageUrls = [];
  
+    
     function showScreen(name) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(`screen-${name}`).classList.add('active');
+      const target = document.getElementById(`screen-${name}`);
+      if(target) target.classList.add('active');
       window.scrollTo(0, 0);
+
+      const nav = document.getElementById('host-bottom-nav');
+      if (name === 'login') {
+        if(nav) nav.style.display = 'none';
+      } else {
+        if(nav) nav.style.display = 'flex';
+      }
+
+      // Update nav active states
+      document.querySelectorAll('#host-bottom-nav .nav-item').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`nav-${name}`);
+      if (activeBtn) activeBtn.classList.add('active');
     }
+
  
     function showToast(msg, type = '') {
       const toast = document.getElementById('toast');
@@ -686,26 +788,26 @@
           <div class="reservation-card-header">
             <div>
               <div class="reservation-guest">${r.guest_name}</div>
-              <div class="reservation-detail">📱 ${r.guest_phone}</div>
+              <div class="reservation-detail">📱 <a href="tel:${r.guest_phone}" style="color:var(--text-mid); text-decoration:none;">${r.guest_phone}</a></div>
             </div>
             <span class="badge badge-${r.status}">${r.status}</span>
           </div>
-          <div class="reservation-detail">🏠 ${r._listing_name || 'Your listing'}</div>
+          <div class="reservation-detail" style="font-weight:600; color:var(--text-dark);">🏠 ${r._listing_name || 'Your listing'}</div>
           <div class="reservation-detail">🗓️ ${r.checkin ? `${new Date(r.checkin).toLocaleDateString('en-GB', {day:'numeric', month:'short'})} - ${r.checkout ? new Date(r.checkout).toLocaleDateString('en-GB', {day:'numeric', month:'short'}) : '?'} (${r.nights} nights)` : `${r.nights} nights`} · ${r.guests} guest${r.guests !== 1 ? 's' : ''}</div>
-          <div class="reservation-detail">💰 ₦${Number(r.total_cost).toLocaleString('en-NG')} on arrival</div>
+          <div class="reservation-detail" style="color:var(--navy); font-weight:700;">💰 ₦${Number(r.total_cost).toLocaleString('en-NG')} on arrival</div>
           
-          <div style="margin-top:10px; display:flex; gap:8px;">
-            <a href="https://wa.me/${r.guest_phone.replace(/^0/, '234').replace('+', '')}?text=Hi%20${encodeURIComponent(r.guest_name)},%20about%20your%20reservation%20for%20${encodeURIComponent(r._listing_name || 'LodgeLink')}%20..." target="_blank" style="flex:1; display:flex; justify-content:center; align-items:center; gap:6px; padding:8px; background:#25D366; color:white; text-decoration:none; border-radius:6px; font-size:13px; font-weight:600;">
+          <div style="margin-top:16px; display:flex; gap:8px;">
+            <a href="https://wa.me/${r.guest_phone.replace(/^0/, '234').replace('+', '')}?text=Hi%20${encodeURIComponent(r.guest_name)},%20about%20your%20reservation%20for%20${encodeURIComponent(r._listing_name || 'LodgeLink')}%20..." target="_blank" style="flex:1; display:flex; justify-content:center; align-items:center; gap:6px; padding:10px; background:#25D366; color:white; text-decoration:none; border-radius:var(--radius-sm); font-size:13px; font-weight:700; transition:opacity 0.2s;">
               📱 WhatsApp
             </a>
-            <button id="chat-btn-${r.id}" onclick="openChat('${r.id}', '${(r.guest_name || 'Guest').replace(/'/g, "\\'")}')" style="flex:1; display:flex; justify-content:center; align-items:center; gap:6px; padding:8px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; position:relative;">
+            <button id="chat-btn-${r.id}" onclick="openChat('${r.id}', '${(r.guest_name || 'Guest').replace(/'/g, "\'")}')" style="flex:1; display:flex; justify-content:center; align-items:center; gap:6px; padding:10px; background:var(--navy); color:white; border:none; border-radius:var(--radius-sm); font-size:13px; font-weight:700; cursor:pointer; position:relative; transition:background 0.2s;">
               💬 Chat
-              <span id="badge-${r.id}" style="display:none; position:absolute; top:-6px; right:-6px; background:#E02424; color:white; border-radius:10px; padding:2px 6px; font-size:10px; line-height:1.2;">New</span>
+              <span id="badge-${r.id}" style="display:none; position:absolute; top:-6px; right:-6px; background:#E02424; color:white; border-radius:10px; padding:2px 6px; font-size:10px; font-weight:800; border:2px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.2);">New</span>
             </button>
           </div>
 
           ${r.status === 'pending' ? `
-          <div class="reservation-actions" style="margin-top:10px;">
+          <div class="reservation-actions" style="margin-top:12px; border-top:1px solid var(--border); padding-top:12px;">
             <button class="btn-confirm" onclick="updateReservation('${r.id}','confirmed')">✓ Confirm</button>
             <button class="btn-decline" onclick="updateReservation('${r.id}','declined')">✕ Decline</button>
           </div>` : ''}
@@ -1199,6 +1301,8 @@
             const isSelf = m.sender_type === 'host';
             let html = `<div class="msg ${m.sender_type}">`;
             html += formatChatMessage(m.content);
+            const timeStr = new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            html += `<span class="msg-time">${timeStr}</span>`;
             if (isSelf) {
               html += `<button onclick="deleteMessage('${m.id}')" title="Delete message" style="position:absolute; left:-28px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:14px; opacity:0.5; padding:4px;">🗑️</button>`;
             }
@@ -1316,6 +1420,28 @@
     setInterval(checkUnreadMessagesHost, 5000);
 
   </script>
+
+  <nav class="bottom-nav" id="host-bottom-nav" style="display:none;" aria-label="Bottom navigation">
+    <button type="button" class="nav-item active" id="nav-dashboard" onclick="showScreen('dashboard')">
+      <div class="nav-icon" style="margin-bottom: 2px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+      </div>
+      <span>Dashboard</span>
+    </button>
+    <button type="button" class="nav-item" id="nav-listings" onclick="showScreen('listings')">
+      <div class="nav-icon" style="margin-bottom: 2px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      </div>
+      <span>Listings</span>
+    </button>
+    <button type="button" class="nav-item" id="nav-guest" onclick="window.location.href='/'">
+      <div class="nav-icon" style="margin-bottom: 2px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+      </div>
+      <span>Guest App</span>
+    </button>
+  </nav>
+
 </body>
 </html>
  
