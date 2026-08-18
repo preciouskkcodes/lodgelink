@@ -167,7 +167,7 @@
       border-radius: var(--radius-lg) var(--radius-lg) 0 0;
       padding: 28px 24px 40px;
       width: 100%; max-width: 480px; margin: 0 auto;
-      transform: translateY(40px); transition: transform 0.3s ease;
+      transform: translateY(100%); transition: transform 0.3s ease;
     }
     #onboarding-overlay.open .onboarding-sheet { transform: translateY(0); }
     .onboarding-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
@@ -325,10 +325,15 @@
     .priority-btn { flex: 1; padding: 9px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--white); font-family: var(--font-body); font-size: 12px; font-weight: 500; color: var(--text-mid); cursor: pointer; transition: all var(--transition); text-align: center; }
     .priority-btn:hover { border-color: var(--navy); background: var(--navy); color: var(--white); }
  
+        @keyframes slideUpFooter {
+      from { transform: translate(-50%, 100%); }
+      to { transform: translate(-50%, 0); }
+    }
+
     /* ── MODALS ── */
     .modal-overlay { position: fixed; inset: 0; background: rgba(11,31,58,0.75); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity var(--transition); }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
-    .modal-sheet { background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 28px 24px 40px; width: 100%; max-width: 480px; margin: 0 auto; transform: translateY(40px); transition: transform var(--transition); max-height: 92vh; overflow-y: auto; }
+    .modal-sheet { background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 28px 24px 40px; width: 100%; max-width: 480px; margin: 0 auto; transform: translateY(100%); transition: transform var(--transition); max-height: 92vh; overflow-y: auto; }
     .modal-overlay.open .modal-sheet { transform: translateY(0); }
     .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
     .modal-title { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px; }
@@ -794,10 +799,12 @@
       background: var(--white);
       padding: 16px 20px 24px;
       border-top: 1px solid var(--border);
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
       z-index: 50;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      animation: slideUpFooter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
   
     
