@@ -985,49 +985,31 @@ window.handleLogoutApp = function() {
 };
 
 
+
 // ════════════════════════════════════════════════════════════════
-// PAYMENTS — Paystack + flat ₦2,000 reservation fee
+// PAYMENTS — Inline Reservation Form + Paystack
 // ════════════════════════════════════════════════════════════════
 const PAYSTACK_PUBLIC_KEY = 'pk_test_REPLACE_WITH_YOUR_PAYSTACK_PUBLIC_KEY';
-const RESERVATION_FEE = 2000;  // flat ₦2,000 booking fee (matches PRD)
+const RESERVATION_FEE = 2000;
 
 let _pendingPayment = null;
 
 window.openPaymentModal = function(listingName, pricePerNight, listingId) {
-  // Gate behind auth
-  if (!getAuthUser()) {
-    pendingAuthCallback = function() { window.openPaymentModal(listingName, pricePerNight, listingId); };
-    showScreen('login');
-    return;
-  }
-
   _pendingPayment = { listingName, pricePerNight, listingId };
-  const total = pricePerNight + RESERVATION_FEE;
+  
+  // Pre-fill form if user is known
+  const user = getAuthUser() || {};
+  const nameInput = document.getElementById('guest-name');
+  const emailInput = document.getElementById('guest-email');
+  const phoneInput = document.getElementById('guest-phone');
+  const nightsInput = document.getElementById('guest-nights');
+  
+  if (nameInput) nameInput.value = user.name || '';
+  if (emailInput) emailInput.value = user.email || '';
+  if (phoneInput) phoneInput.value = user.phone || '';
+  if (nightsInput) nightsInput.value = "1";
 
-  const el = document.getElementById('payment-summary-content');
-  if (el) {
-    el.innerHTML = `
-      <div style="background:var(--bg-light);border-radius:var(--radius-md);padding:16px;margin-bottom:16px;">
-        <div style="font-weight:700;font-size:15px;margin-bottom:4px;">${listingName}</div>
-        <div style="font-size:13px;color:var(--text-light);">1 night stay</div>
-      </div>
-      <div class="payment-summary-row">
-        <span style="color:var(--text-mid);">Room rate (1 night)</span>
-        <span>&#8358;${pricePerNight.toLocaleString()}</span>
-      </div>
-      <div class="payment-summary-row">
-        <span style="color:var(--text-mid);">Reservation fee</span>
-        <span>&#8358;${RESERVATION_FEE.toLocaleString()}</span>
-      </div>
-      <div class="payment-summary-row">
-        <span><strong>Total</strong></span>
-        <span style="color:var(--navy);font-weight:800;">&#8358;${total.toLocaleString()}</span>
-      </div>
-    `;
-  }
-
-  const payBtn = document.getElementById('pay-now-btn');
-  if (payBtn) payBtn.dataset.total = total;
+  updatePaymentTotal();
 
   const modal = document.getElementById('payment-modal');
   if (modal) {
@@ -1037,6 +1019,30 @@ window.openPaymentModal = function(listingName, pricePerNight, listingId) {
       const sheet = document.getElementById('payment-modal-sheet');
       if (sheet) sheet.style.transform = 'translateY(0)';
     }, 10);
+  }
+};
+
+window.updatePaymentTotal = function() {
+  if (!_pendingPayment) return;
+  const nights = parseInt(document.getElementById('guest-nights').value || 1);
+  const roomSubtotal = _pendingPayment.pricePerNight * nights;
+  
+  const el = document.getElementById('payment-summary-content');
+  if (el) {
+    el.innerHTML = `
+      <div style="background:var(--bg-light);border-radius:var(--radius-md);padding:14px;margin-bottom:12px;">
+        <div style="font-weight:700;font-size:14px;margin-bottom:4px;color:var(--navy);">${_pendingPayment.listingName}</div>
+        <div style="font-size:12px;color:var(--text-mid);">₦${_pendingPayment.pricePerNight.toLocaleString()} x ${nights} night${nights > 1 ? 's' : ''}</div>
+      </div>
+      <div class="payment-summary-row" style="padding:6px 0;">
+        <span style="color:var(--text-mid); font-size:13px;">Estimated total stay</span>
+        <span style="font-size:13px;">₦${roomSubtotal.toLocaleString()}</span>
+      </div>
+      <div class="payment-summary-row" style="padding:6px 0;">
+        <span style="color:var(--text-dark); font-weight:700; font-size:14px;">Reservation fee (Due now)</span>
+        <span style="color:var(--navy); font-weight:800; font-size:14px;">₦${RESERVATION_FEE.toLocaleString()}</span>
+      </div>
+    `;
   }
 };
 
@@ -1050,12 +1056,22 @@ window.closePaymentModal = function() {
 };
 
 window.initiatePaystackPayment = function() {
-  const payBtn = document.getElementById('pay-now-btn');
-  const total = parseInt((payBtn || {}).dataset.total || 0);
+  const name = document.getElementById('guest-name').value.trim();
+  const email = document.getElementById('guest-email').value.trim();
+  const phone = document.getElementById('guest-phone').value.trim();
+  const nights = parseInt(document.getElementById('guest-nights').value || 1);
+
+  if (!name || !email || !phone) {
+    showToast('Please fill all details (Name, Email, Phone)', 'error');
+    return;
+  }
+
+  // Save to localStorage for future pre-filling
+  setAuthUser({ name, email, phone, loggedInAt: Date.now() });
+  updateProfileUI();
 
   if (!window.PaystackPop) {
-    // Paystack SDK not loaded (offline / no real key) — demo success
-    showToast('Demo: Booking of \u20a6' + total.toLocaleString() + ' complete!', 'success');
+    showToast('Demo: Reservation of ₦2,000 complete!', 'success');
     closePaymentModal();
     if (_pendingPayment) {
       handleReservation(_pendingPayment.listingName, _pendingPayment.pricePerNight, _pendingPayment.listingId);
@@ -1063,15 +1079,22 @@ window.initiatePaystackPayment = function() {
     return;
   }
 
-  const user = getAuthUser();
   const handler = window.PaystackPop.setup({
     key: PAYSTACK_PUBLIC_KEY,
-    email: (user ? user.phone : 'guest') + '@lodgelink.app',
-    amount: total * 100,  // kobo
+    email: email,
+    amount: RESERVATION_FEE * 100,  // kobo
     currency: 'NGN',
     ref: 'LL-' + Date.now(),
+    metadata: {
+      custom_fields: [
+        { display_name: 'Name', variable_name: 'name', value: name },
+        { display_name: 'Phone', variable_name: 'phone', value: phone },
+        { display_name: 'Nights', variable_name: 'nights', value: nights },
+        { display_name: 'Listing', variable_name: 'listing', value: _pendingPayment.listingName }
+      ]
+    },
     callback: function(response) {
-      showToast('Payment successful! \u20a6' + total.toLocaleString(), 'success');
+      showToast('Payment successful! Ref: ' + response.reference, 'success');
       closePaymentModal();
       if (_pendingPayment) {
         handleReservation(_pendingPayment.listingName, _pendingPayment.pricePerNight, _pendingPayment.listingId);
@@ -1081,8 +1104,6 @@ window.initiatePaystackPayment = function() {
   });
   handler.openIframe();
 };
-
-
 // ════════════════════════════════════════════════════════════════
 // MAPS — Google Maps embed on listing details page
 // ════════════════════════════════════════════════════════════════
