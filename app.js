@@ -257,54 +257,32 @@ function buildCard(listing, allPrices) {
     PLACEHOLDERS[(hash + 4) % PLACEHOLDERS.length],
   ];
 
-  if (imgs.length === 0) {
-    // Build a swipeable carousel with beautiful placeholder images
-    const allImgs = carouselFallbacks;
-    galleryHtml = `
-      <div class="img-slider" id="${cardId}-slider" data-index="0">
-        ${allImgs.map((src, i) => `
-          <img src="${src}" alt="${listing.name} photo ${i + 1}"
-               class="slider-img"
-               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-                      opacity:${i === 0 ? 1 : 0};transition:opacity 0.4s ease;" />
-        `).join('')}
-        <button class="slider-btn slider-prev"
-                onclick="slideImg(event,'${cardId}-slider',-1)"
-                aria-label="Previous photo">&#8249;</button>
-        <button class="slider-btn slider-next"
-                onclick="slideImg(event,'${cardId}-slider', 1)"
-                aria-label="Next photo">&#8250;</button>
-        <div class="slider-dots">
-          ${allImgs.map((_, i) => `
-            <span class="slider-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></span>
-          `).join('')}
-        </div>
-      </div>`;
-  } else if (imgs.length === 1) {
-    galleryHtml = `<img src="${imgs[0]}" alt="${listing.name}"
-      style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" />`;
-  } else {
-    galleryHtml = `
-      <div class="img-slider" id="${cardId}-slider" data-index="0">
-        ${imgs.map((src, i) => `
-          <img src="${src}" alt="${listing.name} photo ${i + 1}"
-               class="slider-img"
-               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-                      opacity:${i === 0 ? 1 : 0};transition:opacity 0.35s ease;" />
-        `).join('')}
-        <button class="slider-btn slider-prev"
-                onclick="slideImg(event,'${cardId}-slider',-1)"
-                aria-label="Previous photo">&#8249;</button>
-        <button class="slider-btn slider-next"
-                onclick="slideImg(event,'${cardId}-slider', 1)"
-                aria-label="Next photo">&#8250;</button>
-        <div class="slider-dots">
-          ${imgs.map((_, i) => `
-            <span class="slider-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></span>
-          `).join('')}
-        </div>
-      </div>`;
+  // Pad images to ensure there is always a carousel of at least 3 images
+  let finalImgs = [...imgs];
+  while (finalImgs.length < 3) {
+    finalImgs.push(carouselFallbacks[finalImgs.length % carouselFallbacks.length]);
   }
+
+  galleryHtml = `
+    <div class="img-slider" id="${cardId}-slider" data-index="0">
+      ${finalImgs.map((src, i) => `
+        <img src="${src}" alt="${listing.name} photo ${i + 1}"
+             class="slider-img"
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+                    opacity:${i === 0 ? 1 : 0};transition:opacity 0.4s ease;" />
+      `).join('')}
+      <button class="slider-btn slider-prev"
+              onclick="slideImg(event,'${cardId}-slider',-1)"
+              aria-label="Previous photo">&#8249;</button>
+      <button class="slider-btn slider-next"
+              onclick="slideImg(event,'${cardId}-slider', 1)"
+              aria-label="Next photo">&#8250;</button>
+      <div class="slider-dots">
+        ${finalImgs.map((_, i) => `
+          <span class="slider-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></span>
+        `).join('')}
+      </div>
+    </div>`;
  
   const card = document.createElement('article');
   card.className = 'listing-card';
@@ -938,26 +916,45 @@ window.showListingDetails = function(listingId) {
   
   let coverHtml;
   const detailsId = 'details-' + listing.id.substring(0, 8);
-  if (imgs.length === 0) {
-    coverHtml = `<div style="width:100%;height:100%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:40px;">🏨</div>`;
-  } else if (imgs.length === 1) {
-    coverHtml = `<img src="${imgs[0]}" alt="${listing.name}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" />`;
-  } else {
-    coverHtml = `
-      <div class="img-slider" id="${detailsId}-slider" data-index="0" style="width:100%;height:100%;position:absolute;inset:0;">
-        ${imgs.map((src, i) => `
-          <img src="${src}" alt="${listing.name} photo ${i + 1}"
-               class="slider-img"
-               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-                      opacity:${i === 0 ? 1 : 0};transition:opacity 0.35s ease;" />
-        `).join('')}
-        <button class="slider-btn slider-prev" onclick="slideImg(event,'${detailsId}-slider',-1)" style="left:10px;top:50%;transform:translateY(-50%);">&#8249;</button>
-        <button class="slider-btn slider-next" onclick="slideImg(event,'${detailsId}-slider', 1)" style="right:10px;top:50%;transform:translateY(-50%);">&#8250;</button>
-        <div class="slider-dots">
-          ${imgs.map((_, i) => `<span class="slider-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></span>`).join('')}
-        </div>
-      </div>`;
+  
+  const hash = (listing.name || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const PLACEHOLDERS = [
+    "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80",
+    "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",
+    "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600&q=80",
+    "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?w=600&q=80",
+    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80",
+    "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80",
+    "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600&q=80",
+    "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600&q=80",
+  ];
+  
+  let finalImgs = [...imgs];
+  if (finalImgs.length < 3) {
+    const carouselFallbacks = [
+      PLACEHOLDERS[hash % PLACEHOLDERS.length],
+      PLACEHOLDERS[(hash + 2) % PLACEHOLDERS.length],
+      PLACEHOLDERS[(hash + 4) % PLACEHOLDERS.length]
+    ];
+    while (finalImgs.length < 3) {
+      finalImgs.push(carouselFallbacks[finalImgs.length % carouselFallbacks.length]);
+    }
   }
+
+  coverHtml = `
+    <div class="img-slider" id="${detailsId}-slider" data-index="0" style="width:100%;height:100%;position:absolute;inset:0;">
+      ${finalImgs.map((src, i) => `
+        <img src="${src}" alt="${listing.name} photo ${i + 1}"
+             class="slider-img"
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+                    opacity:${i === 0 ? 1 : 0};transition:opacity 0.35s ease;" />
+      `).join('')}
+      <button class="slider-btn slider-prev" onclick="slideImg(event,'${detailsId}-slider',-1)" style="left:10px;top:50%;transform:translateY(-50%);">&#8249;</button>
+      <button class="slider-btn slider-next" onclick="slideImg(event,'${detailsId}-slider', 1)" style="right:10px;top:50%;transform:translateY(-50%);">&#8250;</button>
+      <div class="slider-dots">
+        ${finalImgs.map((_, i) => `<span class="slider-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></span>`).join('')}
+      </div>
+    </div>`;
 
   const locText = listing.location ? listing.location : 'Lodge Venue';
 
