@@ -1107,7 +1107,7 @@ window.initiatePaystackPayment = function() {
   setAuthUser({ name, email, phone, loggedInAt: Date.now() });
   updateProfileUI();
 
-  if (!window.PaystackPop) {
+  if (!window.PaystackPop || PAYSTACK_PUBLIC_KEY.includes('REPLACE_WITH')) {
     showToast('Demo: Reservation of ₦2,000 complete!', 'success');
     closePaymentModal();
     if (_pendingPayment) {
