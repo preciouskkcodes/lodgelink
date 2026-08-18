@@ -827,10 +827,16 @@ window.showScreen = function(screenName) {
   exploreScreen.classList.remove('active');
   bookingsScreen.classList.remove('active');
   if (detailsScreen) detailsScreen.classList.remove('active');
+  // Also clear auth screens
+  ['login','otp','profile'].forEach(name => {
+    const s = document.getElementById('screen-' + name);
+    if (s) s.classList.remove('active');
+  });
 
   // Show/Hide bottom nav
   if (bottomNav) {
-    bottomNav.style.display = screenName === 'listing-details' ? 'none' : 'flex';
+    const hideNav = screenName === 'listing-details' || screenName === 'login' || screenName === 'otp';
+    bottomNav.style.display = hideNav ? 'none' : 'flex';
   }
 
   // Update screens
@@ -841,6 +847,11 @@ window.showScreen = function(screenName) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else if (screenName === 'listing-details') {
     if (detailsScreen) detailsScreen.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (screenName === 'login' || screenName === 'otp' || screenName === 'profile') {
+    const targetScreen = document.getElementById('screen-' + screenName);
+    if (targetScreen) targetScreen.classList.add('active');
+    if (bottomNav) bottomNav.style.display = 'none';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
     exploreScreen.classList.add('active');
@@ -934,7 +945,9 @@ window.sendOtp = function() {
   if (pendingAuthCallback) {
     const cb = pendingAuthCallback;
     pendingAuthCallback = null;
-    cb();
+    // Show listing details first, then invoke the pending action (e.g. open payment modal)
+    showScreen('listing-details');
+    setTimeout(cb, 100);
   } else {
     showScreen('explore');
   }
