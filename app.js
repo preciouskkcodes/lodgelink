@@ -1008,21 +1008,16 @@ function calculateNights() {
 }
 
 window.openPaymentModal = function(listingName, pricePerNight, listingId) {
-  _pendingPayment = { listingName, pricePerNight, listingId };
+  activeReservation = { propertyName: listingName, pricePerNight, listingId };
   
-  // Pre-fill form if user is known
-  const user = getAuthUser() || {};
-  const nameInput = document.getElementById('guest-name');
-  const emailInput = document.getElementById('guest-email');
-  const phoneInput = document.getElementById('guest-phone');
-  const checkinInput = document.getElementById('guest-checkin');
-  const checkoutInput = document.getElementById('guest-checkout');
-  
-  if (nameInput) nameInput.value = user.name || '';
-  if (emailInput) emailInput.value = user.email || '';
-  if (phoneInput) phoneInput.value = user.phone || '';
+  // Pre-fill returning guest details
+  document.getElementById('input-name').value = localStorage.getItem('ll_guest_name') || '';
+  document.getElementById('input-email').value = localStorage.getItem('ll_guest_email') || '';
+  document.getElementById('input-phone').value = localStorage.getItem('ll_guest_phone') || '';
   
   // Set default dates: Today and Tomorrow
+  const checkinInput = document.getElementById('input-checkin');
+  const checkoutInput = document.getElementById('input-checkout');
   if (checkinInput && checkoutInput) {
     const today = new Date();
     const tomorrow = new Date();
@@ -1030,7 +1025,6 @@ window.openPaymentModal = function(listingName, pricePerNight, listingId) {
     checkinInput.value = today.toISOString().split('T')[0];
     checkoutInput.value = tomorrow.toISOString().split('T')[0];
     
-    // Set min date to today
     checkinInput.min = today.toISOString().split('T')[0];
     checkoutInput.min = today.toISOString().split('T')[0];
   }
@@ -1049,24 +1043,28 @@ window.openPaymentModal = function(listingName, pricePerNight, listingId) {
 };
 
 window.updatePaymentTotal = function() {
-  if (!_pendingPayment) return;
+  if (!activeReservation) return;
   
-  const nights = calculateNights();
-  const roomSubtotal = _pendingPayment.pricePerNight * nights;
-  
-  // Ensure checkout is not before checkin
-  const checkinInput = document.getElementById('guest-checkin');
-  const checkoutInput = document.getElementById('guest-checkout');
-  if (checkinInput && checkoutInput && checkinInput.value) {
-     checkoutInput.min = checkinInput.value;
+  const checkinVal = document.getElementById('input-checkin')?.value;
+  const checkoutVal = document.getElementById('input-checkout')?.value;
+  let nights = 1;
+  if (checkinVal && checkoutVal) {
+    const d1 = new Date(checkinVal);
+    const d2 = new Date(checkoutVal);
+    const diffTime = d2 - d1;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays > 0) nights = diffDays;
+    document.getElementById('input-checkout').min = checkinVal;
   }
+  
+  const roomSubtotal = activeReservation.pricePerNight * nights;
   
   const el = document.getElementById('payment-summary-content');
   if (el) {
     el.innerHTML = `
       <div style="background:var(--bg-light);border-radius:var(--radius-md);padding:14px;margin-bottom:12px;">
-        <div style="font-weight:700;font-size:14px;margin-bottom:4px;color:var(--navy);">${_pendingPayment.listingName}</div>
-        <div style="font-size:12px;color:var(--text-mid);">₦${_pendingPayment.pricePerNight.toLocaleString()} x ${nights} night${nights > 1 ? 's' : ''}</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:4px;color:var(--navy);">${activeReservation.propertyName}</div>
+        <div style="font-size:12px;color:var(--text-mid);">₦${activeReservation.pricePerNight.toLocaleString()} x ${nights} night${nights > 1 ? 's' : ''}</div>
       </div>
       <div class="payment-summary-row" style="padding:6px 0;">
         <span style="color:var(--text-mid); font-size:13px;">Estimated total stay</span>
@@ -1074,7 +1072,7 @@ window.updatePaymentTotal = function() {
       </div>
       <div class="payment-summary-row" style="padding:6px 0; border-top:1px dashed var(--border); margin-top:8px; padding-top:12px;">
         <span style="color:var(--text-dark); font-weight:700; font-size:14px;">Reservation fee (Due now)</span>
-        <span style="color:var(--navy); font-weight:800; font-size:16px;">₦${RESERVATION_FEE.toLocaleString()}</span>
+        <span style="color:var(--navy); font-weight:800; font-size:16px;">₦2,000</span>
       </div>
     `;
   }
@@ -1089,59 +1087,7 @@ window.closePaymentModal = function() {
   }, 350);
 };
 
-window.initiatePaystackPayment = function() {
-  const name = document.getElementById('guest-name').value.trim();
-  const email = document.getElementById('guest-email').value.trim();
-  const phone = document.getElementById('guest-phone').value.trim();
-  const nights = calculateNights();
-  
-  const checkinVal = document.getElementById('guest-checkin')?.value || '';
-  const checkoutVal = document.getElementById('guest-checkout')?.value || '';
 
-  if (!name || !email || !phone || !checkinVal || !checkoutVal) {
-    showToast('Please fill all details including dates', 'error');
-    return;
-  }
-
-  // Save to localStorage for future pre-filling
-  setAuthUser({ name, email, phone, loggedInAt: Date.now() });
-  updateProfileUI();
-
-  if (!window.PaystackPop || PAYSTACK_PUBLIC_KEY.includes('REPLACE_WITH')) {
-    showToast('Demo: Reservation of ₦2,000 complete!', 'success');
-    closePaymentModal();
-    if (_pendingPayment) {
-      handleReservation(_pendingPayment.listingName, _pendingPayment.pricePerNight, _pendingPayment.listingId);
-    }
-    return;
-  }
-
-  const handler = window.PaystackPop.setup({
-    key: PAYSTACK_PUBLIC_KEY,
-    email: email,
-    amount: RESERVATION_FEE * 100,  // kobo
-    currency: 'NGN',
-    ref: 'LL-' + Date.now(),
-    metadata: {
-      custom_fields: [
-        { display_name: 'Name', variable_name: 'name', value: name },
-        { display_name: 'Phone', variable_name: 'phone', value: phone },
-        { display_name: 'Dates', variable_name: 'dates', value: checkinVal + ' to ' + checkoutVal },
-        { display_name: 'Nights', variable_name: 'nights', value: nights },
-        { display_name: 'Listing', variable_name: 'listing', value: _pendingPayment.listingName }
-      ]
-    },
-    callback: function(response) {
-      showToast('Payment successful! Ref: ' + response.reference, 'success');
-      closePaymentModal();
-      if (_pendingPayment) {
-        handleReservation(_pendingPayment.listingName, _pendingPayment.pricePerNight, _pendingPayment.listingId);
-      }
-    },
-    onClose: function() { showToast('Payment cancelled'); }
-  });
-  handler.openIframe();
-};
 // ════════════════════════════════════════════════════════════════
 // MAPS — Google Maps embed on listing details page
 // ════════════════════════════════════════════════════════════════

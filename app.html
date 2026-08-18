@@ -1774,29 +1774,30 @@
       
       <div id="payment-form-inputs" style="margin-bottom: 24px; text-align: left;">
         <label style="display:block; font-size:12px; font-weight:700; color:var(--text-mid); margin-bottom:6px;">Your Name</label>
-        <input type="text" id="guest-name" placeholder="John Doe" class="auth-input" style="padding:12px; margin-bottom:16px; font-size:14px; background:#FAFCFF;" />
+        <input type="text" id="input-name" placeholder="John Doe" class="auth-input" style="padding:12px; margin-bottom:16px; font-size:14px; background:#FAFCFF;" />
         
         <label style="display:block; font-size:12px; font-weight:700; color:var(--text-mid); margin-bottom:6px;">Email Address</label>
-        <input type="email" id="guest-email" placeholder="john@example.com" class="auth-input" style="padding:12px; margin-bottom:16px; font-size:14px; background:#FAFCFF;" />
+        <input type="email" id="input-email" placeholder="john@example.com" class="auth-input" style="padding:12px; margin-bottom:16px; font-size:14px; background:#FAFCFF;" />
         
         <label style="display:block; font-size:12px; font-weight:700; color:var(--text-mid); margin-bottom:6px;">Phone Number</label>
-        <input type="tel" id="guest-phone" placeholder="08012345678" class="auth-input" style="padding:12px; margin-bottom:16px; font-size:14px; background:#FAFCFF;" />
+        <input type="tel" id="input-phone" placeholder="08012345678" class="auth-input" style="padding:12px; margin-bottom:16px; font-size:14px; background:#FAFCFF;" />
 
         <div style="display:flex; gap:12px; margin-bottom:16px;">
           <div style="flex:1;">
             <label style="display:block; font-size:12px; font-weight:700; color:var(--text-mid); margin-bottom:6px;">Check-in</label>
-            <input type="date" id="guest-checkin" class="auth-input" style="padding:12px; margin-bottom:0; font-size:14px; background:#FAFCFF;" onchange="updatePaymentTotal()" />
+            <input type="date" id="input-checkin" class="auth-input" style="padding:12px; margin-bottom:0; font-size:14px; background:#FAFCFF;" onchange="updatePaymentTotal()" />
           </div>
           <div style="flex:1;">
             <label style="display:block; font-size:12px; font-weight:700; color:var(--text-mid); margin-bottom:6px;">Check-out</label>
-            <input type="date" id="guest-checkout" class="auth-input" style="padding:12px; margin-bottom:0; font-size:14px; background:#FAFCFF;" onchange="updatePaymentTotal()" />
+            <input type="date" id="input-checkout" class="auth-input" style="padding:12px; margin-bottom:0; font-size:14px; background:#FAFCFF;" onchange="updatePaymentTotal()" />
           </div>
         </div>
       </div>
 
       <div id="payment-summary-content" style="margin-bottom: 16px;"></div>
 
-      <button id="pay-now-btn" class="auth-btn" onclick="initiatePaystackPayment()" style="margin-top:8px;">
+      <input type="hidden" id="input-guests" value="1" />
+      <button id="btn-reserve-confirm" class="auth-btn" onclick="confirmReservation()" style="margin-top:8px;">
         Pay ₦2,000 Reservation Fee
       </button>
       <div class="pay-secure-badge">🔒 Secured by Paystack — SSL encrypted</div>
