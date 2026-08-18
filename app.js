@@ -986,6 +986,7 @@ window.handleLogoutApp = function() {
 
 
 
+
 // ════════════════════════════════════════════════════════════════
 // PAYMENTS — Inline Reservation Form + Paystack
 // ════════════════════════════════════════════════════════════════
@@ -993,6 +994,18 @@ const PAYSTACK_PUBLIC_KEY = 'pk_test_REPLACE_WITH_YOUR_PAYSTACK_PUBLIC_KEY';
 const RESERVATION_FEE = 2000;
 
 let _pendingPayment = null;
+
+function calculateNights() {
+  const checkinVal = document.getElementById('guest-checkin')?.value;
+  const checkoutVal = document.getElementById('guest-checkout')?.value;
+  if (!checkinVal || !checkoutVal) return 1;
+  
+  const d1 = new Date(checkinVal);
+  const d2 = new Date(checkoutVal);
+  const diffTime = d2 - d1;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays > 0 ? diffDays : 1;
+}
 
 window.openPaymentModal = function(listingName, pricePerNight, listingId) {
   _pendingPayment = { listingName, pricePerNight, listingId };
@@ -1002,12 +1015,25 @@ window.openPaymentModal = function(listingName, pricePerNight, listingId) {
   const nameInput = document.getElementById('guest-name');
   const emailInput = document.getElementById('guest-email');
   const phoneInput = document.getElementById('guest-phone');
-  const nightsInput = document.getElementById('guest-nights');
+  const checkinInput = document.getElementById('guest-checkin');
+  const checkoutInput = document.getElementById('guest-checkout');
   
   if (nameInput) nameInput.value = user.name || '';
   if (emailInput) emailInput.value = user.email || '';
   if (phoneInput) phoneInput.value = user.phone || '';
-  if (nightsInput) nightsInput.value = "1";
+  
+  // Set default dates: Today and Tomorrow
+  if (checkinInput && checkoutInput) {
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+    checkinInput.value = today.toISOString().split('T')[0];
+    checkoutInput.value = tomorrow.toISOString().split('T')[0];
+    
+    // Set min date to today
+    checkinInput.min = today.toISOString().split('T')[0];
+    checkoutInput.min = today.toISOString().split('T')[0];
+  }
 
   updatePaymentTotal();
 
@@ -1024,8 +1050,16 @@ window.openPaymentModal = function(listingName, pricePerNight, listingId) {
 
 window.updatePaymentTotal = function() {
   if (!_pendingPayment) return;
-  const nights = parseInt(document.getElementById('guest-nights').value || 1);
+  
+  const nights = calculateNights();
   const roomSubtotal = _pendingPayment.pricePerNight * nights;
+  
+  // Ensure checkout is not before checkin
+  const checkinInput = document.getElementById('guest-checkin');
+  const checkoutInput = document.getElementById('guest-checkout');
+  if (checkinInput && checkoutInput && checkinInput.value) {
+     checkoutInput.min = checkinInput.value;
+  }
   
   const el = document.getElementById('payment-summary-content');
   if (el) {
@@ -1036,11 +1070,11 @@ window.updatePaymentTotal = function() {
       </div>
       <div class="payment-summary-row" style="padding:6px 0;">
         <span style="color:var(--text-mid); font-size:13px;">Estimated total stay</span>
-        <span style="font-size:13px;">₦${roomSubtotal.toLocaleString()}</span>
+        <span style="font-size:13px; font-weight:600;">₦${roomSubtotal.toLocaleString()}</span>
       </div>
-      <div class="payment-summary-row" style="padding:6px 0;">
+      <div class="payment-summary-row" style="padding:6px 0; border-top:1px dashed var(--border); margin-top:8px; padding-top:12px;">
         <span style="color:var(--text-dark); font-weight:700; font-size:14px;">Reservation fee (Due now)</span>
-        <span style="color:var(--navy); font-weight:800; font-size:14px;">₦${RESERVATION_FEE.toLocaleString()}</span>
+        <span style="color:var(--navy); font-weight:800; font-size:16px;">₦${RESERVATION_FEE.toLocaleString()}</span>
       </div>
     `;
   }
@@ -1059,10 +1093,13 @@ window.initiatePaystackPayment = function() {
   const name = document.getElementById('guest-name').value.trim();
   const email = document.getElementById('guest-email').value.trim();
   const phone = document.getElementById('guest-phone').value.trim();
-  const nights = parseInt(document.getElementById('guest-nights').value || 1);
+  const nights = calculateNights();
+  
+  const checkinVal = document.getElementById('guest-checkin')?.value || '';
+  const checkoutVal = document.getElementById('guest-checkout')?.value || '';
 
-  if (!name || !email || !phone) {
-    showToast('Please fill all details (Name, Email, Phone)', 'error');
+  if (!name || !email || !phone || !checkinVal || !checkoutVal) {
+    showToast('Please fill all details including dates', 'error');
     return;
   }
 
@@ -1089,6 +1126,7 @@ window.initiatePaystackPayment = function() {
       custom_fields: [
         { display_name: 'Name', variable_name: 'name', value: name },
         { display_name: 'Phone', variable_name: 'phone', value: phone },
+        { display_name: 'Dates', variable_name: 'dates', value: checkinVal + ' to ' + checkoutVal },
         { display_name: 'Nights', variable_name: 'nights', value: nights },
         { display_name: 'Listing', variable_name: 'listing', value: _pendingPayment.listingName }
       ]
