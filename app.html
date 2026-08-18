@@ -1766,11 +1766,7 @@
   </header>
  
   
-  
-
-  
-
-    <!-- ── PAYMENT MODAL ─────────────────────────────────────────────────── -->
+  <!-- ── PAYMENT MODAL ─────────────────────────────────────────────────── -->
   <div class="modal-overlay" id="payment-modal" onclick="if(event.target===this)closePaymentModal()">
     <div class="modal-sheet" id="payment-modal-sheet" style="padding-bottom: 40px; max-height: 90vh; overflow-y: auto;">
       <div class="modal-handle"></div>
@@ -1778,7 +1774,7 @@
       
       <div id="payment-summary-content" style="margin-bottom: 16px;"></div>
 
-      <div style="margin-bottom: 16px;">
+      <div style="margin-bottom: 16px; text-align: left;">
         <label style="display:block; font-size:12px; font-weight:700; color:var(--text-mid); margin-bottom:6px;">Your Name</label>
         <input type="text" id="guest-name" placeholder="John Doe" class="auth-input" style="padding:12px; margin-bottom:12px; font-size:14px; background:#FAFCFF;" />
         
@@ -1808,6 +1804,44 @@
       <div class="pay-secure-badge">🔒 Secured by Paystack — SSL encrypted</div>
     </div>
   </div>
+
+  <!-- MAIN -->
+  <div id="screen-explore" class="app-screen active">
+  <main id="main" role="main">
+    <div class="container">
+ 
+      <div class="filter-bar-wrap">
+        <p class="filter-hint" id="filter-hint" aria-live="polite">👇 Tap a filter to narrow results instantly</p>
+        <div class="filter-bar" role="group" aria-label="Filter accommodation type">
+          <button class="filter-btn active" type="button">All</button>
+          <button class="filter-btn" type="button">Asese</button>
+          <button class="filter-btn" type="button">RCCG Camp</button>
+          <button class="filter-btn" type="button">Hotel</button>
+          <button class="filter-btn" type="button">Guesthouse</button>
+          <button class="filter-btn" type="button">Hostel</button>
+          <button class="filter-btn" type="button">Self-contain</button>
+        </div>
+      </div>
+ 
+      <div class="results-header">
+        <p class="results-count"><strong id="results-count-num">—</strong> available</p>
+        <button class="sort-btn" type="button" aria-label="Sort results"><span aria-hidden="true">⇅</span> Sort</button>
+      </div>
+ 
+      <div id="list-root" role="list" aria-label="Available accommodation listings"></div>
+ 
+      <div class="no-match-panel" id="no-match-panel" role="alert" aria-live="polite">
+        <div class="no-match-icon" aria-hidden="true">🔍</div>
+        <h2 class="no-match-title">No exact match found</h2>
+        <p class="no-match-body">No rooms match your exact search.<br />Here are the closest alternatives.</p>
+        <div class="priority-question">
+          <p>What matters more to you?</p>
+          <div class="priority-btns">
+            <button class="priority-btn" type="button" id="btn-priority-budget">Stay within budget</button>
+            <button class="priority-btn" type="button" id="btn-priority-distance">Close to venue</button>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
   </div><!-- /#screen-explore -->
