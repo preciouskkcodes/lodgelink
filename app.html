@@ -330,6 +330,118 @@
       to { transform: translate(-50%, 0); }
     }
 
+    
+    /* ── AUTH SCREENS ── */
+    .auth-screen-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 32px 24px 48px;
+      background: var(--white);
+      text-align: center;
+    }
+    .auth-logo-wrap {
+      width: 72px; height: 72px;
+      background: var(--navy);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .auth-logo-wrap span { font-size: 32px; }
+    .auth-title {
+      font-family: var(--font-head);
+      font-size: 26px; font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+    .auth-sub {
+      font-size: 14px; color: var(--text-light);
+      margin-bottom: 36px; line-height: 1.6;
+    }
+    .auth-input {
+      width: 100%; padding: 16px 18px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 16px; color: var(--text-dark);
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 14px;
+      background: var(--white);
+    }
+    .auth-input:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(11,31,58,0.08); }
+    .auth-btn {
+      width: 100%; padding: 16px;
+      background: var(--navy); color: var(--white);
+      border: none; border-radius: var(--radius-md);
+      font-family: var(--font-head);
+      font-size: 16px; font-weight: 700;
+      cursor: pointer; margin-bottom: 12px;
+      box-shadow: 0 4px 14px rgba(11,31,58,0.2);
+      transition: background 0.2s;
+    }
+    .auth-btn:hover { background: var(--gold); color: var(--navy); }
+    .auth-btn-ghost {
+      width: 100%; padding: 14px;
+      background: none; color: var(--text-light);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .auth-btn-ghost:hover { border-color: var(--navy); color: var(--navy); }
+    .otp-input {
+      font-size: 28px; letter-spacing: 18px;
+      text-align: center; font-weight: 700;
+    }
+
+    /* ── MAP UI ── */
+    .distance-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(11,31,58,0.07);
+      color: var(--text-dark);
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .map-preview {
+      width: 100%; height: 180px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      overflow: hidden; position: relative;
+      margin-bottom: 16px;
+      background: #EEF4FB;
+    }
+    .map-preview iframe {
+      width: 100%; height: 100%; border: none;
+    }
+    .map-overlay-btn {
+      position: absolute; bottom: 10px; right: 10px;
+      background: var(--navy); color: var(--white);
+      border: none; border-radius: 20px;
+      padding: 6px 14px; font-size: 12px;
+      font-weight: 600; cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* ── PAYMENT SHEET ── */
+    #payment-modal .details-section-title { margin-top: 0; }
+    .payment-summary-row {
+      display: flex; justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .payment-summary-row:last-child { border-bottom: none; font-weight: 700; font-size: 15px; }
+    .pay-secure-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--text-light);
+      justify-content: center; margin-top: 12px;
+    }
+
     /* ── MODALS ── */
     .modal-overlay { position: fixed; inset: 0; background: rgba(11,31,58,0.75); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity var(--transition); }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
@@ -1653,6 +1765,45 @@
     </div>
   </header>
  
+  
+  <!-- ── AUTH: PHONE LOGIN SCREEN ─────────────────────────────────────── -->
+  <div id="screen-login" class="app-screen">
+    <div class="auth-screen-wrap">
+      <div class="auth-logo-wrap"><span>🔐</span></div>
+      <h2 class="auth-title">Welcome to LodgeLink</h2>
+      <p class="auth-sub">Enter your phone number to continue.<br/>We'll send a one-time code.</p>
+      <input type="tel" id="login-phone" class="auth-input" placeholder="e.g. 08012345678" maxlength="14" />
+      <button class="auth-btn" onclick="sendOtp()">Send OTP</button>
+      <button class="auth-btn-ghost" onclick="showScreen('explore')">Browse without login</button>
+    </div>
+  </div>
+
+  <!-- ── AUTH: OTP VERIFY SCREEN ──────────────────────────────────────── -->
+  <div id="screen-otp" class="app-screen">
+    <div class="auth-screen-wrap">
+      <div class="auth-logo-wrap"><span>💬</span></div>
+      <h2 class="auth-title">Enter your code</h2>
+      <p class="auth-sub" id="otp-sub">Enter the 4-digit code we sent to your number.</p>
+      <input type="number" id="login-otp" class="auth-input otp-input" placeholder="· · · ·" maxlength="4" />
+      <button class="auth-btn" onclick="verifyOtp()">Verify &amp; Continue</button>
+      <button class="auth-btn-ghost" onclick="showScreen('login')">Change number</button>
+    </div>
+  </div>
+
+  <!-- ── PAYMENT MODAL ─────────────────────────────────────────────────── -->
+  <div class="modal-overlay" id="payment-modal" onclick="if(event.target===this)closePaymentModal()">
+    <div class="modal-sheet" id="payment-modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="details-section-title">Confirm &amp; Pay</div>
+      <div id="payment-summary-content"></div>
+      <button id="pay-now-btn" class="auth-btn" onclick="initiatePaystackPayment()" style="margin-top:16px;">
+        Pay with Paystack
+      </button>
+      <div class="pay-secure-badge">🔒 Secured by Paystack — SSL encrypted</div>
+      <button class="auth-btn-ghost" onclick="closePaymentModal()" style="margin-top:10px;">Cancel</button>
+    </div>
+  </div>
+
   <!-- MAIN -->
   <div id="screen-explore" class="app-screen active">
   <main id="main" role="main">
@@ -1905,6 +2056,8 @@
  
   <script src="app.js?v=2"></script>
   <script src="https://js.paystack.co/v1/inline.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_KEY&libraries=places&callback=initGoogleMaps" async defer></script>
+
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
