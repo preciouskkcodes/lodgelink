@@ -990,7 +990,7 @@ window.handleLogoutApp = function() {
 // ════════════════════════════════════════════════════════════════
 // PAYMENTS — Inline Reservation Form + Paystack
 // ════════════════════════════════════════════════════════════════
-const PAYSTACK_PUBLIC_KEY = 'pk_test_REPLACE_WITH_YOUR_PAYSTACK_PUBLIC_KEY';
+const PAYSTACK_PUBLIC_KEY = 'pk_live_3d75970ca819e2febf78281901410d755d38b5bc';
 const RESERVATION_FEE = 2000;
 
 let _pendingPayment = null;
