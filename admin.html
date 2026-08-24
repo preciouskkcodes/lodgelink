@@ -602,6 +602,20 @@
  
     // ─── SUPABASE HELPER ─────────────────────────────────────────────
     const db = {
+      async insert(table, data) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error(`Insert failed: ${res.status}`);
+        return res.json();
+      },
       async get(table, filters = {}) {
         let url = `${SUPABASE_URL}/rest/v1/${table}?select=*`;
         Object.entries(filters).forEach(([k, v]) => {
@@ -801,6 +815,7 @@
             ${r.guest_phone ? `<div style="display:flex; gap:6px; margin-top:4px;">
               <a href="tel:${r.guest_phone}" style="padding:3px 8px; background:#E0F2FE; color:#0369A1; border-radius:6px; text-decoration:none; font-size:11px; font-weight:700;">📞 Call</a>
               <a href="https://wa.me/${String(r.guest_phone).replace(/\D/g,'').replace(/^0/,'234')}" target="_blank" style="padding:3px 8px; background:#DCFCE7; color:#15803D; border-radius:6px; text-decoration:none; font-size:11px; font-weight:700;">💬 WhatsApp</a>
+              <button onclick="openAdminChat('${(r.guest_name||'Guest').replace(/'/g,"\\'")}', '${r.id}')" style="padding:3px 8px; background:#F1F5F9; color:var(--navy); border:1px solid var(--border); border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;">💬 App Chat</button>
             </div>` : ''}
           </td>
             <td>${listing ? listing.name : r.listing_id?.substring(0,8) + '...'}</td>
@@ -832,6 +847,7 @@
             <div style="display:flex; gap:6px; margin-top:4px;">
               <a href="tel:${h.phone}" style="padding:3px 8px; background:#E0F2FE; color:#0369A1; border-radius:6px; text-decoration:none; font-size:11px; font-weight:700;">📞 Call</a>
               <a href="https://wa.me/${String(h.phone).replace(/\D/g,'').replace(/^0/,'234')}" target="_blank" style="padding:3px 8px; background:#DCFCE7; color:#15803D; border-radius:6px; text-decoration:none; font-size:11px; font-weight:700;">💬 WhatsApp</a>
+              <button onclick="openAdminChat('${(h.name||'Host').replace(/'/g,"\\'")}', '${h.id || h.phone}')" style="padding:3px 8px; background:#F1F5F9; color:var(--navy); border:1px solid var(--border); border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;">💬 App Chat</button>
             </div>
           </td>
           <td><span class="badge badge-approved">${h.role}</span></td>
@@ -936,5 +952,116 @@
     document.addEventListener('DOMContentLoaded', init);
   </script>
  
+
+  <!-- ADMIN IN-APP CHAT MODAL -->
+  <div id="admin-chat-modal" style="display:none; position:fixed; inset:0; background:rgba(11,31,58,0.6); z-index:999; align-items:center; justify-content:center; padding:16px;">
+    <div style="background:var(--white); width:100%; max-width:440px; border-radius:20px; overflow:hidden; box-shadow:0 12px 32px rgba(0,0,0,0.25); display:flex; flex-direction:column; max-height:85vh;">
+      
+      <!-- Modal Header -->
+      <div style="background:var(--navy); color:var(--white); padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-family:var(--font-head); font-weight:700; font-size:16px;" id="admin-chat-title">Admin Chat</div>
+          <div style="font-size:11px; opacity:0.7;" id="admin-chat-subtitle">Direct In-App Message</div>
+        </div>
+        <button onclick="closeAdminChat()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer; padding:4px;">✕</button>
+      </div>
+
+      <!-- Messages Area -->
+      <div id="admin-chat-messages" style="flex:1; padding:16px; overflow-y:auto; background:#F8FAFC; min-height:260px; display:flex; flex-direction:column; gap:10px;">
+        <div style="text-align:center; color:var(--text-light); font-size:12px; margin:auto;">Loading messages...</div>
+      </div>
+
+      <!-- Input Area -->
+      <div style="padding:12px 16px; background:var(--white); border-top:1px solid var(--border); display:flex; gap:8px; align-items:center;">
+        <input type="text" id="admin-chat-input" placeholder="Type a message to user..." style="flex:1; padding:12px 14px; border:1px solid var(--border); border-radius:12px; font-size:14px; outline:none; font-family:var(--font-body);" onkeypress="if(event.key==='Enter')sendAdminMessage()" />
+        <button onclick="sendAdminMessage()" style="background:var(--navy); color:white; border:none; padding:12px 18px; border-radius:12px; font-weight:700; font-size:14px; cursor:pointer; font-family:var(--font-head);">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let activeAdminChatId = null;
+    let adminChatPollInterval = null;
+
+    async function openAdminChat(name, chatId) {
+      activeAdminChatId = chatId;
+      document.getElementById('admin-chat-title').textContent = 'Chat with ' + name;
+      document.getElementById('admin-chat-subtitle').textContent = 'ID: ' + chatId;
+      const modal = document.getElementById('admin-chat-modal');
+      modal.style.display = 'flex';
+      
+      await fetchAdminMessages();
+      
+      if (adminChatPollInterval) clearInterval(adminChatPollInterval);
+      adminChatPollInterval = setInterval(fetchAdminMessages, 3000);
+    }
+
+    function closeAdminChat() {
+      const modal = document.getElementById('admin-chat-modal');
+      modal.style.display = 'none';
+      if (adminChatPollInterval) {
+        clearInterval(adminChatPollInterval);
+        adminChatPollInterval = null;
+      }
+    }
+
+    async function fetchAdminMessages() {
+      if (!activeAdminChatId) return;
+      const container = document.getElementById('admin-chat-messages');
+      try {
+        const msgs = await db.get('messages', { reservation_id: activeAdminChatId });
+        if (!msgs || msgs.length === 0) {
+          container.innerHTML = `<div style="text-align:center; color:var(--text-light); font-size:12px; margin:auto;">No messages yet. Send a message to start conversation.</div>`;
+          return;
+        }
+
+        msgs.sort((a,b) => new Date(a.created_at || a.timestamp) - new Date(b.created_at || b.timestamp));
+
+        container.innerHTML = msgs.map(m => {
+          const isAdmin = m.sender_type === 'admin';
+          const isHost = m.sender_type === 'host';
+          const bg = isAdmin ? 'var(--navy)' : (isHost ? '#0284C7' : '#FFFFFF');
+          const color = isAdmin || isHost ? '#FFFFFF' : 'var(--text-dark)';
+          const align = isAdmin ? 'flex-end' : 'flex-start';
+          const border = isAdmin || isHost ? 'none' : '1px solid var(--border)';
+          const senderLabel = isAdmin ? 'Admin' : (isHost ? 'Host' : 'Guest');
+
+          return `
+            <div style="align-self:${align}; max-width:80%;">
+              <div style="font-size:10px; color:var(--text-light); margin-bottom:2px; text-align:${isAdmin ? 'right' : 'left'};">${senderLabel}</div>
+              <div style="background:${bg}; color:${color}; padding:10px 14px; border-radius:14px; font-size:13px; border:${border}; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+                ${m.text || m.content || ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        container.scrollTop = container.scrollHeight;
+      } catch (e) {
+        console.error('Error fetching admin chat messages:', e);
+      }
+    }
+
+    async function sendAdminMessage() {
+      const input = document.getElementById('admin-chat-input');
+      const text = input.value.trim();
+      if (!text || !activeAdminChatId) return;
+
+      input.value = '';
+
+      try {
+        await db.insert('messages', {
+          reservation_id: activeAdminChatId,
+          sender_type: 'admin',
+          text: text,
+          created_at: new Date().toISOString()
+        });
+        fetchAdminMessages();
+      } catch (e) {
+        alert('Could not send message: ' + e.message);
+      }
+    }
+  </script>
 </body>
+
 </html>
