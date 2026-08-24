@@ -155,10 +155,17 @@
       font-weight: 700;
       font-size: 13px;
       color: #92400E;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
       gap: 6px;
+    }
+
+    .bank-sub {
+      font-size: 12px;
+      color: #B45309;
+      margin-bottom: 12px;
+      line-height: 1.4;
     }
 
     .bank-field {
@@ -215,6 +222,24 @@
       box-shadow: 0 4px 14px rgba(11,31,58,0.15);
     }
 
+    .btn-whatsapp {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: #25D366;
+      color: var(--white);
+      text-align: center;
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-head);
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 14px rgba(37,211,102,0.2);
+    }
+
     .btn-secondary {
       display: block;
       width: 100%;
@@ -235,14 +260,14 @@
   <div class="card">
     <div class="success-header">
       <div class="icon-badge">✓</div>
-      <h1 class="success-title">Reservation Fee Paid!</h1>
-      <p class="success-subtitle">Your ₦2,000 fee was received. Room held for you.</p>
+      <h1 class="success-title">Reservation Fee Received!</h1>
+      <p class="success-subtitle">₦2,000 booking fee paid to LodgeLink. Room held.</p>
     </div>
 
     <div class="card-body">
       <div class="info-group">
-        <div class="info-label">Accommodation Details</div>
-        <div class="prop-name" id="res-prop">LodgeLink Stay</div>
+        <div class="info-label">Hotel Accommodation</div>
+        <div class="prop-name" id="res-prop">LodgeLink Hotel</div>
         <div class="date-badge" id="res-dates">Dates: Pending confirmation</div>
       </div>
 
@@ -253,17 +278,18 @@
           <span id="res-total">₦0</span>
         </div>
         <div class="summary-row">
-          <span>Reservation Fee Paid (Paystack)</span>
+          <span>Reservation Fee Paid (to LodgeLink)</span>
           <span style="color:var(--green); font-weight:700;">-₦2,000</span>
         </div>
         <div class="summary-row total">
-          <span>Balance Due on Arrival</span>
+          <span>Remaining Balance Due to Host</span>
           <span id="res-balance">₦0</span>
         </div>
       </div>
 
       <div class="bank-card" id="bank-card" style="display:none;">
-        <div class="bank-header">🏦 Host Payment Details</div>
+        <div class="bank-header">🏦 Host Payment & Account Details</div>
+        <div class="bank-sub">Pay your remaining balance directly to the host's bank account below or upon arrival at the hotel.</div>
         <div class="bank-field"><strong>Account Name:</strong> <span id="host-acc-name">—</span></div>
         <div class="bank-field"><strong>Bank:</strong> <span id="host-bank-name">—</span></div>
         <div class="account-num-box">
@@ -272,7 +298,8 @@
         </div>
       </div>
 
-      <a id="btn-chat-host" href="app.html#chat" class="btn-primary">💬 Chat with Host / Send Payment Proof</a>
+      <a id="btn-chat-host" href="app.html#chat" class="btn-primary">💬 Chat with Host (In-App)</a>
+      <a id="btn-wa-host" href="#" class="btn-whatsapp" style="display:none;">📱 Chat with Host on WhatsApp</a>
       <a href="app.html#bookings" class="btn-secondary">View My Bookings</a>
     </div>
   </div>
@@ -287,7 +314,9 @@
         
         const latest = reservations[reservations.length - 1];
 
-        document.getElementById('res-prop').textContent = latest.propertyName || latest.name || 'Room Stay';
+        // Hotel Name
+        document.getElementById('res-prop').textContent = latest.propertyName || latest.hotelName || latest.name || 'Hotel Stay';
+        
         if (latest.checkin && latest.checkout) {
           document.getElementById('res-dates').textContent = `${latest.checkin} to ${latest.checkout} (${latest.nights || 1} night${(latest.nights||1)>1?'s':''})`;
         }
@@ -313,8 +342,9 @@
         if (hostPhone) {
           const cleanPhone = String(hostPhone).replace(/\D/g, '');
           const waPhone = cleanPhone.startsWith('0') ? '234' + cleanPhone.slice(1) : cleanPhone;
-          const chatBtn = document.getElementById('btn-chat-host');
-          chatBtn.href = `https://wa.me/${waPhone}?text=${encodeURIComponent('Hello, I just paid the ₦2,000 reservation fee on LodgeLink for ' + (latest.propertyName||'the room') + '. Here is my proof of payment.')}`;
+          const waBtn = document.getElementById('btn-wa-host');
+          waBtn.style.display = 'block';
+          waBtn.href = `https://wa.me/${waPhone}`;
         }
       } catch (e) {
         console.error('Error populating success page:', e);
@@ -324,7 +354,7 @@
     function copyAccNum() {
       const num = document.getElementById('host-acc-num').textContent;
       navigator.clipboard.writeText(num).then(() => {
-        alert('Account number copied to clipboard!');
+        alert('Host account number copied to clipboard!');
       }).catch(() => {
         alert('Copied: ' + num);
       });

@@ -817,52 +817,43 @@ window.closeModal = function() {
  
 // ─── SCREEN NAVIGATION ────────────────────────────────────────────────────────
 window.showScreen = function(screenName) {
-  // Toggle screens
   const exploreScreen  = document.getElementById('screen-explore');
   const bookingsScreen = document.getElementById('screen-bookings');
   const detailsScreen  = document.getElementById('screen-listing-details');
+  const chatScreen     = document.getElementById('screen-chat');
+  const profileScreen  = document.getElementById('screen-profile');
   const bottomNav      = document.querySelector('.bottom-nav');
-  if (!exploreScreen || !bookingsScreen) return;
 
-  exploreScreen.classList.remove('active');
-  bookingsScreen.classList.remove('active');
-  if (detailsScreen) detailsScreen.classList.remove('active');
-  // Also clear auth screens
-  ['login','otp','profile'].forEach(name => {
-    const s = document.getElementById('screen-' + name);
+  // Deactivate all screens
+  [exploreScreen, bookingsScreen, detailsScreen, chatScreen, profileScreen].forEach(s => {
     if (s) s.classList.remove('active');
   });
 
-  // Show/Hide bottom nav
-  if (bottomNav) {
-    const hideNav = screenName === 'listing-details' || screenName === 'login' || screenName === 'otp';
-    bottomNav.style.display = hideNav ? 'none' : 'flex';
-  }
+  // Update nav buttons active state
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.remove('active');
+    const onclickStr = el.getAttribute('onclick') || '';
+    if (onclickStr.includes(`'${screenName}'`)) {
+      el.classList.add('active');
+    }
+  });
 
-  // Update screens
   if (screenName === 'bookings') {
-    bookingsScreen.classList.add('active');
-    renderGuestBookings();
-    syncLocalBookingsWithBackend();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  } else if (screenName === 'listing-details') {
+    if (bookingsScreen) bookingsScreen.classList.add('active');
+    renderBookings();
+  } else if (screenName === 'chat' || screenName === 'messages') {
+    if (chatScreen) chatScreen.classList.add('active');
+    if (typeof loadChatScreen === 'function') loadChatScreen();
+  } else if (screenName === 'profile') {
+    if (profileScreen) profileScreen.classList.add('active');
+    updateProfileUI();
+  } else if (screenName === 'details') {
     if (detailsScreen) detailsScreen.classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  } else if (screenName === 'login' || screenName === 'otp' || screenName === 'profile') {
-    const targetScreen = document.getElementById('screen-' + screenName);
-    if (targetScreen) targetScreen.classList.add('active');
-    if (bottomNav) bottomNav.style.display = 'none';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
-    exploreScreen.classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (exploreScreen) exploreScreen.classList.add('active');
   }
 
-  // Update nav active states
-  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-  const activeNavId = screenName === 'bookings' ? 'nav-bookings' : 'nav-explore';
-  const activeNav = document.getElementById(activeNavId);
-  if (activeNav) activeNav.classList.add('active');
+  window.scrollTo(0, 0);
 };
 
 // ─── BACKGROUND SYNC ───────────────────────────────────────────────────────────
