@@ -1008,7 +1008,17 @@ function calculateNights() {
 }
 
 window.openPaymentModal = function(listingName, pricePerNight, listingId) {
-  activeReservation = { propertyName: listingName, pricePerNight, listingId };
+  const listing = (typeof allListings !== 'undefined' ? allListings : []).find(l => String(l.id) === String(listingId)) || {};
+  activeReservation = {
+    propertyName: listingName,
+    pricePerNight: pricePerNight,
+    listingId: listingId,
+    hostPhone: listing.hostPhone || listing.host_phone || '',
+    hostBankName: listing.hostBankName || listing.host_bank_name || '',
+    hostBankAccount: listing.hostBankAccount || listing.host_bank_account || '',
+    hostBankBank: listing.hostBankBank || listing.host_bank_bank || '',
+    image: listing.image || listing.imageUrl || ''
+  };
   
   // Pre-fill returning guest details
   document.getElementById('input-name').value = localStorage.getItem('ll_guest_name') || '';
