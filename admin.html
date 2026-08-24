@@ -1051,10 +1051,9 @@
 
       try {
         await db.insert('messages', {
-          reservation_id: activeAdminChatId,
+          reservation_id: String(activeAdminChatId),
           sender_type: 'admin',
-          text: text,
-          created_at: new Date().toISOString()
+          content: text
         });
         fetchAdminMessages();
       } catch (e) {
