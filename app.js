@@ -829,6 +829,15 @@ window.showScreen = function(screenName) {
     if (s) s.classList.remove('active');
   });
 
+  // Toggle bottom nav visibility
+  if (bottomNav) {
+    if (screenName === 'details' || screenName === 'listing-details' || screenName === 'chat') {
+      bottomNav.style.display = 'none';
+    } else {
+      bottomNav.style.display = 'flex';
+    }
+  }
+
   // Update nav buttons active state
   document.querySelectorAll('.nav-item').forEach(el => {
     el.classList.remove('active');
