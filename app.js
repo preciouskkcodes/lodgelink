@@ -847,7 +847,7 @@ window.showScreen = function(screenName) {
   } else if (screenName === 'profile') {
     if (profileScreen) profileScreen.classList.add('active');
     updateProfileUI();
-  } else if (screenName === 'details') {
+  } else if (screenName === 'details' || screenName === 'listing-details') {
     if (detailsScreen) detailsScreen.classList.add('active');
   } else {
     if (exploreScreen) exploreScreen.classList.add('active');
@@ -1109,7 +1109,7 @@ function buildMapPreviewHtml(location) {
 
 // ─── LISTING DETAILS ───────────────────────────────────────────────────────────
 window.showListingDetails = function(listingId) {
-  const listing = allListings.find(l => l.id === listingId);
+  const listing = allListings.find(l => String(l.id) === String(listingId));
   if (!listing) return;
   
   const content = document.getElementById('listing-details-content');
