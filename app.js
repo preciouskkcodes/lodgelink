@@ -526,32 +526,30 @@ window.confirmReservation = async function() {
   const name    = document.getElementById('input-name').value.trim();
   const email   = document.getElementById('input-email').value.trim();
   const phone   = document.getElementById('input-phone').value.trim();
-  const guests  = document.getElementById('input-guests').value;
+  const guests  = document.getElementById('input-guests')?.value || '1';
   const checkin = document.getElementById('input-checkin').value;
   const checkout = document.getElementById('input-checkout').value;
   const cleanPhone = phone.trim().replace(/\s+/g, '');
   const isIntl = /^\+\d{10,15}$/.test(cleanPhone);
-  
+
   if (!name || !email || !phone || !checkin || !checkout) {
     alert('Please fill in all required fields.');
     return;
   }
-  
+
   if (!isIntl) {
     alert('Please enter a valid international phone number starting with + (e.g. +2348012345678).');
     return;
   }
-  
-  // Save for future bookings
+
   localStorage.setItem('ll_guest_name', name);
   localStorage.setItem('ll_guest_email', email);
   localStorage.setItem('ll_guest_phone', cleanPhone);
-  
+
   const d1 = new Date(checkin);
   const d2 = new Date(checkout);
-  const diffTime = d2 - d1;
-  const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+  const nights = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+
   if (nights <= 0) {
     alert('Check-out date must be after check-in date.');
     return;
@@ -561,7 +559,7 @@ window.confirmReservation = async function() {
     listing_id:      activeReservation.listingId,
     guest_name:      name,
     guest_email:     email,
-    guest_phone:     phone,
+    guest_phone:     cleanPhone,
     guests:          parseInt(guests, 10),
     checkin:         checkin,
     checkout:        checkout,
@@ -570,79 +568,57 @@ window.confirmReservation = async function() {
     total_cost:      nights * activeReservation.pricePerNight,
     reservation_fee: 2000,
     program:         'unspecified',
-    status:          'pending',
+    status:          'paid',
   };
 
   const btn = document.getElementById('btn-reserve-confirm');
-  const originalText = btn.textContent;
-  btn.textContent = 'Processing...';
-  btn.disabled = true;
+  const originalText = btn ? btn.textContent : 'Pay ₦2,000 Reservation Fee';
+  if (btn) { btn.textContent = 'Processing...'; btn.disabled = true; }
 
-  try {
-    // Save to Supabase FIRST to get a real ID for Paystack metadata
-    const saved = await db.insert('reservations', record);
-    if (!saved || !saved[0] || !saved[0].id) {
-      throw new Error("Could not connect to server. Check your internet.");
-    }
-    const realId = saved[0].id;
-
-    // Launch Paystack Inline
-    let handler = PaystackPop.setup({
-      key: 'pk_live_3d75970ca819e2febf78281901410d755d38b5bc',
-      email: email,
-      amount: 200000, // ₦2,000 in kobo
-      currency: 'NGN',
-      channels: ['card', 'bank_transfer', 'bank', 'ussd', 'qr', 'mobile_money'],
-      ref: 'LL_' + Math.floor((Math.random() * 1000000000) + 1),
-      metadata: {
-        custom_fields: [
-          {
-            display_name: "Reservation ID",
-            variable_name: "reservation_id",
-            value: realId
-          }
-        ]
-      },
-      callback: function(response) {
-        // Payment successful! Create local record
+  let handler = PaystackPop.setup({
+    key: 'pk_live_3d75970ca819e2febf78281901410d755d38b5bc',
+    email: email,
+    amount: 200000,
+    currency: 'NGN',
+    channels: ['card', 'bank_transfer', 'bank', 'ussd', 'qr', 'mobile_money'],
+    ref: 'LL_' + Math.floor((Math.random() * 1000000000) + 1),
+    metadata: { custom_fields: [{ display_name: "Guest Name", variable_name: "guest_name", value: name }] },
+    callback: async function(response) {
+      // Only save to DB after SUCCESSFUL payment
+      try {
+        const saved = await db.insert('reservations', record);
+        const realId = (saved && saved[0] && saved[0].id) ? saved[0].id : ('LL_' + Date.now());
         const localRecord = {
-          ...record,
-          id:              realId,
+          ...record, id: realId,
           propertyName:    activeReservation.propertyName,
           pricePerNight:   activeReservation.pricePerNight,
           totalCost:       record.total_cost,
           total:           record.total_cost,
           guestName:       name,
-          paymentMethod:   'arrival',
-          image:           activeReservation.imageUrl || activeReservation.image || '',
+          paymentMethod:   'paystack',
+          image:           activeReservation.image || '',
           hostPhone:       activeReservation.hostPhone || '',
           hostBankName:    activeReservation.hostBankName || '',
           hostBankAccount: activeReservation.hostBankAccount || '',
           hostBankBank:    activeReservation.hostBankBank || '',
           timestamp:       new Date().toISOString(),
-          status:          'paid' // Optimistic update, webhook will also do this
+          status:          'paid'
         };
         const records = loadData();
         records.push(localRecord);
         saveData(records);
-
-        closeModal();
-        alert('Payment complete! Reference: ' + response.reference);
-        window.location.href = 'success.html';
-      },
-      onClose: function() {
-        alert('Payment cancelled. Your reservation is still pending.');
-        btn.textContent = originalText;
-        btn.disabled = false;
+      } catch (e) {
+        console.error('Error saving paid reservation:', e);
       }
-    });
+      closePaymentModal();
+      window.location.href = 'success.html';
+    },
+    onClose: function() {
+      if (btn) { btn.textContent = originalText; btn.disabled = false; }
+    }
+  });
 
-    handler.openIframe();
-  } catch (err) {
-    alert(err.message);
-    btn.textContent = originalText;
-    btn.disabled = false;
-  }
+  handler.openIframe();
 };
 
 // ─── ESPEES / KINGSPAY PAYMENT ────────────────────────────────────────────────
