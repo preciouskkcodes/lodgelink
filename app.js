@@ -592,6 +592,7 @@ window.confirmReservation = async function() {
       email: email,
       amount: 200000, // ₦2,000 in kobo
       currency: 'NGN',
+      channels: ['card', 'bank_transfer', 'bank', 'ussd', 'qr', 'mobile_money'],
       ref: 'LL_' + Math.floor((Math.random() * 1000000000) + 1),
       metadata: {
         custom_fields: [
