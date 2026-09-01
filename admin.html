@@ -717,11 +717,13 @@
     // ─── LOAD DASHBOARD ──────────────────────────────────────────────
     async function loadDashboard() {
       try {
-        const [listings, reservations, users] = await Promise.all([
+        const [listings, allRes, users] = await Promise.all([
           db.getAll('listings'),
           db.getAll('reservations'),
           db.get('users', { role: 'host' }),
         ]);
+        // Only show paid or confirmed reservations
+        const reservations = allRes.filter(r => r.status === 'paid' || r.status === 'confirmed');
  
         // Stats
         const pendingListings = listings.filter(l => !l.approved);
@@ -1048,6 +1050,7 @@
         fetchAdminMessages();
       } catch (e) {
         alert('Could not send message: ' + e.message);
+        console.error('Send error:', e);
       }
     }
   </script>
